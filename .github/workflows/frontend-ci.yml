@@ -1,0 +1,50 @@
+name: GitHub CI pipeline - Frontend
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'frontend/**'
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'frontend/**'
+
+jobs:
+  install:
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        node-version: [24.6.0]
+
+    steps:
+      - name: repo checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          clean: true
+
+      - name: Node setup
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: install dependencies
+        working-directory: ./frontend
+        run: npm install
+
+      - name: build
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: test
+        working-directory: ./frontend
+        run: npm test
+
+      - name: linting
+        working-directory: ./frontend
+        run: npm run lint
+
+      - name: prettier formatting
+        working-directory: ./frontend
+        run: npx prettier --check .
