@@ -1,1 +1,69 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap");
 @import "tailwindcss";
+
+/* Base page layout applied to all <main> tags */
+main {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 5vw, 48px);
+  padding-top: clamp(12px, 2vw, 24px);
+  padding-bottom: clamp(32px, 4vw, 56px);
+}
+
+@layer base {
+  body {
+    @apply bg-white dark:bg-darkmodebackground;
+    font-family: "Nunito", sans-serif;
+  }
+}
+
+@theme {
+  /* Colors from figma design */
+  --color-lightpurple: #e1d1eb; /* for card, navbar in lightmode */
+  --color-lightbuttonpurple: #957bba; /* for buttons in lightmode */
+  --color-darkpurple: #8f669f; /* for card, navbar, carouseldots in darkmode */
+  --color-darkbuttonpurple: #311558; /* for buttons, active carouseldots in darkmode */
+  --color-lightdots: #9e8db5; /* for carouseldots in lightmode */
+  --color-activelightdots: #865bc3; /* for active carouseldots in lightmode */
+  --color-gray: #d2d2d2; /* for carousel in lightmode */
+  --color-darkgray: #9d9d9d; /* for carousel in darkmode */
+  --color-lightsearchbargray: #f3f3f3; /* for searchbar in lightmode */
+  --color-darksearchbargray: #494949; /* for searchbar in darkmode */
+  --color-darkmodebackground: #2d2d2d; /* for background in darkmode */
+}
+
+/* Mobile is default */
+/* Tablet */
+@media (min-width: 600px) {
+  body {
+    font-size: 1rem;
+  }
+}
+
+/* Tablet, vertical */
+@media (min-width: 769px) {
+  body {
+    font-size: 1.05rem;
+  }
+}
+
+/* Small desktop */
+@media (min-width: 1024px) {
+  body {
+    font-size: 1.1rem;
+  }
+}
+
+/* Large desktop */
+@media (min-width: 1280px) {
+  body {
+    font-size: 1.15rem;
+  }
+}
+
+/* Extra large, wide monitors */
+@media (min-width: 1536px) {
+  body {
+    font-size: 1.2rem;
+  }
+}

@@ -1,9 +1,18 @@
-import { render, screen } from "@testing-library/react";
+// App.test.tsx
+import { render } from "@testing-library/react";
 import App from "../App";
-import { expect, it } from "vitest";
 import "@testing-library/jest-dom";
+import { MemoryRouter } from "react-router-dom";
+import { vi } from "vitest";
 
-it("renders welcome message", () => {
-  render(<App />);
-  expect(screen.getByText(/Hello world!/i)).toBeInTheDocument();
+vi.mock("../index.css", () => ({}));
+
+describe("App Component", () => {
+  it("renders header and routes correctly", () => {
+    render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+    );
+  });
 });

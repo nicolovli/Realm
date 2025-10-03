@@ -1,9 +1,18 @@
+import { Routes, Route } from "react-router-dom";
+import { FavoritePage, HomePage, LoginPage, ResultPage } from "./pages";
 import "./index.css";
+import { Header } from "./components/Header/Header";
 
 function App() {
   return (
     <>
-      <h1 className="text-3xl font-bold underline">Hello world!</h1>
+      <Header />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/result" element={<ResultPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/favorites" element={<FavoritePage />} />
+      </Routes>
     </>
   );
 }

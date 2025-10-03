@@ -14,12 +14,21 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check"
   },
+  "vitest": {
+    "environment": "jsdom",
+    "setupFiles": [
+      "./test/setup.ts"
+    ]
+  },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@tailwindcss/vite": "^4.1.13",
+    "@types/react-router-dom": "^5.3.3",
     "flowbite": "^3.1.2",
     "flowbite-react": "^0.12.9",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-router-dom": "^7.9.3",
     "tailwindcss": "^4.1.13"
   },
   "devDependencies": {
