@@ -1,0 +1,54 @@
+name: GitHub CI pipeline - Backend
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'backend/**'
+
+jobs:
+  install:
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        node-version: [24.6.0]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          clean: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: TypeScript build
+        working-directory: ./backend
+        run: npm run build
+
+      - name: Lint
+        working-directory: ./backend
+        run: npm run lint
+
+      - name: Prettier check
+        working-directory: ./backend
+        run: npx prettier --check .
+
+      - name: Prisma format & validate
+        working-directory: ./backend
+        env:
+            DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          npx prisma format
+          npx prisma validate

@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -14,9 +7,81 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Post {
-  id        Int     @default(autoincrement()) @id
-  title     String
-  content   String?
-  published Boolean @default(false)
+model Game {
+  id               Int       @id @default(autoincrement())
+  sid              Int       @unique
+  name             String
+  image            String?
+  descriptionHtml  String?
+  descriptionText  String?
+  descriptionShort String?
+  publishedStore   DateTime?
+
+  platforms  Platform[]  @relation("GamePlatforms")
+  tags       Tag[]       @relation("GameTags")
+  languages  Language[]  @relation("GameLanguages")
+  categories Category[]  @relation("GameCategories")
+  genres     Genre[]     @relation("GameGenres")
+  developers Developer[] @relation("GameDevelopers")
+  publishers Publisher[] @relation("GamePublishers")
+}
+
+model Platform {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  games Game[] @relation("GamePlatforms")
+}
+
+model Tag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  games Game[] @relation("GameTags")
+}
+
+model Language {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  games Game[] @relation("GameLanguages")
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  games Game[] @relation("GameCategories")
+}
+
+model Genre {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  games Game[] @relation("GameGenres")
+}
+
+model Developer {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  games Game[] @relation("GameDevelopers")
+}
+
+model Publisher {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  games Game[] @relation("GamePublishers")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  auth0Id    String   @unique
+  username   String   @unique
+  givenName  String
+  familyName String
+  email      String   @unique
+  reviews    Review[] //one user can have many reviews
+}
+
+model Review {
+  id          Int    @id @default(autoincrement())
+  description String
+  star        Int
+  user        User   @relation(fields: [userId], references: [id])
+  userId      Int
 }

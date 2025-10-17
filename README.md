@@ -100,7 +100,7 @@ Les [README for backend her](backend/README.md)
 ### Frontend kan kjøres med:
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 ### Backend kan kjøres med:
@@ -124,7 +124,6 @@ Deretter generere Prisma Client:
 npx prisma generate
 npm start
 ```
-
 
 <!-- ## Testing
 

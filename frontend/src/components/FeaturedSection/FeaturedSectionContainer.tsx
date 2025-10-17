@@ -1,0 +1,48 @@
+import { LOADINGandERROR } from "@/lib/classNames";
+import FeaturedCarousel from "./FeaturedCarousel";
+import { GET_FEATURED_GAMES } from "@/lib/graphql/queries/featuredGames";
+import { useQuery } from "@apollo/client/react";
+import type { FeaturedGame, GetFeaturedGamesData } from "@/types/GameTypes";
+import { FeaturedCardSkeleton } from "../Skeletons";
+
+export default function FeaturedSection() {
+  const { loading, error, data } = useQuery<GetFeaturedGamesData>(
+    GET_FEATURED_GAMES,
+    {
+      variables: { take: 10, filter: { tags: ["Otome"] } },
+      fetchPolicy: "cache-first",
+    },
+  );
+
+  if (loading) return <p className={LOADINGandERROR}>Loading...</p>;
+  if (error) return <p className={LOADINGandERROR}>Error: {error.message}</p>;
+
+  const top10: FeaturedGame[] = data?.games ?? [];
+
+  return (
+    <div className="overflow-x-hidden">
+      {loading ? (
+        <section className="flex gap-4 mt-6">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <section
+              key={i}
+              className={`
+                shrink-0
+                w-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4
+              `}
+            >
+              <FeaturedCardSkeleton />
+            </section>
+          ))}
+        </section>
+      ) : (
+        <FeaturedCarousel
+          items={top10}
+          onExploreAll={() => {
+            /* Navigate to all games */
+          }}
+        />
+      )}
+    </div>
+  );
+}

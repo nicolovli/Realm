@@ -1,21 +1,15 @@
 import { useRef, useState, type ComponentType, type SVGProps } from "react";
 import { Logo } from "../../assets/Logo";
 import {
-  ArrowRightStartOnRectangleIcon,
   Bars3Icon,
-  // GlobeEuropeAfricaIcon,
+  GlobeEuropeAfricaIcon,
   HeartIcon,
   MagnifyingGlassIcon,
-  SunIcon,
 } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
-import { MobileSearchMenu } from "./MobileSearchMenu";
-import { MobileMenu } from "./MobileMenu";
-
-const icon_classname =
-  "w-8 h-8 text-black dark:text-white cursor-pointer hover:text-white dark:hover:text-black focus:outline-none focus:ring-2 focus:ring-blue-500";
-
-const focus = "focus:outline-none focus:ring-2 focus:ring-blue-500";
+import { AuthButton, MobileMenu, MobileSearchMenu, SearchBar } from "./";
+import { FOCUS_VISIBLE, ICON_CLASSNAME } from "../../lib/classNames";
+import { ToggleTheme } from "./ToggleTheme";
 
 export type Item = {
   title: string;
@@ -29,11 +23,11 @@ const navigation: Item[] = [
     href: "/favorites",
     icon: HeartIcon,
   },
-  // {
-  //   title: "Discover",
-  //   href: "/result",
-  //   icon: GlobeEuropeAfricaIcon,
-  // },
+  {
+    title: "Discover",
+    href: "/games",
+    icon: GlobeEuropeAfricaIcon,
+  },
 ];
 
 export const Header = () => {
@@ -43,9 +37,12 @@ export const Header = () => {
   const barIconRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <header className="sticky top-4 z-50 flex flex-col m-3 gap-2 w-[min(1600px,92%)] mx-auto">
+    <header
+      className="sticky top-4 z-50 flex flex-col m-3 gap-2 w-[min(1600px,92%)] mx-auto"
+      tabIndex={0}
+    >
       <section className="bg-lightpurple dark:bg-darkpurple shadow-sm rounded-full flex flex-row justify-between items-center p-3 gap-1">
-        <Link to="/" aria-label="Homepage" className={focus}>
+        <Link to="/" aria-label="Homepage" className={FOCUS_VISIBLE}>
           <Logo
             size={50}
             className="text-black dark:text-white hover:text-white dark:hover:text-black"
@@ -54,10 +51,10 @@ export const Header = () => {
 
         {/* Dekstop navigation + search, hidden in mobile version */}
         <section className="hidden md:flex flex-1 items-center gap-6">
-          {/* TODO: Add searchbar here */}
-          <div className="border-2 rounded-full py-2 px-5 w-64 md:w-fit md:ml-10">
-            Searchbar here for sprint2
-          </div>
+          <SearchBar
+            placeholder="Search for games, tags, genres..."
+            className="flex-1 max-w-md ml-6"
+          />
 
           <nav
             aria-label="Main Navigation"
@@ -71,7 +68,7 @@ export const Header = () => {
                   to={item.href}
                   className={
                     "group flex items-center text-black dark:text-white hover:text-white dark:hover:text-black gap-1 " +
-                    focus
+                    FOCUS_VISIBLE
                   }
                 >
                   <Icon aria-hidden="true" className="w-6 h-6" />
@@ -82,46 +79,17 @@ export const Header = () => {
           </nav>
         </section>
 
-        <Link
-          to="/login"
-          className={
-            "hidden md:flex md:flex-row items-center gap-1 bg-lightbuttonpurple dark:bg-darkbuttonpurple rounded-full text-white py-3 px-5 hover:bg-darkbuttonpurple dark:hover:bg-lightbuttonpurple " +
-            focus
-          }
-        >
-          <ArrowRightStartOnRectangleIcon
-            aria-hidden="true"
-            className="w-5 h-5"
-          />
-          Login
-        </Link>
+        <AuthButton className="hidden md:flex md:flex-row" />
 
-        {/* TODO: Need to implement darkmode before switching the sun to moon icon */}
-        <button
-          aria-label="Toggle dark mode"
-          className={icon_classname + " hidden md:block lg:ml-5 lg:mr-5"}
-        >
-          <SunIcon aria-hidden="true" />
-        </button>
+        <ToggleTheme className="hidden md:block lg:ml-5 lg:mr-5" />
 
         {/* Mobile icons only visible in reponsivive small size */}
         <section className="flex flex-row gap-2 mr-2 md:hidden items-center">
-          <Link
-            to="/login"
-            className={
-              "flex items-center gap-1 bg-lightbuttonpurple dark:bg-darkbuttonpurple rounded-full text-white py-3 px-5 hover:bg-darkbuttonpurple dark:hover:bg-lightbuttonpurple md:invisible " +
-              focus
-            }
-          >
-            <ArrowRightStartOnRectangleIcon
-              aria-hidden="true"
-              className="w-5 h-5"
-            />
-            Login
-          </Link>
+          <AuthButton className="flex md:invisible" />
+
           <button
             ref={searchIconRef}
-            className={icon_classname}
+            className={ICON_CLASSNAME}
             onClick={() => setShowSearchMenu((prev) => !prev)}
             aria-label="Open search menu"
             aria-expanded={showSearchMenu}
@@ -129,19 +97,13 @@ export const Header = () => {
             <MagnifyingGlassIcon aria-hidden="true" />
           </button>
 
-          {/* TODO: Need to implement darkmode before switching the sun to moon icon */}
-          <button
-            className={icon_classname + " md:hidden"}
-            aria-label="Toggle dark mode"
-          >
-            <SunIcon aria-hidden="true" />
-          </button>
+          <ToggleTheme className="md:hidden" />
 
           <button
             ref={barIconRef}
             aria-label="Open menu"
             aria-expanded={showMenu}
-            className={icon_classname}
+            className={ICON_CLASSNAME}
             onClick={() => setShowMenu((prev) => !prev)}
           >
             <Bars3Icon aria-hidden="true" />

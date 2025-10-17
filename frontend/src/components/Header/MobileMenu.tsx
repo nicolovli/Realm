@@ -1,6 +1,6 @@
 import { useEffect, useRef, type RefObject } from "react";
 import type { Item } from "./Header";
-import { useClickOutside } from "./useClickOutside";
+import { useClickOutside } from "../../hooks/useClickOutside";
 import { Link } from "react-router-dom";
 
 interface NavigationMenuProps {
