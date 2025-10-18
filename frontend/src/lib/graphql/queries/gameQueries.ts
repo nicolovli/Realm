@@ -1,7 +1,12 @@
 import { gql } from "@apollo/client";
 
 export const GET_GAMES = gql`
-  query GetGames($filter: GameFilter, $search: String, $after: ID, $take: Int) {
+  query GetGames(
+    $filter: GameFilter
+    $search: String
+    $after: Int
+    $take: Int
+  ) {
     games(filter: $filter, search: $search, after: $after, take: $take) {
       id
       sid

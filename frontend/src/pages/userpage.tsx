@@ -4,7 +4,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect } from "react";
 import { GET_USER_BY_AUTH0_ID } from "../lib/graphql/queries/user";
 import { useQuery } from "@apollo/client/react";
-import type { UserByAuth0IdData } from "../types/user";
+import type { UserByAuth0IdData } from "../types/User";
 import { Profile } from "../components/User";
 
 export const UserPage = () => {

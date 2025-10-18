@@ -3,7 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@apollo/client/react";
 import { GET_USER_BY_AUTH0_ID } from "../../lib/graphql/queries/user";
-import type { UserByAuth0IdData, UserByAuth0IdVars } from "../../types/user";
+import type { UserByAuth0IdData, UserByAuth0IdVars } from "../../types/User";
 
 export const AuthRedirectHandler = () => {
   const { user, isAuthenticated, isLoading } = useAuth0();

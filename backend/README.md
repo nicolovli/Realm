@@ -1,15 +1,15 @@
 # Backend for Realm
 
+[<- Tilbake til ROOT README](../README.md)
+
 En Apollo Server backend, med Prisma og PostgreSQL som database
 
 ## Innholdfortegnelse
 
 - [Oppsett](#oppsett)
+- [Konfigurer Miljøvariabler](#konfigurer-miljøvariabler)
   - [Installering](#installering)
-  - [Konfigurer Miljøvariabler](#konfigurer-miljøvariabler)
   - [Kjør serveren](#kjør-serveren)
-- [GraphQL API](#graphql-api)
-- [Mutasjoner](#mutasjoner)
 
 ## Oppsett
 
@@ -19,10 +19,36 @@ For å sette opp backend må du ha følgende tilgjengelig på maskinen:
 - Npm
 - Tilgang til et NTNU nettverk
 
-### Installering
+## Konfigurer Miljøvariabler
 
-> [!IMPORTANT]
-> For innlevering 1: En viktig ting å påpeke er at backend techstack kun er satt opp. Det vil si at det ikke er nødvendig å kjøre backend for å teste frontend for denne innleveringen. Det er derfor ikke nødvendig å kjøre backend, da man må installere postgreSQL på sin lokale PC.
+Kjør koden under, og fyll inn URL til din lokal-database på .env filen.
+
+```bash
+cp .env.template .env
+```
+
+```
+PORT=3001
+DATABASE_URL="postgresql:<DB_USER>:<DB_PASSWORD>@<DB_HOST>:<DB_PORT>/<DB_NAME>?schema=public"
+AUTH0_SECRET=<YOUR_AUTH0_SECRET>
+AUTH0_CLIENT_ID=<YOUR_AUTH0_CLIENT_ID>
+AUTH0_DOMAIN=<YOUR_AUTH0_DOMAIN>
+```
+
+> [!NOTE]
+> Miljøvariablene som trengs for å kjøre applikasjonen kan man finne i vår VM under `/home/jennciad/backend/.env`. Dersom du ønsker å kopiere dette for å bruke lokalt, må du legge de under .env filen i `backend` folder for at ting skal funke.
+
+## Kjør backend gjennom VM
+
+Det er allerede satt opp en kjørende backend på VM. Du trenger kun å være på `frontend`-mappen og kjøre:
+
+```bash
+npm run dev:vm
+```
+
+## Kjøre backend lokalt
+
+For å teste den lokale backend må du ha en [steam.json](https://github.com/leinstay/steamdb/blob/main/steamdb.json) fil lastet opp til folder `backend/db`.
 
 1. Klon repoet og last ned dependencies
 
@@ -32,7 +58,22 @@ cd backend
 npm install
 ```
 
-2. To build the project run:
+2. Få databasen opp til din lokale database
+   Denne løsningen vil overskrive din nåværende database.
+
+```bash
+npx prisma migrate dev
+npx tsx src/scripts/importJson.ts
+npx prisma generate
+```
+
+3. For å kjøre koden
+
+```bash
+npm run dev
+```
+
+<!-- 2. To build the project run:
 
 ```bash
 npx prisma generate
@@ -43,19 +84,9 @@ npx tsc
 
 ```bash
 npm run dist
-```
+``` -->
 
-### Konfigurer Miljøvariabler
-
-Kjør koden under, og fyll inn URL til lokal-database på .env filen.
-
-```bash
-cp .env.template .env
-```
-
-- **DATABASE_URL**=URL til din lokale database
-
-### Oppsett for første gang (må fjernes før sluttlevering):
+<!-- ## Oppsett for første gang (må fjernes før sluttlevering):
 
 For å se dataen i databasen og importere json fil for første gang, kjør:
 
@@ -100,12 +131,4 @@ For å kjøre serveren for produksjon:
 
 ```bash
 npm start
-```
-
-## GraphQL API
-
-Kommer til sprint 2
-
-## Mutasjoner
-
-Kommer til sprint 2
+``` -->

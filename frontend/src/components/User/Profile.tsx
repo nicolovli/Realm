@@ -1,5 +1,5 @@
 import { FOCUS_VISIBLE } from "../../lib/classNames";
-import type { UserByAuth0IdData } from "../../types/user";
+import type { UserByAuth0IdData } from "../../types/User";
 
 interface UserProfileProps {
   user: {
