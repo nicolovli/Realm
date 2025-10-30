@@ -17,20 +17,18 @@ export const FilterChips = ({
   if (!hasActiveFilters) return null;
 
   return (
-    <section className="flex flex-col gap-2 w-full" aria-label="Active filters">
+    <section className="flex gap-2 w-full" aria-label="Active filters">
       {/* Clear all filters button */}
       <button
         type="button"
         onClick={onClearAll}
-        className={`${FOCUS_VISIBLE} ${HOVER} self-start text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400 cursor-pointer`}
+        className={`${FOCUS_VISIBLE} ${HOVER} self-start text-sm tracking-wide text-gray-600 dark:text-white/80 cursor-pointer px-3 py-1.5 rounded-full bg-gray-200 dark:bg-white/40 shadow-sm whitespace-nowrap flex-shrink-0 min-w-[8rem]`}
       >
         Clear all filters
       </button>
 
       {/* Active filter chips list */}
-      <ul
-        className={`flex flex-nowrap gap-2 overflow-x-auto pb-1 list-none scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 `}
-      >
+      <ul className={`flex flex-nowrap gap-2 overflow-x-auto pb-1 list-none `}>
         {activeFilters.map(({ key, value, label }) => (
           <li key={`${key}-${value}`}>
             <span className="inline-flex items-center gap-2 rounded-full bg-gray dark:bg-white/70 px-3 py-1 text-sm text-black shadow-sm flex-shrink-0">

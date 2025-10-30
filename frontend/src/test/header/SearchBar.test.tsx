@@ -94,7 +94,7 @@ describe("SearchBar Component", () => {
     await user.type(input, "Test Game");
     await user.click(screen.getByLabelText("Search"));
 
-    expect(mockNavigate).toHaveBeenCalledWith("/games?search=Test%20Game");
+    expect(mockNavigate).toHaveBeenCalledWith("/games?search=Test+Game");
   });
 
   it("navigates to game detail when clicking suggestion", async () => {

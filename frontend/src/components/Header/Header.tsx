@@ -1,15 +1,9 @@
-import { useRef, useState, type ComponentType, type SVGProps } from "react";
+import { type ComponentType, type SVGProps } from "react";
 import { Logo } from "../../assets/Logo";
-import {
-  Bars3Icon,
-  GlobeEuropeAfricaIcon,
-  HeartIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
+import { GlobeEuropeAfricaIcon, HeartIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
-import { AuthButton, MobileMenu, MobileSearchMenu, SearchBar } from "./";
-import { FOCUS_VISIBLE, ICON_CLASSNAME } from "../../lib/classNames";
-import { ToggleTheme } from "./ToggleTheme";
+import { AuthButton, MobileSheetMenu, SearchBar, ToggleTheme } from "./";
+import { FOCUS_VISIBLE } from "../../lib/classNames";
 
 export type Item = {
   title: string;
@@ -25,24 +19,16 @@ const navigation: Item[] = [
   },
   {
     title: "Discover",
-    href: "/games",
+    href: "/games?sort=popularity",
     icon: GlobeEuropeAfricaIcon,
   },
 ];
 
 export const Header = () => {
-  const [showSearchMenu, setShowSearchMenu] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-  const searchIconRef = useRef<HTMLButtonElement>(null);
-  const barIconRef = useRef<HTMLButtonElement>(null);
-
   return (
-    <header
-      className="sticky top-4 z-50 flex flex-col m-3 gap-2 w-[min(1600px,92%)] mx-auto"
-      tabIndex={0}
-    >
+    <header className="sticky top-4 z-50 flex flex-col m-3 gap-2 w-[min(1600px,92%)] mx-auto">
       <section className="bg-lightpurple dark:bg-darkpurple shadow-sm rounded-full flex flex-row justify-between items-center p-3 gap-1">
-        <Link to="/" aria-label="Homepage" className={FOCUS_VISIBLE}>
+        <Link to="" aria-label="Homepage" className={FOCUS_VISIBLE}>
           <Logo
             size={50}
             className="text-black dark:text-white hover:text-white dark:hover:text-black"
@@ -80,51 +66,14 @@ export const Header = () => {
         </section>
 
         <AuthButton className="hidden md:flex md:flex-row" />
-
-        <ToggleTheme className="hidden md:block lg:ml-5 lg:mr-5" />
+        <ToggleTheme className=" hidden md:block lg:ml-5 lg:mr-5" />
 
         {/* Mobile icons only visible in reponsivive small size */}
-        <section className="flex flex-row gap-2 mr-2 md:hidden items-center">
-          <AuthButton className="flex md:invisible" />
-
-          <button
-            ref={searchIconRef}
-            className={ICON_CLASSNAME}
-            onClick={() => setShowSearchMenu((prev) => !prev)}
-            aria-label="Open search menu"
-            aria-expanded={showSearchMenu}
-          >
-            <MagnifyingGlassIcon aria-hidden="true" />
-          </button>
-
-          <ToggleTheme className="md:hidden" />
-
-          <button
-            ref={barIconRef}
-            aria-label="Open menu"
-            aria-expanded={showMenu}
-            className={ICON_CLASSNAME}
-            onClick={() => setShowMenu((prev) => !prev)}
-          >
-            <Bars3Icon aria-hidden="true" />
-          </button>
+        <section className="flex flex-row gap-3 w-full md:hidden items-center">
+          <SearchBar />
+          <MobileSheetMenu navigation={navigation} />
         </section>
       </section>
-
-      {/* Dropdown search menu */}
-      <MobileSearchMenu
-        isOpen={showSearchMenu}
-        onClose={() => setShowSearchMenu(false)}
-        triggerRef={searchIconRef}
-      />
-
-      {/* Dropdown menu */}
-      <MobileMenu
-        isOpen={showMenu}
-        onClose={() => setShowMenu(false)}
-        triggerRef={barIconRef}
-        items={navigation}
-      />
     </header>
   );
 };

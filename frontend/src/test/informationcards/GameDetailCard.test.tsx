@@ -1,16 +1,56 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { GameDetailCard } from "../../components/InformationCards";
+import { MockedProvider } from "@apollo/client/testing/react";
+
+// Mock auth status hook and components
+vi.mock("@/hooks/useAuthStatus", () => ({
+  useAuthStatus: vi.fn(() => ({
+    isLoggedIn: false,
+    setIsLoggedIn: vi.fn(),
+  })),
+}));
+
+vi.mock("../../components/HeartIcon", () => ({
+  HeartIcon: ({
+    onRequireLogin,
+  }: {
+    gameId: number;
+    onRequireLogin: () => void;
+  }) => (
+    <button onClick={onRequireLogin} aria-label="Favorite game">
+      Heart Icon
+    </button>
+  ),
+}));
+
+vi.mock("../../components/User", () => ({
+  AuthDialog: ({ open }: { open: boolean }) =>
+    open ? <div data-testid="auth-dialog">Auth Dialog</div> : null,
+}));
 
 describe("GameDetailCard", () => {
   const mockProps = {
+    gameId: 1,
     title: "Test Game",
     descriptionShort: "This is a test game description",
     image: "/test-image.jpg",
   };
 
+  beforeEach(() => {
+    Object.defineProperty(window, "innerWidth", {
+      writable: true,
+      configurable: true,
+      value: 1024,
+    });
+  });
+
   it("renders the component with required props", () => {
-    render(<GameDetailCard {...mockProps} />);
+    render(
+      <MockedProvider mocks={[]}>
+        <GameDetailCard {...mockProps} />
+      </MockedProvider>,
+    );
 
     expect(screen.getByText("Test Game")).toBeInTheDocument();
     expect(
@@ -18,7 +58,7 @@ describe("GameDetailCard", () => {
     ).toBeInTheDocument();
     expect(screen.getByAltText("Test Game")).toHaveAttribute(
       "src",
-      "/test-image.jpg",
+      "https://images.weserv.nl/?url=%2Ftest-image.jpg&w=800&output=webp",
     );
   });
 
@@ -30,7 +70,11 @@ describe("GameDetailCard", () => {
       platforms: "PC, PS5",
     };
 
-    render(<GameDetailCard {...propsWithOptional} />);
+    render(
+      <MockedProvider mocks={[]}>
+        <GameDetailCard {...propsWithOptional} />
+      </MockedProvider>,
+    );
 
     expect(screen.getByText("Action")).toBeInTheDocument();
     expect(screen.getByText("Adventure")).toBeInTheDocument();
@@ -45,7 +89,11 @@ describe("GameDetailCard", () => {
       tags: ["Action", "Adventure"],
     };
 
-    render(<GameDetailCard {...propsWithTags} />);
+    render(
+      <MockedProvider mocks={[]}>
+        <GameDetailCard {...propsWithTags} />
+      </MockedProvider>,
+    );
 
     expect(screen.getByText("Action")).toBeInTheDocument();
     expect(screen.getByText("Adventure")).toBeInTheDocument();
@@ -57,7 +105,11 @@ describe("GameDetailCard", () => {
       developers: "Epic Games Studio",
     };
 
-    render(<GameDetailCard {...propsWithDeveloper} />);
+    render(
+      <MockedProvider mocks={[]}>
+        <GameDetailCard {...propsWithDeveloper} />
+      </MockedProvider>,
+    );
 
     expect(screen.getByText(/Epic Games Studio/)).toBeInTheDocument();
   });
@@ -68,13 +120,21 @@ describe("GameDetailCard", () => {
       platforms: "PC, Xbox, PlayStation",
     };
 
-    render(<GameDetailCard {...propsWithPlatforms} />);
+    render(
+      <MockedProvider mocks={[]}>
+        <GameDetailCard {...propsWithPlatforms} />
+      </MockedProvider>,
+    );
 
     expect(screen.getByText(/PC, Xbox, PlayStation/)).toBeInTheDocument();
   });
 
   it("applies correct CSS classes to section", () => {
-    const { container } = render(<GameDetailCard {...mockProps} />);
+    const { container } = render(
+      <MockedProvider mocks={[]}>
+        <GameDetailCard {...mockProps} />
+      </MockedProvider>,
+    );
 
     const section = container.querySelector("section");
     expect(section).toHaveClass(
@@ -88,23 +148,24 @@ describe("GameDetailCard", () => {
   });
 
   it("renders the image in the correct position", () => {
-    const { container } = render(<GameDetailCard {...mockProps} />);
+    const { container } = render(
+      <MockedProvider mocks={[]}>
+        <GameDetailCard {...mockProps} />
+      </MockedProvider>,
+    );
 
     const innerSection = container.querySelector("section section");
     expect(innerSection?.className).not.toContain("flex-row-reverse");
   });
 
-  it("renders placeholder sections", () => {
-    render(<GameDetailCard {...mockProps} />);
-
-    expect(screen.getByText("star rating placeholder")).toBeInTheDocument();
-    expect(screen.getByText("heart icon placeholder")).toBeInTheDocument();
-  });
-
   it("logs to console when onButtonClick would be called", () => {
     const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    render(<GameDetailCard {...mockProps} />);
+    render(
+      <MockedProvider mocks={[]}>
+        <GameDetailCard {...mockProps} />
+      </MockedProvider>,
+    );
     expect(screen.getByText("Test Game")).toBeInTheDocument();
 
     consoleSpy.mockRestore();
@@ -112,6 +173,7 @@ describe("GameDetailCard", () => {
 
   it("renders all optional props together", () => {
     const fullProps = {
+      gameId: 1,
       title: "Complete Game",
       descriptionShort: "A fully featured game with all metadata",
       image: "/complete-game.jpg",
@@ -120,7 +182,11 @@ describe("GameDetailCard", () => {
       platforms: "PC, PS5, Xbox",
     };
 
-    render(<GameDetailCard {...fullProps} />);
+    render(
+      <MockedProvider mocks={[]}>
+        <GameDetailCard {...fullProps} />
+      </MockedProvider>,
+    );
 
     expect(screen.getByText("Complete Game")).toBeInTheDocument();
     expect(

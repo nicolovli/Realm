@@ -7,15 +7,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model Game {
-  id               Int       @id @default(autoincrement())
-  sid              Int       @unique
+  id               Int         @id @default(autoincrement())
+  sid              Int         @unique
   name             String
   image            String?
   descriptionHtml  String?
   descriptionText  String?
   descriptionShort String?
   publishedStore   DateTime?
+
+  avgRating       Float?   
+  reviewsCount    Int      @default(0)
+  favoritesCount  Int      @default(0)
+  popularityScore Int      @default(0)
+  hasRatings      Boolean  @default(false)
 
   platforms  Platform[]  @relation("GamePlatforms")
   tags       Tag[]       @relation("GameTags")
@@ -24,64 +31,89 @@ model Game {
   genres     Genre[]     @relation("GameGenres")
   developers Developer[] @relation("GameDevelopers")
   publishers Publisher[] @relation("GamePublishers")
+  favoritedBy User[]   @relation("Favorites")
+  reviews          Review[]    @relation("GameReviews")
+
+  @@index([popularityScore], map: "idx_game_popularity")
+  @@index([avgRating], map: "idx_game_avg_rating")
+  @@index([publishedStore], map: "idx_game_published")
 }
 
 model Platform {
   id    Int    @id @default(autoincrement())
   name  String @unique
   games Game[] @relation("GamePlatforms")
+
+  @@index([name], map: "idx_platform_name")
 }
 
 model Tag {
   id    Int    @id @default(autoincrement())
   name  String @unique
   games Game[] @relation("GameTags")
+
+  @@index([name], map: "idx_tag_name")
 }
 
 model Language {
   id    Int    @id @default(autoincrement())
   name  String @unique
   games Game[] @relation("GameLanguages")
+
+  @@index([name], map: "idx_language_name")
 }
 
 model Category {
   id    Int    @id @default(autoincrement())
   name  String @unique
   games Game[] @relation("GameCategories")
+
+  @@index([name], map: "idx_category_name")
 }
 
 model Genre {
   id    Int    @id @default(autoincrement())
   name  String @unique
   games Game[] @relation("GameGenres")
+
+  @@index([name], map: "idx_genre_name")
 }
 
 model Developer {
   id    Int    @id @default(autoincrement())
   name  String @unique
   games Game[] @relation("GameDevelopers")
+
+  @@index([name], map: "idx_developer_name")
 }
 
 model Publisher {
   id    Int    @id @default(autoincrement())
   name  String @unique
   games Game[] @relation("GamePublishers")
+
+  @@index([name], map: "idx_publisher_name")
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  auth0Id    String   @unique
-  username   String   @unique
-  givenName  String
-  familyName String
-  email      String   @unique
-  reviews    Review[] //one user can have many reviews
+  id       Int      @id @default(autoincrement())
+  username String   @unique
+  email    String   @unique
+  password String
+  reviews  Review[]
+  favorites Game[]   @relation("Favorites") //many-to-many relation between user and games
 }
 
 model Review {
-  id          Int    @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   description String
   star        Int
-  user        User   @relation(fields: [userId], references: [id])
   userId      Int
+  user        User   @relation(fields: [userId], references: [id])
+  gameId      Int
+  game        Game     @relation("GameReviews", fields: [gameId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, gameId])
 }

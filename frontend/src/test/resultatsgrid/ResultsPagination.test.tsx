@@ -1,9 +1,9 @@
 import { render, screen, cleanup } from "@testing-library/react";
-import ResultsPagination from "../../components/ResultsGrid/ResultsPagination";
+import { ResultsPagination } from "../../components/ResultsGrid/ResultsPagination";
 import { vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 
-describe("ResultsPagination", () => {
+describe("ResultsPagination (always-input)", () => {
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
@@ -18,8 +18,7 @@ describe("ResultsPagination", () => {
         onNext={vi.fn()}
       />,
     );
-    const prev = screen.getByRole("button", { name: /prev/i });
-    expect(prev).toBeDisabled();
+    expect(screen.getByRole("button", { name: /prev/i })).toBeDisabled();
   });
 
   it("enables Next when page < totalPages (default logic)", () => {
@@ -31,8 +30,7 @@ describe("ResultsPagination", () => {
         onNext={vi.fn()}
       />,
     );
-    const next = screen.getByRole("button", { name: /next/i });
-    expect(next).not.toBeDisabled();
+    expect(screen.getByRole("button", { name: /next/i })).not.toBeDisabled();
   });
 
   it("respects canNext/canPrev overrides", () => {
@@ -66,11 +64,9 @@ describe("ResultsPagination", () => {
 
     await user.click(screen.getByRole("button", { name: /prev/i }));
     await user.click(screen.getByRole("button", { name: /next/i }));
-
     expect(onPrev).toHaveBeenCalledTimes(1);
     expect(onNext).toHaveBeenCalledTimes(1);
 
-    // Now disable both and verify no more calls
     rerender(
       <ResultsPagination
         page={2}
@@ -81,16 +77,14 @@ describe("ResultsPagination", () => {
         onNext={onNext}
       />,
     );
-
     await user.click(screen.getByRole("button", { name: /prev/i }));
     await user.click(screen.getByRole("button", { name: /next/i }));
-
     expect(onPrev).toHaveBeenCalledTimes(1);
     expect(onNext).toHaveBeenCalledTimes(1);
   });
 
-  it("renders page indicator", () => {
-    render(
+  it("renders an always-visible input; readOnly when onPage is not provided", () => {
+    const { rerender } = render(
       <ResultsPagination
         page={3}
         totalPages={10}
@@ -98,26 +92,96 @@ describe("ResultsPagination", () => {
         onNext={vi.fn()}
       />,
     );
-    expect(screen.getByText(/Page 3 \/ 10/i)).toBeInTheDocument();
+
+    const input = screen.getByLabelText(/page number/i);
+    expect(input).toBeInTheDocument();
+    expect(input).toHaveAttribute("readonly"); // no onPage => readOnly
+    expect(screen.getByText(/\/ 10/i)).toBeInTheDocument();
+
+    // with onPage -> editable (no readonly)
+    rerender(
+      <ResultsPagination
+        page={3}
+        totalPages={10}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+        onPage={vi.fn()}
+      />,
+    );
+    expect(screen.getByLabelText(/page number/i)).not.toHaveAttribute(
+      "readonly",
+    );
   });
 
-  it("renders jump-to select when onPage is provided and totalPages > 1", async () => {
+  it("typing a number and pressing Enter calls onPage with that page", async () => {
     const onPage = vi.fn();
     const user = userEvent.setup();
+
     render(
       <ResultsPagination
         page={1}
-        totalPages={3}
+        totalPages={5}
         onPrev={vi.fn()}
         onNext={vi.fn()}
         onPage={onPage}
       />,
     );
 
-    const select = screen.getByLabelText(/jump to/i);
-    expect(select).toBeInTheDocument();
+    const input = screen.getByLabelText(/page number/i);
+    await user.clear(input);
+    await user.type(input, "4{Enter}");
+    expect(onPage).toHaveBeenCalledWith(4);
+  });
 
-    await user.selectOptions(select, "2");
-    expect(onPage).toHaveBeenCalledWith(2);
+  it("Escape or blur cancels edit and does not call onPage", async () => {
+    const onPage = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <ResultsPagination
+        page={2}
+        totalPages={5}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+        onPage={onPage}
+      />,
+    );
+
+    const input = screen.getByLabelText(/page number/i);
+
+    // Esc cancels and resets value to current page
+    await user.clear(input);
+    await user.type(input, "5{Escape}");
+    expect(onPage).not.toHaveBeenCalled();
+    expect((input as HTMLInputElement).value).toBe("2");
+
+    // Blur cancels
+    await user.clear(input);
+    await user.type(input, "3");
+    await user.click(screen.getByRole("button", { name: /next/i })); // blur
+    expect(onPage).not.toHaveBeenCalled();
+    expect(
+      (screen.getByLabelText(/page number/i) as HTMLInputElement).value,
+    ).toBe("2");
+  });
+
+  it("clamps out-of-range values on submit", async () => {
+    const onPage = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <ResultsPagination
+        page={1}
+        totalPages={5}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+        onPage={onPage}
+      />,
+    );
+
+    const input = screen.getByLabelText(/page number/i);
+    await user.clear(input);
+    await user.type(input, "999{Enter}");
+    expect(onPage).toHaveBeenCalledWith(5);
   });
 });

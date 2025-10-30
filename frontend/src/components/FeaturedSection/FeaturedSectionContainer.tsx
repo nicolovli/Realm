@@ -1,11 +1,11 @@
 import { LOADINGandERROR } from "@/lib/classNames";
-import FeaturedCarousel from "./FeaturedCarousel";
+import { FeaturedCarousel } from "./FeaturedCarousel";
 import { GET_FEATURED_GAMES } from "@/lib/graphql/queries/featuredGames";
 import { useQuery } from "@apollo/client/react";
 import type { FeaturedGame, GetFeaturedGamesData } from "@/types/GameTypes";
 import { FeaturedCardSkeleton } from "../Skeletons";
 
-export default function FeaturedSection() {
+export const FeaturedSection = () => {
   const { loading, error, data } = useQuery<GetFeaturedGamesData>(
     GET_FEATURED_GAMES,
     {
@@ -14,13 +14,12 @@ export default function FeaturedSection() {
     },
   );
 
-  if (loading) return <p className={LOADINGandERROR}>Loading...</p>;
   if (error) return <p className={LOADINGandERROR}>Error: {error.message}</p>;
 
   const top10: FeaturedGame[] = data?.games ?? [];
 
   return (
-    <div className="overflow-x-hidden">
+    <section className="overflow-x-hidden">
       {loading ? (
         <section className="flex gap-4 mt-6">
           {Array.from({ length: 10 }).map((_, i) => (
@@ -43,6 +42,6 @@ export default function FeaturedSection() {
           }}
         />
       )}
-    </div>
+    </section>
   );
-}
+};

@@ -1,4 +1,4 @@
-import { FeaturedSectionContainer } from "../components/FeaturedSection";
+import { FeaturedSection } from "@/components/FeaturedSection/FeaturedSectionContainer";
 import { PromoCard } from "../components/InformationCards";
 
 export const HomePage = () => {
@@ -12,7 +12,7 @@ export const HomePage = () => {
         className="w-[min(1600px,92%)] mx-auto grid gap-[clamp(20px,3vw,32px)]"
         aria-label="Featured games"
       >
-        <FeaturedSectionContainer />
+        <FeaturedSection />
       </section>
     </main>
   );

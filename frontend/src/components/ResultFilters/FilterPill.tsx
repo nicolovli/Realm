@@ -49,6 +49,8 @@ export const FilterPill = ({
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
         disabled={isDisabled}
+        aria-label={`Filter by ${label}`}
+        aria-expanded={open}
         className={`
           ${FOCUS_VISIBLE}
           ${HOVER}
@@ -74,11 +76,19 @@ export const FilterPill = ({
                 : selectedValues.includes(option.name);
             const isDisabled = option.disabled && !isSelected;
 
+            const disabledClass = isDisabled
+              ? "opacity-40 cursor-not-allowed pointer-events-none"
+              : "cursor-pointer";
+
             return (
               <DropdownMenuCheckboxItem
                 key={option.name}
                 checked={isSelected}
                 disabled={isDisabled}
+                aria-disabled={isDisabled}
+                title={
+                  isDisabled ? "No matching results for this option" : undefined
+                }
                 onCheckedChange={() =>
                   !isDisabled && handleOptionToggle(option.name)
                 }
@@ -88,8 +98,8 @@ export const FilterPill = ({
                 className={`
                   ${FOCUS_VISIBLE}
                   ${HOVER}
-                  ${DISABLED}
-                  text-black dark:text-white cursor-pointer my-1 
+                  text-black dark:text-white my-1 
+                  ${disabledClass}
                   ${isSelected ? "bg-white/40 dark:bg-black/20 font-bold" : ""}
                 `}
               >

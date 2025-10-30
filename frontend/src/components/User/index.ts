@@ -1,3 +1,4 @@
-export * from "./AuthRedirectHandler";
 export * from "./Profile";
-export * from "./ProfileForm";
+export * from "./AuthDialog";
+export * from "./Login";
+export * from "./Register";

@@ -140,7 +140,7 @@ const Carousel = forwardRef<
           canScrollNext,
         }}
       >
-        <div
+        <section
           ref={ref}
           onKeyDownCapture={handleKeyDown}
           className={cn("relative", className)}
@@ -149,7 +149,7 @@ const Carousel = forwardRef<
           {...props}
         >
           {children}
-        </div>
+        </section>
       </CarouselContext.Provider>
     );
   },
@@ -163,8 +163,8 @@ const CarouselContent = forwardRef<
   const { carouselRef, orientation } = useCarousel();
 
   return (
-    <div ref={carouselRef} className="overflow-hidden">
-      <div
+    <section ref={carouselRef} className="overflow-hidden">
+      <span
         ref={ref}
         className={cn(
           "flex",
@@ -173,7 +173,7 @@ const CarouselContent = forwardRef<
         )}
         {...props}
       />
-    </div>
+    </section>
   );
 });
 CarouselContent.displayName = "CarouselContent";
@@ -183,7 +183,7 @@ const CarouselItem = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
     const { orientation } = useCarousel();
 
     return (
-      <div
+      <section
         ref={ref}
         role="group"
         aria-roledescription="slide"

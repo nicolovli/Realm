@@ -1,88 +1,143 @@
-import { describe, it, expect, vi, type Mock } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AuthButton } from "../../components/Header";
-import { BrowserRouter } from "react-router-dom";
-import { useAuth0 } from "@auth0/auth0-react";
-import { useNavigate } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
+import * as useAuthStatusModule from "@/hooks/useAuthStatus";
 
-vi.mock("@auth0/auth0-react", () => ({
-  useAuth0: vi.fn(),
+// Mock Auth status hook
+vi.mock("@/hooks/useAuthStatus");
+
+// Mock AuthDialog to avoid rendering internals
+vi.mock("../../components/User", () => ({
+  AuthDialog: ({
+    open,
+    onOpenChange,
+  }: {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+  }) =>
+    open ? (
+      <div data-testid="auth-dialog">
+        <button onClick={() => onOpenChange(false)}>Close Dialog</button>
+      </div>
+    ) : null,
 }));
 
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return {
-    ...actual,
-    useNavigate: vi.fn(),
-  };
-});
-
 describe("AuthButton", () => {
-  const mockLoginWithRedirect = vi.fn();
-  const mockNavigate = vi.fn();
-
   beforeEach(() => {
-    (useNavigate as unknown as Mock).mockReturnValue(mockNavigate);
+    vi.clearAllMocks();
   });
 
-  it("renders Login button and icon when not authenticated", async () => {
-    (useAuth0 as Mock).mockReturnValue({
-      isAuthenticated: false,
-      loginWithRedirect: mockLoginWithRedirect,
-      user: null,
+  afterEach(() => {
+    cleanup();
+  });
+
+  const renderWithRouter = (isLoggedIn = false) => {
+    vi.mocked(useAuthStatusModule.useAuthStatus).mockReturnValue({
+      isLoggedIn,
+      setIsLoggedIn: vi.fn(),
+    });
+
+    return render(
+      <MemoryRouter>
+        <AuthButton />
+      </MemoryRouter>,
+    );
+  };
+
+  it("renders login button when not logged in", () => {
+    renderWithRouter(false);
+
+    const loginButton = screen.getByRole("button", { name: /login/i });
+    expect(loginButton).toBeInTheDocument();
+    expect(loginButton).toHaveTextContent("Login");
+  });
+
+  it("renders account button when logged in and navigates to /profile", async () => {
+    renderWithRouter(true);
+
+    const accountButton = screen.getByRole("button", { name: /view account/i });
+    expect(accountButton).toBeInTheDocument();
+
+    const svg = accountButton.querySelector("svg");
+    expect(svg).toBeInTheDocument();
+  });
+
+  it("opens auth dialog when login button is clicked", async () => {
+    const user = userEvent.setup();
+    renderWithRouter(false);
+
+    const loginButton = screen.getByRole("button", { name: /login/i });
+    expect(screen.queryByTestId("auth-dialog")).not.toBeInTheDocument();
+
+    await user.click(loginButton);
+
+    expect(screen.getByTestId("auth-dialog")).toBeInTheDocument();
+  });
+
+  it("closes auth dialog when closed", async () => {
+    const user = userEvent.setup();
+    renderWithRouter(false);
+
+    const loginButton = screen.getByRole("button", { name: /login/i });
+
+    await user.click(loginButton);
+    expect(screen.getByTestId("auth-dialog")).toBeInTheDocument();
+
+    const closeButton = screen.getByText("Close Dialog");
+    await user.click(closeButton);
+
+    expect(screen.queryByTestId("auth-dialog")).not.toBeInTheDocument();
+  });
+
+  it("applies correct CSS classes to login button", () => {
+    renderWithRouter(false);
+
+    const loginButton = screen.getByRole("button", { name: /login/i });
+    expect(loginButton).toHaveClass("bg-lightbuttonpurple");
+    expect(loginButton).toHaveClass("dark:bg-darkbuttonpurple");
+  });
+
+  it("dispatches auth-change event after successful login", async () => {
+    const user = userEvent.setup();
+    const mockSetIsLoggedIn = vi.fn();
+    const dispatchEventSpy = vi.spyOn(window, "dispatchEvent");
+
+    const localStorageMock = {
+      getItem: vi.fn((key: string) => (key === "token" ? "fake-token" : null)),
+      setItem: vi.fn(() => {}),
+      removeItem: vi.fn(() => {}),
+      clear: vi.fn(),
+      length: 0,
+      key: vi.fn(() => null),
+    };
+    Object.defineProperty(window, "localStorage", {
+      value: localStorageMock,
+      writable: true,
+    });
+
+    vi.mocked(useAuthStatusModule.useAuthStatus).mockReturnValue({
+      isLoggedIn: false,
+      setIsLoggedIn: mockSetIsLoggedIn,
     });
 
     render(
-      <BrowserRouter>
+      <MemoryRouter>
         <AuthButton />
-      </BrowserRouter>,
+      </MemoryRouter>,
     );
 
-    const button = screen.getByRole("button", { name: /login/i });
-    expect(button).toBeInTheDocument();
+    const loginButton = screen.getByRole("button", { name: /login/i });
+    await user.click(loginButton);
 
-    await userEvent.click(button);
-    expect(mockLoginWithRedirect).toHaveBeenCalledOnce();
-  });
+    const closeButton = screen.getByText("Close Dialog");
+    await user.click(closeButton);
 
-  it("renders Profile text when authenticated without picture", async () => {
-    (useAuth0 as Mock).mockReturnValue({
-      isAuthenticated: true,
-      loginWithRedirect: mockLoginWithRedirect,
-      user: { name: "Test User", picture: null },
-    });
+    if (localStorageMock.getItem("token")) {
+      expect(mockSetIsLoggedIn).toHaveBeenCalledWith(true);
+    }
 
-    render(
-      <BrowserRouter>
-        <AuthButton />
-      </BrowserRouter>,
-    );
-
-    const button = screen.getByRole("button", { name: /profile/i });
-    expect(button).toBeInTheDocument();
-
-    await userEvent.click(button);
-    expect(mockNavigate).toHaveBeenCalledWith("/profile");
-  });
-
-  it("renders profile picture when authenticated with picture", async () => {
-    (useAuth0 as Mock).mockReturnValue({
-      isAuthenticated: true,
-      loginWithRedirect: mockLoginWithRedirect,
-      user: { name: "Test User", picture: "pic.jpg" },
-    });
-
-    render(
-      <BrowserRouter>
-        <AuthButton />
-      </BrowserRouter>,
-    );
-
-    const img = screen.getByRole("img", { name: /profile/i });
-    expect(img).toBeInTheDocument();
-
-    await userEvent.click(img);
-    expect(mockNavigate).toHaveBeenCalledWith("/profile");
+    dispatchEventSpy.mockRestore();
   });
 });

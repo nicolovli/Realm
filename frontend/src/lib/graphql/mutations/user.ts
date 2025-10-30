@@ -1,11 +1,22 @@
 export const CREATE_USER = `
-  mutation CreateUser($auth0Id: String!, $username: String!, $givenName: String!, $familyName: String!, $email: String!) {
-    createUser(auth0Id: $auth0Id, username: $username, givenName: $givenName, familyName: $familyName, email: $email) {
+  mutation CreateUser($username: String!, $email: String!, $password: String!) {
+    createUser(username: $username, email: $email, password: $password) {
       id
       username
-      givenName
-      familyName
       email
+    }
+  }
+`;
+
+export const LOGIN_USER = `
+  mutation LoginUser($username: String!, $password: String!){
+    loginUser(username: $username, password: $password){
+      token
+      user{
+        id
+        username
+        email
+      }
     }
   }
 `;

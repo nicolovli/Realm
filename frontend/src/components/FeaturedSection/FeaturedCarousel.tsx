@@ -1,11 +1,5 @@
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type KeyboardEventHandler,
-} from "react";
-import FeaturedCard from "./FeaturedCard";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { FeaturedCard } from "./FeaturedCard";
 import { Link } from "react-router-dom";
 
 // ⬇️ shadcn/ui (Embla) carousel
@@ -18,32 +12,29 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import type { FeaturedGame } from "@/types/GameTypes";
+import { FOCUS_VISIBLE, HOVER } from "@/lib/classNames";
 
-// ====== style constants (kept from your original) ======
 export const arrowClass =
   "absolute top-1/2 -translate-y-1/2 z-20 h-10 w-10 " +
   "flex items-center justify-center rounded-full backdrop-blur " +
   "text-black dark:text-white " +
   "bg-opacity-60 bg-lightpurple " +
   "dark:bg-opacity-50 dark:bg-darkpurple " +
-  "hover:brightness-110 " +
-  "focus:outline-none focus:ring-2 " +
-  "focus:ring-activelightdots dark:focus:ring-darkbuttonpurple";
+  "hover:brightness-110 cursor-pointer " +
+  FOCUS_VISIBLE;
 
 export const dotBaseClass =
   "h-2 w-2 rounded-full transition-all " +
-  "bg-lightdots dark:bg-darkpurple " +
-  "focus:outline-none focus:ring-2 " +
-  "focus:ring-activelightdots dark:focus:ring-darkbuttonpurple";
+  "bg-lightdots dark:bg-darkpurple cursor-pointer " +
+  FOCUS_VISIBLE;
 
 export const activeDotClass = "w-4 bg-activelightdots dark:bg-darkbuttonpurple";
 
 export const exploreBtnClass =
   "rounded-full px-4 py-2 text-sm font-medium text-white shadow " +
-  "bg-lightbuttonpurple hover:brightness-110 " +
-  "dark:bg-darkbuttonpurple dark:hover:brightness-110 " +
-  "focus:outline-none focus:ring-2 cursor-pointer " +
-  "focus:ring-activelightdots dark:focus:ring-darkpurple";
+  "bg-lightbuttonpurple dark:bg-darkbuttonpurple cursor-pointer " +
+  HOVER +
+  FOCUS_VISIBLE;
 
 // ====== helpers ======
 function useAnyHover() {
@@ -84,22 +75,15 @@ export type FeaturedCarouselProps = {
   items: FeaturedGame[]; // pass up to 10 items (or more, loop handles it)
   title?: string;
   onExploreAll?: () => void;
-  itemBasisClassName?: string; // e.g. "basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
+  itemBasisClassName?: string;
 };
 
-/**
- * Carousel component using shadcn/ui Carousel
- *
- * Things simplified:
- * - No clone math, px transforms, or custom drag hooks: Embla does it (used by shadcn).
- * - Slides per view handled via responsive flex-basis classes.
- */
-export default function FeaturedCarousel({
+export const FeaturedCarousel = ({
   items,
   title = "Featured games",
   onExploreAll,
   itemBasisClassName = "basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4",
-}: FeaturedCarouselProps) {
+}: FeaturedCarouselProps) => {
   const logical = useMemo(() => items.slice(0, 10), [items]); // keep your 10 cap
   const [api, setApi] = useState<CarouselApi | null>(null);
   const [selected, setSelected] = useState(0);
@@ -134,48 +118,25 @@ export default function FeaturedCarousel({
     };
   }, [api]);
 
-  // keyboard: ArrowLeft/Right, Home/End
-  const onKeyDown: KeyboardEventHandler<HTMLDivElement> = (e) => {
-    if (!api) return;
-    if (e.key === "ArrowRight") {
-      e.preventDefault();
-      api.scrollNext();
-    } else if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      api.scrollPrev();
-    } else if (e.key === "Home") {
-      e.preventDefault();
-      api.scrollTo(0);
-    } else if (e.key === "End") {
-      e.preventDefault();
-      api.scrollTo(snapCount - 1);
-    }
-  };
-
   return (
     <section className="w-full">
       <h2 className="mb-4 text-center text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
         {title}
       </h2>
 
-      <div
+      <article
         ref={regionRef}
-        role="region"
-        aria-roledescription="carousel"
         aria-label={title}
         aria-live="polite"
-        tabIndex={0}
-        onKeyDown={onKeyDown}
-        className="mx-auto w-full overflow-hidden"
+        className="mx-auto w-full overflow-hidden "
       >
-        <div
+        <figure
           className="
             relative isolate overflow-hidden rounded-xl touch-pan-y overscroll-x-contain
             touch:cursor-grab touch:active:cursor-grabbing sm:px-0"
           onPointerDownCapture={() => setHint(false)}
         >
           <Carousel
-            // Embla options: loop + start-aligned snaps (closest to your previous behavior)
             opts={{
               loop: true,
               align: "start",
@@ -183,9 +144,9 @@ export default function FeaturedCarousel({
               duration: 20,
             }}
             setApi={setApi}
-            className="w-full"
+            className={`w-full`}
           >
-            <CarouselContent className="select-none gap-0 sm:gap-4 md:gap-6 lg:gap-8">
+            <CarouselContent className="select-none gap-0 sm:gap-4 md:gap-6 lg:gap-8 ">
               {logical.map((g) => (
                 <CarouselItem
                   key={g.id}
@@ -196,7 +157,7 @@ export default function FeaturedCarousel({
               ))}
             </CarouselContent>
 
-            {/* Prev/Next arrows with your styles, only on hover-capable devices */}
+            {/* Prev/Next arrows only on hover-capable devices */}
             <CarouselPrevious
               aria-label="Previous slide"
               className={`${arrowClass} left-2 ${anyHover ? "flex" : "hidden"}`}
@@ -213,7 +174,7 @@ export default function FeaturedCarousel({
 
           {/* swipe hint (touch only, hidden after first interaction) */}
           {hint && (
-            <div
+            <p
               className="pointer-events-none absolute right-3 top-3 rounded-full px-2 py-1 text-xs text-white"
               style={{
                 // matches your oklab color-mix intent
@@ -221,11 +182,10 @@ export default function FeaturedCarousel({
               }}
             >
               Swipe →
-            </div>
+            </p>
           )}
-        </div>
+        </figure>
 
-        {/* Dots (use Embla snaps; highlight current) */}
         <nav aria-label="Pagination" className="mt-4 flex justify-center gap-2">
           {Array.from({ length: snapCount }).map((_, i) => {
             const isActive = selected === i;
@@ -247,16 +207,16 @@ export default function FeaturedCarousel({
 
         {/* Explore */}
         {onExploreAll && (
-          <Link className="mt-6 flex justify-center" to="/games">
-            <button
-              onClick={onExploreAll}
-              className={exploreBtnClass + " bg-lightbuttonpurple"}
-            >
+          <Link
+            className="mt-6 flex justify-center focus-visible:outline-none"
+            to="/games"
+          >
+            <button onClick={onExploreAll} className={exploreBtnClass}>
               Explore all games
             </button>
           </Link>
         )}
-      </div>
+      </article>
     </section>
   );
-}
+};

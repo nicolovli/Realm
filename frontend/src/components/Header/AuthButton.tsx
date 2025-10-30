@@ -1,58 +1,71 @@
-import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
-import { useAuth0 } from "@auth0/auth0-react";
+import {
+  ArrowRightStartOnRectangleIcon,
+  UserCircleIcon,
+} from "@heroicons/react/24/outline";
 import { FOCUS_VISIBLE } from "../../lib/classNames";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthDialog } from "../User";
+import { useAuthStatus } from "@/hooks/useAuthStatus";
 
 interface AuthButtonProps {
   className?: string;
 }
 
 export const AuthButton = ({ className = "" }: AuthButtonProps) => {
-  const { loginWithRedirect, isAuthenticated, user } = useAuth0();
+  const { isLoggedIn, setIsLoggedIn } = useAuthStatus();
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-
   const loginbutton =
-    "flex items-center gap-1 text-white bg-lightbuttonpurple dark:bg-darkbuttonpurple rounded-full text-whitehover:bg-darkbuttonpurple dark:hover:bg-lightbuttonpurple " +
+    "flex items-center gap-1 rounded-full cursor-pointer " +
     FOCUS_VISIBLE +
     " " +
     className;
 
-  const handleAuth = () => {
-    if (!isAuthenticated) {
-      loginWithRedirect({
-        appState: { returnTo: window.location.pathname },
-      });
-    } else {
-      navigate("/profile");
-    }
+  const handleAccountClick = () => {
+    navigate("/profile");
   };
 
   return (
-    <button
-      onClick={handleAuth}
-      className={
-        isAuthenticated ? loginbutton + " p-0" : loginbutton + " py-3 px-5"
-      }
-    >
-      {!isAuthenticated && (
-        <ArrowRightStartOnRectangleIcon
-          aria-hidden="true"
-          className="w-5 h-5"
-        />
-      )}
-      {isAuthenticated ? (
-        user?.picture ? (
-          <img
-            src={user.picture}
-            alt="Profile"
-            className={`w-10 h-10 rounded-full` + FOCUS_VISIBLE}
-          />
-        ) : (
-          "Profile"
-        )
+    <>
+      {isLoggedIn ? (
+        <button
+          onClick={handleAccountClick}
+          className={
+            loginbutton +
+            "text-black dark:text-white hover:text-white dark:hover:text-black"
+          }
+          title="View Account"
+          aria-label="View account"
+        >
+          <UserCircleIcon className="w-8 h-8" />
+        </button>
       ) : (
-        "Login"
+        <button
+          onClick={() => setOpen(true)}
+          className={
+            loginbutton +
+            " py-3 px-5 bg-lightbuttonpurple dark:bg-darkbuttonpurple hover:bg-darkbuttonpurple text-white dark:hover:bg-lightbuttonpurple"
+          }
+          aria-label="login"
+        >
+          <ArrowRightStartOnRectangleIcon
+            aria-hidden="true"
+            className="w-5 h-5"
+          />
+          Login
+        </button>
       )}
-    </button>
+      <AuthDialog
+        open={open}
+        onOpenChange={(open) => {
+          setOpen(open);
+          if (!open && localStorage.getItem("token")) {
+            setIsLoggedIn(true);
+            window.dispatchEvent(new Event("auth-change"));
+          }
+        }}
+      />
+    </>
   );
 };

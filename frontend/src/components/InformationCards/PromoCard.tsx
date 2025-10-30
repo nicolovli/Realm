@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@apollo/client/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { GET_PROMO_GAMES } from "../../lib/graphql/queries/promoGames";
-import GameCardBase from "./GameCardBase";
+import { GET_REVIEWS_META_FOR_GAME } from "../../lib/graphql/queries/reviewQueries";
+import { GameCardBase } from "./GameCardBase";
 import { useNavigate } from "react-router-dom";
 import { HOVER, FOCUS_VISIBLE, CARD_CONTAINER } from "../../lib/classNames";
 import { LOADINGandERROR } from "@/lib/classNames";
@@ -13,6 +14,7 @@ interface Game {
   name: string;
   descriptionShort: string;
   image: string;
+  rating?: number;
 }
 
 interface GetPromoGamesData {
@@ -35,6 +37,18 @@ export const PromoCard = () => {
 
   const games = data?.games ?? [];
   const currentGame = games[currentIndex];
+
+  // Rating
+  const { data: metaData } = useQuery<
+    { reviewsMetaForGame: { averageStar: number; totalReviews: number } },
+    { gameId: number }
+  >(GET_REVIEWS_META_FOR_GAME, {
+    variables: { gameId: Number(currentGame?.id) },
+    skip: !currentGame,
+    fetchPolicy: "cache-first",
+  });
+
+  const avgRating = metaData?.reviewsMetaForGame?.averageStar;
 
   const goToSlide = (index: number) => setCurrentIndex(index);
   const nextSlide = useCallback(
@@ -83,13 +97,17 @@ export const PromoCard = () => {
       tabIndex={0}
     >
       <GameCardBase
+        gameId={Number(currentGame.id)}
         title={currentGame.name}
         descriptionShort={currentGame.descriptionShort}
         image={currentGame.image}
         buttonText="Read more"
         onButtonClick={() => navigate(`/games/${currentGame.id}`)}
         imagePosition="left"
-        showPlaceholders={false}
+        rating={
+          typeof avgRating === "number" ? avgRating : (currentGame.rating ?? 0)
+        }
+        isPromoCard={true}
       />
 
       {/* Dot navigation */}
@@ -141,5 +159,3 @@ export const PromoCard = () => {
     </section>
   );
 };
-
-export default PromoCard;

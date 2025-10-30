@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Game" ADD COLUMN     "avgRating" DOUBLE PRECISION,
+ADD COLUMN     "favoritesCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "hasRatings" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "popularityScore" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "reviewsCount" INTEGER NOT NULL DEFAULT 0;

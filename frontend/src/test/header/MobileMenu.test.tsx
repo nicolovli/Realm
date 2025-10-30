@@ -1,26 +1,43 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
-import { MobileMenu } from "../../components/Header";
-import type { JSX, RefObject, SVGProps } from "react";
-import { useClickOutside } from "../../hooks/useClickOutside";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import { MobileSheetMenu } from "../../components/Header/MobileSheetMenu";
+import type { SVGProps } from "react";
 
-vi.mock("../../hooks/useClickOutside", () => ({
-  useClickOutside: vi.fn(),
+vi.mock("@/components/ui/sheet", () => ({
+  Sheet: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SheetTrigger: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="sheet-trigger">{children}</div>
+  ),
+  SheetContent: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="sheet-content">{children}</div>
+  ),
+  SheetHeader: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="sheet-header">{children}</div>
+  ),
+  SheetTitle: ({ children }: { children: React.ReactNode }) => (
+    <h2 data-testid="sheet-title">{children}</h2>
+  ),
+  SheetDescription: ({ children }: { children: React.ReactNode }) => (
+    <p data-testid="sheet-description">{children}</p>
+  ),
+  SheetClose: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
+vi.mock("@/components/Header", () => ({
+  AuthButton: () => <button data-testid="auth-btn">AuthButton</button>,
+  ToggleTheme: () => <button data-testid="toggle-theme">ToggleTheme</button>,
+}));
+
+// --- Mock icons ---
 const MockIcon = (
   props: SVGProps<SVGSVGElement> & { "data-testid"?: string },
 ) => <svg {...props} data-testid={props["data-testid"]} />;
 
-type Item = {
-  href: string;
-  title: string;
-  icon: (props: SVGProps<SVGSVGElement>) => JSX.Element;
-};
-
-const mockItems: Item[] = [
+const mockNavigation = [
   {
     href: "/favorites",
     title: "Favorites",
@@ -29,83 +46,72 @@ const mockItems: Item[] = [
     ),
   },
   {
-    href: "/profile",
-    title: "Profile",
+    href: "/discover",
+    title: "Discover",
     icon: (props: SVGProps<SVGSVGElement>) => (
-      <MockIcon {...props} data-testid="icon-profile" />
+      <MockIcon {...props} data-testid="icon-discover" />
     ),
   },
 ];
 
-describe("MobileMenu", () => {
-  const setup = (
-    isOpen: boolean,
-    items = mockItems,
-    triggerRef: RefObject<HTMLButtonElement | null> = { current: null },
-  ) => {
-    const onClose = vi.fn();
+describe("MobileSheetMenu", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const renderMenu = () =>
     render(
       <MemoryRouter>
-        <MobileMenu
-          isOpen={isOpen}
-          onClose={onClose}
-          triggerRef={triggerRef}
-          items={items}
-        />
+        <MobileSheetMenu navigation={mockNavigation} />
       </MemoryRouter>,
     );
-    return { onClose };
-  };
 
-  it("does not render when isOpen=false", () => {
-    setup(false);
-    expect(screen.queryByTestId("mobile-menu")).not.toBeInTheDocument();
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
-  it("renders links when isOpen=true", () => {
-    setup(true);
-    const menu = screen.getByTestId("mobile-menu");
-    expect(menu).toBeInTheDocument();
-    expect(screen.getByText("Favorites")).toBeInTheDocument();
-    expect(screen.getByText("Profile")).toBeInTheDocument();
+  it("renders the sheet trigger button", () => {
+    renderMenu();
+    const trigger = screen.getByLabelText("Open mobile menu");
+    expect(trigger).toBeInTheDocument();
   });
 
-  it("closes when Escape is pressed", async () => {
-    const { onClose } = setup(true);
-    await userEvent.keyboard("{Escape}");
-    expect(onClose).toHaveBeenCalled();
-  });
-
-  it("registers useClickOutside correctly", () => {
-    const { onClose } = setup(true);
-    expect(useClickOutside).toHaveBeenCalledWith(
-      true,
-      onClose,
-      expect.any(Object),
-      { current: null },
+  it("renders the menu title and description", () => {
+    renderMenu();
+    expect(screen.getByTestId("sheet-title")).toHaveTextContent("Menu");
+    expect(screen.getByTestId("sheet-description")).toHaveTextContent(
+      "Welcome to your hub. From here, you can explore, manage, and personalize your Realm experience.",
     );
   });
 
-  it("keeps focus order within links when tabbing", async () => {
-    setup(true);
-    const user = userEvent.setup();
-    const links = screen.getAllByRole("link");
-
-    await user.tab();
-    expect(links[0]).toHaveFocus();
-
-    await user.tab();
-    expect(links[1]).toHaveFocus();
+  it("renders AuthButton and ToggleTheme", () => {
+    renderMenu();
+    expect(screen.getByTestId("auth-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("toggle-theme")).toBeInTheDocument();
   });
 
-  it("renders nothing when items array is empty", () => {
-    setup(true, []);
-    const menu = screen.getByTestId("mobile-menu");
-    expect(menu).toBeInTheDocument();
-    expect(menu.querySelectorAll("a").length).toBe(0);
+  it("renders all navigation links with correct text and icons", () => {
+    renderMenu();
+    expect(screen.getByText("Favorites")).toBeInTheDocument();
+    expect(screen.getByText("Discover")).toBeInTheDocument();
+    expect(screen.getByTestId("icon-fav")).toBeInTheDocument();
+    expect(screen.getByTestId("icon-discover")).toBeInTheDocument();
   });
 
-  it("does not crash if triggerRef is null", () => {
-    expect(() => setup(true, mockItems, { current: null })).not.toThrow();
+  it("renders no links if navigation array is empty", () => {
+    render(
+      <MemoryRouter>
+        <MobileSheetMenu navigation={[]} />
+      </MemoryRouter>,
+    );
+    const navLinks = screen.queryAllByRole("link");
+    expect(navLinks.length).toBe(0);
+  });
+
+  it("opens and closes sheet on trigger click (mocked behavior)", async () => {
+    renderMenu();
+    const trigger = screen.getByLabelText("Open mobile menu");
+    await userEvent.click(trigger);
+    expect(trigger).toBeEnabled();
   });
 });

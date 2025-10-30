@@ -1,6 +1,5 @@
 import { Routes, Route } from "react-router-dom";
 import {
-  CompleteProfilePage,
   FavoritePage,
   HomePage,
   ResultPage,
@@ -9,25 +8,30 @@ import {
 } from "./pages";
 import "./index.css";
 import { Header } from "./components/Header";
-import { AuthRedirectHandler } from "./components/User";
 import { Breadcrumbs } from "./components/Breadcrumbs";
+import { Footer } from "./components/Footer";
+import { Toaster } from "./components/ui/sonner";
 
 function App() {
   return (
-    <>
+    <section className="flex flex-col min-h-screen">
       <Header />
-      <AuthRedirectHandler />
       <Breadcrumbs />
 
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/games" element={<ResultPage />} />
-        <Route path="/favorites" element={<FavoritePage />} />
-        <Route path="/games/:id" element={<InformationPage />} />
-        <Route path="/completeprofile" element={<CompleteProfilePage />} />
-        <Route path="/profile" element={<UserPage />} />
-      </Routes>
-    </>
+      <main className="flex-grow !p-0">
+        <Routes>
+          <Route path="" element={<HomePage />} />
+          <Route path="/games" element={<ResultPage />} />
+          <Route path="/favorites" element={<FavoritePage />} />
+          <Route path="/games/:id" element={<InformationPage />} />
+          <Route path="/profile" element={<UserPage />} />
+        </Routes>
+      </main>
+
+      <Footer />
+
+      <Toaster position="top-center" richColors />
+    </section>
   );
 }
 

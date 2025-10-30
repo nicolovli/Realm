@@ -2,11 +2,11 @@ name: GitHub CI pipeline - Backend
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main, dev3]
     paths:
       - 'backend/**'
   pull_request:
-    branches: [main, dev]
+    branches: [main, dev3]
     paths:
       - 'backend/**'
 

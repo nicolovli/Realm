@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import type { ResultsPaginationProps } from "@/types/ResultPaginationTypes";
 import {
   DISABLED,
@@ -6,7 +7,7 @@ import {
   PILL_TRIGGER_BASE,
 } from "../../lib/classNames";
 
-export default function ResultsPagination({
+export const ResultsPagination = ({
   page,
   totalPages,
   canPrev,
@@ -14,11 +15,35 @@ export default function ResultsPagination({
   onPrev,
   onNext,
   onPage,
-}: ResultsPaginationProps) {
+  isJumping,
+}: ResultsPaginationProps) => {
   const prevEnabled = canPrev ?? page > 1;
   const nextEnabled = canNext ?? page < Math.max(totalPages, 1);
   const total = Math.max(totalPages, 1);
-  const jumpId = "results-pagination-jump";
+
+  // Always-visible input state
+  const [draft, setDraft] = useState<number>(page);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // Keep input synced with external page changes
+  useEffect(() => {
+    setDraft(page);
+  }, [page]);
+
+  const clamp = (n: number) => {
+    const v = Number.isFinite(n) ? n : page; // fallback to current page
+    return Math.max(1, Math.min(total, Math.floor(v)));
+  };
+
+  const submitDraft = () => {
+    if (!onPage) return;
+    const target = clamp(draft);
+    if (target !== page) onPage(target);
+  };
+
+  const cancelDraft = () => {
+    setDraft(page);
+  };
 
   return (
     <nav
@@ -28,63 +53,82 @@ export default function ResultsPagination({
       {/* Prev */}
       <button
         type="button"
-        onClick={prevEnabled ? onPrev : undefined}
-        disabled={!prevEnabled}
+        onClick={prevEnabled && !isJumping ? onPrev : undefined}
+        disabled={!prevEnabled || isJumping}
         aria-label="Previous page"
         className={`${PILL_TRIGGER_BASE} ${FOCUS_VISIBLE} ${HOVER} ${DISABLED} select-none`}
       >
         <span aria-hidden>←</span> Prev
       </button>
 
-      {/* Page indicator */}
-      <output
-        aria-live="polite"
+      {/* Center: always an input */}
+      <form
         className="
-          rounded-xl px-4 py-2 text-sm font-semibold select-none
-          bg-lightpurple dark:bg-darkpurple text-black dark:text-white
+          flex items-center gap-2
+          rounded-xl px-3 py-1.5
+          bg-lightpurple dark:bg-darkpurple
           border border-gray-200 dark:border-ashygray
         "
+        onSubmit={(e) => {
+          e.preventDefault();
+          submitDraft();
+        }}
       >
-        Page {page} / {total}
-      </output>
+        <label htmlFor="page-input" className="sr-only">
+          Go to page
+        </label>
+
+        <span className="text-sm font-semibold text-black dark:text-white">
+          Page
+        </span>
+        <section className="relative">
+          <input
+            id="page-input"
+            ref={inputRef}
+            type="text" // no spinners anywhere
+            inputMode="numeric"
+            aria-label="Page number"
+            disabled={isJumping || !onPage}
+            min={1}
+            max={total}
+            value={Number.isNaN(draft) ? "" : draft}
+            readOnly={!onPage} // if no handler, show but don't allow edits
+            aria-disabled={!onPage}
+            onChange={(e) =>
+              setDraft(
+                e.target.value === ""
+                  ? ("" as unknown as number)
+                  : Number(e.target.value),
+              )
+            }
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                e.preventDefault();
+                cancelDraft();
+                // keep focus for accessibility
+                inputRef.current?.select();
+              }
+            }}
+            onBlur={cancelDraft} // cancel on blur to avoid accidental jumps
+            className={`${DISABLED} ${FOCUS_VISIBLE} w-[4.5ch] px-2 py-1 rounded-md outline-none bg-lightsearchbargray dark:bg-darksearchbargray text-black dark:text-white text-sm text-center disabled:opacity-80 disabled:cursor-not-allowed`}
+          />
+        </section>
+
+        <span className="text-sm font-semibold text-black dark:text-white">
+          / {total}
+        </span>
+      </form>
 
       {/* Next */}
       <button
         type="button"
-        onClick={nextEnabled ? onNext : undefined}
-        disabled={!nextEnabled}
+        onClick={nextEnabled && !isJumping ? onNext : undefined}
+        disabled={!nextEnabled || isJumping}
         aria-label="Next page"
         className={`${PILL_TRIGGER_BASE} ${FOCUS_VISIBLE} ${HOVER} ${DISABLED} select-none`}
       >
         Next <span aria-hidden>→</span>
       </button>
-
-      {/* Jump-to page */}
-      {onPage && total > 1 && (
-        <div className="ml-2 sm:ml-3 text-sm flex items-center gap-2">
-          <label htmlFor={jumpId} className="text-black dark:text-white">
-            Jump to
-          </label>
-          <select
-            id={jumpId}
-            className="
-              px-2 py-1 rounded-md outline-none
-              bg-white dark:bg-darkblack
-              border border-gray-200 dark:border-ashygray
-              text-black dark:text-white
-              focus-visible:outline-blue
-            "
-            value={page}
-            onChange={(e) => onPage(Number(e.target.value))}
-          >
-            {Array.from({ length: total }, (_, i) => i + 1).map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
     </nav>
   );
-}
+};

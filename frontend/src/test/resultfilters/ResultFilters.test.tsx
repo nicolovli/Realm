@@ -3,14 +3,13 @@ import { vi, type MockedFunction } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { MockedResponse } from "@apollo/client/testing";
+import { ResultFilters } from "@/components/ResultFilters";
 
 // Mock the ResultFilters component (default export)
 vi.mock("../../components/ResultFilters", () => ({
   __esModule: true,
-  default: vi.fn(() => null),
+  ResultFilters: vi.fn(() => null),
 }));
-
-import ResultFilters from "../../components/ResultFilters";
 
 const mockResultFilters = ResultFilters as MockedFunction<typeof ResultFilters>;
 
@@ -51,6 +50,9 @@ const defaultProps = {
   isLoading: false,
   sortOption: "popularity" as const,
   setSortOption: vi.fn(),
+  order: "desc" as const,
+  setOrder: vi.fn(),
+  pageSize: 9,
   matchesCount: 0,
   filtersReady: true,
   filterError: undefined,
@@ -60,8 +62,13 @@ const defaultProps = {
   gamesLoading: false,
   totalPages: 1,
   currentPage: 1,
+  canPrev: false,
+  canNext: false,
+  isPending: false,
+  isJumping: false,
   handleNextPage: vi.fn(),
   handlePrevPage: vi.fn(),
+  handleGoToPage: vi.fn(),
   handlePageReset: vi.fn(),
 };
 

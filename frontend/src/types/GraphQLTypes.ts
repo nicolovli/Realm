@@ -1,9 +1,6 @@
-// API response shapes (GetGamesData, FilterOptionsData, etc.)
-
 import type { Game, GameFilter } from "./GameTypes";
 import type { FilterOption } from "./FilterTypes";
 
-// GraphQL Query Response Types
 export type GetGamesData = {
   games: Game[];
 };
@@ -57,4 +54,32 @@ export type AvailableFilterOptionsData = {
 export type AvailableFilterOptionsVariables = {
   currentFilter: GameFilter;
   search?: string;
+};
+
+export type GamesConnectionNode = {
+  id: string;
+  name: string;
+  image?: string | null;
+  descriptionShort?: string | null;
+  publishedStore?: string | null;
+};
+
+export type GamesConnectionData = {
+  gamesConnection?: {
+    totalCount: number;
+    pageInfo: {
+      hasNextPage: boolean;
+      endCursor: string | null;
+    };
+    edges: { cursor: string; node: GamesConnectionNode }[];
+  };
+};
+
+export type GetFilteredGamesCursorVars = {
+  filter: GameFilter | Record<string, never>;
+  search?: string;
+  sortBy: string;
+  sortOrder: "asc" | "desc";
+  first: number;
+  after?: string;
 };

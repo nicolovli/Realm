@@ -20,6 +20,9 @@ For å sette opp frontend må du ha følgende tilgjengelig på maskinen:
 - Npm
 - Tilgang til et NTNU nettverk
 
+> [!NOTE]
+> Det finnes miljøvariabler i `frontend`-mappen men det er ikke noe du trenger å føre inn. Bare kjør kommandoene som er gitt under.
+
 ### Installering
 
 Klon repoet og last ned dependencies

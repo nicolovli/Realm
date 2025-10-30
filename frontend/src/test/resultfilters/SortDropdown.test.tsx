@@ -1,12 +1,11 @@
 import { render, cleanup } from "@testing-library/react";
 import { vi, type MockedFunction } from "vitest";
+import { SortDropdown } from "../../components/ResultFilters";
 
-vi.mock("../../components/ResultFilters/SortDropdown", () => ({
+vi.mock("../../components/ResultFilters", () => ({
   __esModule: true,
   SortDropdown: vi.fn(() => null),
 }));
-
-import { SortDropdown } from "../../components/ResultFilters/SortDropdown";
 
 const mockSortDropdown = SortDropdown as MockedFunction<typeof SortDropdown>;
 
@@ -16,19 +15,43 @@ afterEach(() => {
 });
 
 const sortOptions = [
-  { value: "popularity" as const, label: "Popularity" },
-  { value: "alphabetical" as const, label: "Alphabetical" },
-  { value: "release-date" as const, label: "Release date" },
-  { value: "rating" as const, label: "Rating" },
+  {
+    value: "popularity" as const,
+    label: "Popularity",
+    sortValue: "popularity" as const,
+    order: "desc" as const,
+    onSelect: () => {},
+  },
+  {
+    value: "alphabetical" as const,
+    label: "Alphabetical",
+    sortValue: "alphabetical" as const,
+    order: "asc" as const,
+    onSelect: () => {},
+  },
+  {
+    value: "release-date" as const,
+    label: "Release date",
+    sortValue: "release-date" as const,
+    order: "desc" as const,
+    onSelect: () => {},
+  },
+  {
+    value: "rating" as const,
+    label: "Rating",
+    sortValue: "rating" as const,
+    order: "desc" as const,
+    onSelect: () => {},
+  },
 ];
 
 describe("SortDropdown", () => {
   it("renders with correct props", () => {
     const props = {
       sortOption: "popularity" as const,
+      order: "desc" as const,
       setSortOption: vi.fn(),
       sortOptions,
-      // NOTE: no buttonClass prop in the real component
     };
 
     render(<SortDropdown {...props} />);
@@ -40,6 +63,7 @@ describe("SortDropdown", () => {
     const setSortOption = vi.fn();
     const props = {
       sortOption: "alphabetical" as const,
+      order: "asc" as const,
       setSortOption,
       sortOptions,
     };

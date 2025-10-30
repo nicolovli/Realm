@@ -2,7 +2,13 @@ import { useState, useEffect } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import { HOVER, FOCUS_VISIBLE } from "../../lib/classNames";
 
+import { HeartIcon } from "../HeartIcon";
+import { AuthDialog } from "../User";
+import { useAuthStatus } from "@/hooks/useAuthStatus";
+import { StarRating } from "../Reviews/StarRating";
+
 interface GameCardBaseProps {
+  gameId: number;
   title: string;
   descriptionShort: string;
   image: string;
@@ -12,10 +18,29 @@ interface GameCardBaseProps {
   developers?: string;
   platforms?: string;
   imagePosition?: "left" | "right";
-  showPlaceholders?: boolean;
+  rating?: number;
+  isPromoCard?: boolean;
+  publishedStore?: string | null;
+}
+
+// Robust date parser (gjenbrukt fra ReviewItem)
+function toDate(v: unknown): Date | null {
+  if (v instanceof Date) return v;
+  if (typeof v === "number" && Number.isFinite(v)) return new Date(v);
+  if (typeof v === "string") {
+    const s = v.trim();
+    if (/^\d+$/.test(s)) {
+      const n = Number(s);
+      return Number.isFinite(n) ? new Date(n) : null;
+    }
+    const d = new Date(s);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  return null;
 }
 
 export const GameCardBase = ({
+  gameId,
   title,
   descriptionShort,
   image,
@@ -25,10 +50,14 @@ export const GameCardBase = ({
   developers,
   platforms,
   imagePosition = "right",
-  showPlaceholders = true,
+  rating,
+  isPromoCard,
+  publishedStore,
 }: GameCardBaseProps) => {
   const [showAllTags, setShowAllTags] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const { setIsLoggedIn } = useAuthStatus();
 
   const isReversed = imagePosition === "left";
 
@@ -43,6 +72,15 @@ export const GameCardBase = ({
   const visibleTags = showAllTags ? tags : tags.slice(0, isMobile ? 3 : 5);
   const hasExtraTags = tags.length > (isMobile ? 3 : 5);
 
+  const publishedDateObj = toDate(publishedStore);
+  const publishedLabel = publishedDateObj
+    ? publishedDateObj.toLocaleDateString("nb-NO", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : null;
+
   return (
     <section
       className={`flex flex-col md:flex-row items-center bg-lightpurple dark:bg-darkpurple rounded-4xl p-6 w-full ${
@@ -52,9 +90,12 @@ export const GameCardBase = ({
       {/* Image */}
       <figure className="md:w-1/2 flex justify-center mb-4 md:mb-0">
         <img
-          src={image}
+          src={`https://images.weserv.nl/?url=${encodeURIComponent(image)}&w=800&output=webp`}
           alt={title}
+          sizes="(max-width: 768px) 90vw, 50vw"
           className="rounded-3xl w-full h-full max-h-[25rem] object-cover"
+          fetchPriority="high"
+          decoding="async"
         />
       </figure>
 
@@ -63,6 +104,12 @@ export const GameCardBase = ({
         <header className="space-y-4">
           <h2 className="text-xl md:text-3xl">{title}</h2>
 
+          {/* Release / published date */}
+          {publishedLabel && (
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              Released {publishedLabel}
+            </p>
+          )}
           {/* Tags */}
           {tags.length > 0 && (
             <section className="flex flex-wrap justify-center gap-2 items-center">
@@ -78,7 +125,7 @@ export const GameCardBase = ({
               {hasExtraTags && (
                 <button
                   onClick={() => setShowAllTags((prev) => !prev)}
-                  className={`text-gray-800 dark:text-gray-200 ${HOVER} ${FOCUS_VISIBLE}`}
+                  className={`text-gray-800 dark:text-gray-200 cursor-pointer ${HOVER} ${FOCUS_VISIBLE}`}
                   aria-label={
                     showAllTags ? "Show fewer tags" : "Show more tags"
                   }
@@ -93,17 +140,32 @@ export const GameCardBase = ({
             </section>
           )}
 
-          {/* Placeholders */}
-          {showPlaceholders && (
-            <section className="flex justify-center gap-4 mt-3">
-              <span className="border border-gray-400 rounded-md px-3 py-1 text-xs md:text-sm text-gray-700 dark:text-gray-300">
-                star rating placeholder
-              </span>
-              <span className="border border-gray-400 rounded-md px-3 py-1 text-xs md:text-sm text-gray-700 dark:text-gray-300">
-                heart icon placeholder
-              </span>
-            </section>
-          )}
+          <section className="flex justify-center items-center gap-2 mt-3">
+            {rating !== 0 && (
+              <span className="text-xl">{rating?.toFixed(1)} </span>
+            )}
+            <span>
+              <StarRating value={rating ?? 0} readOnly />
+            </span>
+
+            {!isPromoCard && (
+              <HeartIcon
+                gameId={gameId}
+                onRequireLogin={() => setAuthOpen(true)}
+              />
+            )}
+
+            <AuthDialog
+              open={authOpen}
+              onOpenChange={(open) => {
+                setAuthOpen(open);
+                if (!open && localStorage.getItem("token")) {
+                  setIsLoggedIn(true);
+                  window.dispatchEvent(new Event("auth-change"));
+                }
+              }}
+            />
+          </section>
 
           {/* Description */}
           <p className="text-sm md:text-base leading-snug">
@@ -132,7 +194,7 @@ export const GameCardBase = ({
           <section className="mt-6">
             <button
               onClick={onButtonClick}
-              className={`text-white font-medium px-6 py-2 rounded-full bg-lightbuttonpurple dark:bg-darkbuttonpurple text-sm md:text-base ${HOVER} ${FOCUS_VISIBLE}`}
+              className={`text-white font-medium px-6 py-2 rounded-full bg-lightbuttonpurple dark:bg-darkbuttonpurple text-sm md:text-base cursor-pointer ${HOVER} ${FOCUS_VISIBLE}`}
             >
               {buttonText}
             </button>
@@ -142,5 +204,3 @@ export const GameCardBase = ({
     </section>
   );
 };
-
-export default GameCardBase;

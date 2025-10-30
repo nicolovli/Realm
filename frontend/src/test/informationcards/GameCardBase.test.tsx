@@ -1,10 +1,38 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import GameCardBase from "../../components/InformationCards/GameCardBase";
-import { vi } from "vitest";
+import { GameCardBase } from "../../components/InformationCards/GameCardBase";
+import { vi, beforeEach, describe, it, expect } from "vitest";
+import { MockedProvider } from "@apollo/client/testing/react";
+
+// Mock auth status hook and components
+vi.mock("@/hooks/useAuthStatus", () => ({
+  useAuthStatus: vi.fn(() => ({
+    isLoggedIn: false,
+    setIsLoggedIn: vi.fn(),
+  })),
+}));
+
+vi.mock("../../components/HeartIcon", () => ({
+  HeartIcon: ({
+    onRequireLogin,
+  }: {
+    gameId: number;
+    onRequireLogin: () => void;
+  }) => (
+    <button onClick={onRequireLogin} aria-label="Favorite game">
+      Heart Icon
+    </button>
+  ),
+}));
+
+vi.mock("../../components/User", () => ({
+  AuthDialog: ({ open }: { open: boolean }) =>
+    open ? <div data-testid="auth-dialog">Auth Dialog</div> : null,
+}));
 
 describe("GameCardBase", () => {
   const defaultProps = {
+    gameId: 1,
     title: "Test Game",
     descriptionShort: "This is a short description.",
     image: "test-image.jpg",
@@ -12,15 +40,28 @@ describe("GameCardBase", () => {
     developers: "Test Studio",
     platforms: "PC, PS5",
     buttonText: "Learn More",
+    rating: 4,
   };
 
   beforeEach(() => {
     // Mock window width for tag slicing logic
-    vi.spyOn(window, "innerWidth", "get").mockReturnValue(1024);
+    Object.defineProperty(window, "innerWidth", {
+      writable: true,
+      configurable: true,
+      value: 1024,
+    });
+
+    // Mock window.addEventListener
+    vi.spyOn(window, "addEventListener");
+    vi.spyOn(window, "removeEventListener");
   });
 
   it("renders title, description, and image", () => {
-    render(<GameCardBase {...defaultProps} />);
+    render(
+      <MockedProvider mocks={[]}>
+        <GameCardBase {...defaultProps} />
+      </MockedProvider>,
+    );
 
     expect(screen.getByText("Test Game")).toBeInTheDocument();
     expect(
@@ -28,18 +69,26 @@ describe("GameCardBase", () => {
     ).toBeInTheDocument();
     expect(screen.getByAltText("Test Game")).toHaveAttribute(
       "src",
-      "test-image.jpg",
+      "https://images.weserv.nl/?url=test-image.jpg&w=800&output=webp",
     );
   });
 
   it("renders developer and platform info", () => {
-    render(<GameCardBase {...defaultProps} />);
+    render(
+      <MockedProvider mocks={[]}>
+        <GameCardBase {...defaultProps} />
+      </MockedProvider>,
+    );
     expect(screen.getByText(/Developer:/i)).toBeInTheDocument();
     expect(screen.getByText(/Platforms:/i)).toBeInTheDocument();
   });
 
   it("shows only 5 tags initially (desktop width)", () => {
-    render(<GameCardBase {...defaultProps} />);
+    render(
+      <MockedProvider mocks={[]}>
+        <GameCardBase {...defaultProps} />
+      </MockedProvider>,
+    );
     const visibleTags = screen.getAllByText(
       /Action|Adventure|Puzzle|RPG|Horror/,
     );
@@ -48,7 +97,11 @@ describe("GameCardBase", () => {
 
   it("toggles tag visibility when expand/collapse button is clicked", async () => {
     const user = userEvent.setup();
-    render(<GameCardBase {...defaultProps} />);
+    render(
+      <MockedProvider mocks={[]}>
+        <GameCardBase {...defaultProps} />
+      </MockedProvider>,
+    );
 
     const toggleButton = screen.getByRole("button", {
       name: /Show more tags/i,
@@ -73,24 +126,15 @@ describe("GameCardBase", () => {
     expect(collapsedTags).toHaveLength(5);
   });
 
-  it("renders placeholders when showPlaceholders is true", () => {
-    render(<GameCardBase {...defaultProps} showPlaceholders />);
-    expect(screen.getByText(/star rating placeholder/i)).toBeInTheDocument();
-    expect(screen.getByText(/heart icon placeholder/i)).toBeInTheDocument();
-  });
-
-  it("does not render placeholders when showPlaceholders is false", () => {
-    render(<GameCardBase {...defaultProps} showPlaceholders={false} />);
-    expect(
-      screen.queryByText(/star rating placeholder/i),
-    ).not.toBeInTheDocument();
-  });
-
   it("calls onButtonClick when the button is clicked", async () => {
     const user = userEvent.setup();
     const mockClick = vi.fn();
 
-    render(<GameCardBase {...defaultProps} onButtonClick={mockClick} />);
+    render(
+      <MockedProvider mocks={[]}>
+        <GameCardBase {...defaultProps} onButtonClick={mockClick} />
+      </MockedProvider>,
+    );
     const button = screen.getByRole("button", { name: /Learn More/i });
 
     await user.click(button);
@@ -99,8 +143,27 @@ describe("GameCardBase", () => {
 
   it("applies reversed layout when imagePosition='left'", () => {
     const { container } = render(
-      <GameCardBase {...defaultProps} imagePosition="left" />,
+      <MockedProvider mocks={[]}>
+        <GameCardBase {...defaultProps} imagePosition="left" />
+      </MockedProvider>,
     );
-    expect(container.firstChild).toHaveClass("md:flex-row-reverse");
+    const section = container.querySelector("section");
+    expect(section).toHaveClass("md:flex-row-reverse");
+  });
+
+  it("opens auth dialog when heart icon is clicked while not logged in", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MockedProvider mocks={[]}>
+        <GameCardBase {...defaultProps} />
+      </MockedProvider>,
+    );
+
+    const heartButton = screen.getByLabelText("Favorite game");
+    expect(screen.queryByTestId("auth-dialog")).not.toBeInTheDocument();
+
+    await user.click(heartButton);
+    expect(screen.getByTestId("auth-dialog")).toBeInTheDocument();
   });
 });

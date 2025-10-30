@@ -40,6 +40,7 @@ export const GET_FILTERED_GAMES = gql`
     $take: Int = 9
     $after: Int
     $sortBy: String
+    $sortOrder: SortOrder
   ) {
     games(
       filter: $filter
@@ -47,6 +48,7 @@ export const GET_FILTERED_GAMES = gql`
       take: $take
       after: $after
       sortBy: $sortBy
+      sortOrder: $sortOrder
     ) {
       id
       name
@@ -59,6 +61,12 @@ export const GET_FILTERED_GAMES = gql`
       genres
       tags
       categories
+
+      avgRating
+      reviewsCount
+      favoritesCount
+      popularityScore
+      hasRatings
     }
   }
 `;

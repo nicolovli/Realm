@@ -1,11 +1,10 @@
 import { render, cleanup } from "@testing-library/react";
 import { vi, type MockedFunction } from "vitest";
+import { FilterPill } from "../../components/ResultFilters";
 
 vi.mock("../../components/ResultFilters/FilterPill", () => ({
   FilterPill: vi.fn(() => null),
 }));
-
-import { FilterPill } from "../../components/ResultFilters/FilterPill";
 
 const mockFilterPill = FilterPill as MockedFunction<typeof FilterPill>;
 

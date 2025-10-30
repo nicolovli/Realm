@@ -1,16 +1,15 @@
 import { render, cleanup } from "@testing-library/react";
 import { vi, type MockedFunction } from "vitest";
-
-vi.mock("../../components/ResultFilters/MobileFilterDrawer", () => ({
-  MobileFilterDrawer: vi.fn(() => null),
-}));
-
-import { MobileFilterDrawer } from "../../components/ResultFilters/MobileFilterDrawer";
+import { MobileFilterDrawer } from "../../components/ResultFilters";
 import type {
   FilterGroup,
   FilterKey,
   SelectedFilters,
 } from "../../types/FilterTypes";
+
+vi.mock("../../components/ResultFilters", () => ({
+  MobileFilterDrawer: vi.fn(() => null),
+}));
 
 const mockMobileFilterDrawer = MobileFilterDrawer as MockedFunction<
   typeof MobileFilterDrawer

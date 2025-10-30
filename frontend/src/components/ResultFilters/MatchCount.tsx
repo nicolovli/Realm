@@ -12,7 +12,8 @@ export const MatchCount = ({ matchesCount, countError }: MatchCountProps) => {
     <p
       role="status"
       aria-live="polite"
-      className={`text-sm font-semibold ${
+      aria-atomic="true"
+      className={`text-sm font-semibold pt-2 ${
         countError
           ? "text-red-600 dark:text-red-400"
           : "text-black dark:text-white"

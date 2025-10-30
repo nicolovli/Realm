@@ -21,6 +21,12 @@ export const GET_GAMES = gql`
       categories
       genres
       tags
+
+      avgRating
+      reviewsCount
+      favoritesCount
+      popularityScore
+      hasRatings
     }
   }
 `;
@@ -41,6 +47,12 @@ export const GET_GAME = gql`
       categories
       genres
       tags
+
+      avgRating
+      reviewsCount
+      favoritesCount
+      popularityScore
+      hasRatings
     }
   }
 `;

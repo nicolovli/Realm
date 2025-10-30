@@ -1,147 +1,38 @@
 import type { ResultsGridProps } from "@/types/ResultGridTypes";
-import type { Game } from "../../types/GameTypes";
-import { HOVER, FOCUS_VISIBLE } from "../../lib/classNames";
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Card } from "./ResultsCard";
+import { FOCUS_VISIBLE, HOVER } from "@/lib/classNames";
 
 const CardChrome =
   "rounded-2xl ring-1 bg-lightpurple ring-gray dark:bg-darkpurple dark:ring-darkgray overflow-hidden";
 
-function Card({ game, onClick }: { game: Game; onClick?: (g: Game) => void }) {
-  const [loaded, setLoaded] = useState(false);
-  const [errored, setErrored] = useState(false);
-
-  return (
-    <li className="list-none">
-      <article className={CardChrome}>
-        {onClick ? (
-          <button
-            type="button"
-            onClick={() => onClick(game)}
-            className={`${HOVER} ${FOCUS_VISIBLE} group relative block w-full text-left cursor-pointer`}
-            aria-label={`Open ${game.name}`}
-          >
-            <figure className="relative w-full aspect-[16/9]">
-              {/* loading shimmer  */}
-              {!loaded && !errored && (
-                <div className="absolute inset-0 animate-pulse bg-lightsearchbargray dark:bg-darksearchbargray" />
-              )}
-
-              <img
-                src={game.image}
-                alt={game.name}
-                loading="lazy"
-                decoding="async"
-                onLoad={() => setLoaded(true)}
-                onError={() => {
-                  setErrored(true);
-                  setLoaded(true);
-                }}
-                className="
-                  absolute inset-0 h-full w-full object-cover
-                  transition-transform duration-300
-                  group-hover:scale-[1.03]
-                "
-              />
-
-              {errored && (
-                <div className="absolute inset-0 grid place-items-center text-xs text-zinc-600 dark:text-zinc-300">
-                  <span>Image unavailable</span>
-                </div>
-              )}
-
-              {/* Fade-in name on hover/focus */}
-              <figcaption
-                className="
-                  pointer-events-none absolute inset-x-0 bottom-0
-                  p-3 text-white text-sm font-semibold
-                  opacity-0 duration-200
-                  group-hover:opacity-100 group-focus-visible:opacity-100
-                  bg-gradient-to-t from-black/70 via-black/30 to-transparent
-                "
-              >
-                <span className="block line-clamp-1">{game.name}</span>
-              </figcaption>
-            </figure>
-          </button>
-        ) : (
-          <Link
-            to={`/games/${game.id}`}
-            className={`${HOVER} ${FOCUS_VISIBLE} group relative block cursor-pointer`}
-            aria-label={`Open ${game.name}`}
-          >
-            <figure className="relative w-full aspect-[16/9]">
-              {!loaded && !errored && (
-                <div className="absolute inset-0 animate-pulse bg-lightsearchbargray dark:bg-darksearchbargray" />
-              )}
-
-              <img
-                src={game.image}
-                alt={game.name}
-                loading="lazy"
-                decoding="async"
-                onLoad={() => setLoaded(true)}
-                onError={() => {
-                  setErrored(true);
-                  setLoaded(true);
-                }}
-                className="
-                  absolute inset-0 h-full w-full object-cover
-                  transition-transform duration-300
-                  group-hover:scale-[1.03]
-                "
-              />
-
-              {errored && (
-                <div className="absolute inset-0 grid place-items-center text-xs text-zinc-600 dark:text-zinc-300">
-                  <span>Image unavailable</span>
-                </div>
-              )}
-
-              <figcaption
-                className="
-                  pointer-events-none absolute inset-x-0 bottom-0
-                  p-3 text-white text-sm font-semibold
-                  opacity-0 duration-200
-                  group-hover:opacity-100 group-focus-visible:opacity-100
-                  bg-gradient-to-t from-black/70 via-black/30 to-transparent
-                "
-              >
-                <span className="block line-clamp-1">{game.name}</span>
-              </figcaption>
-            </figure>
-          </Link>
-        )}
-      </article>
-    </li>
-  );
-}
-
 function SkeletonCard() {
   return (
-    <li className="list-none">
-      <div className={`${CardChrome} animate-pulse`}>
-        <div className="relative w-full aspect-[16/9] bg-lightsearchbargray dark:bg-darksearchbargray rounded-xl" />
-      </div>
+    <li className="list-none" aria-hidden="true">
+      <span className={`${CardChrome} animate-pulse block`}>
+        <section className="relative w-full aspect-[16/9] bg-lightsearchbargray dark:bg-darksearchbargray rounded-xl" />
+      </span>
     </li>
   );
 }
 
-export default function ResultsGrid({
+export const ResultsGrid = ({
   games,
-  loading,
+  loading, // "no data yet AND fetching"
   emptyState,
   error,
-}: ResultsGridProps) {
-  // Delayed skeleton so that filters can load
-  const [showSkeleton, setShowSkeleton] = useState(true);
+}: ResultsGridProps) => {
+  const PAGE_SIZE = 9;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
+  // Reset visible slice when the dataset length changes
   useEffect(() => {
-    if (!loading) {
-      const timeout = setTimeout(() => setShowSkeleton(false), 500);
-      return () => clearTimeout(timeout);
-    }
-  }, [loading]);
+    setVisibleCount(PAGE_SIZE);
+  }, [games.length]);
+
+  const loadMore = () => {
+    setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, games.length));
+  };
 
   if (error) {
     return (
@@ -154,7 +45,9 @@ export default function ResultsGrid({
     );
   }
 
-  if (!loading && !showSkeleton && games.length === 0) {
+  const shouldShowSkeleton = loading && games.length === 0;
+
+  if (!shouldShowSkeleton && games.length === 0) {
     return (
       <p
         role="status"
@@ -166,15 +59,52 @@ export default function ResultsGrid({
     );
   }
 
+  const items = Array.from({
+    length: shouldShowSkeleton
+      ? PAGE_SIZE
+      : Math.min(visibleCount, games.length),
+  }).map((_, idx) => {
+    if (shouldShowSkeleton) {
+      return <SkeletonCard key={`skeleton-${idx}`} />;
+    }
+    const game = games[idx];
+    if (game) {
+      return <Card key={game.id} game={game} />;
+    }
+
+    return (
+      <li key={`placeholder-${idx}`} className="list-none invisible">
+        <div
+          className={`${CardChrome} block w-full`}
+          style={{ aspectRatio: "16/9" }}
+        />
+      </li>
+    );
+  });
+
   return (
-    <ul
-      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
-      aria-live="polite"
-      role="list"
-    >
-      {loading || showSkeleton
-        ? Array.from({ length: 9 }).map((_, i) => <SkeletonCard key={i} />)
-        : games.map((g) => <Card key={g.id} game={g} />)}
-    </ul>
+    <>
+      <ul
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+        aria-live="polite"
+        role="list"
+      >
+        {items}
+      </ul>
+
+      {!shouldShowSkeleton &&
+        games.length > 0 &&
+        visibleCount < games.length && (
+          <section className="flex justify-center mt-6">
+            <button
+              onClick={loadMore}
+              className={`text-black dark:text-white px-6 py-2 rounded-full bg-lightpurple dark:bg-darkpurple text-sm md:text-base ${HOVER} ${FOCUS_VISIBLE}`}
+              aria-label="Load more games"
+            >
+              Load more favorites
+            </button>
+          </section>
+        )}
+    </>
   );
-}
+};

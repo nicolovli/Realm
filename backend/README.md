@@ -2,14 +2,16 @@
 
 [<- Tilbake til ROOT README](../README.md)
 
-En Apollo Server backend, med Prisma og PostgreSQL som database
+En Apollo Server backend, med Express, Prisma og PostgreSQL som database
 
 ## Innholdfortegnelse
 
-- [Oppsett](#oppsett)
-- [Konfigurer Miljøvariabler](#konfigurer-miljøvariabler)
-  - [Installering](#installering)
-  - [Kjør serveren](#kjør-serveren)
+- [Backend for Realm](#backend-for-realm)
+  - [Innholdfortegnelse](#innholdfortegnelse)
+  - [Oppsett](#oppsett)
+  - [Konfigurer Miljøvariabler](#konfigurer-miljøvariabler)
+  - [Kjør backend gjennom VM](#kjør-backend-gjennom-vm)
+  - [Kjøre backend lokalt](#kjøre-backend-lokalt)
 
 ## Oppsett
 
@@ -29,14 +31,17 @@ cp .env.template .env
 
 ```
 PORT=3001
-DATABASE_URL="postgresql:<DB_USER>:<DB_PASSWORD>@<DB_HOST>:<DB_PORT>/<DB_NAME>?schema=public"
-AUTH0_SECRET=<YOUR_AUTH0_SECRET>
-AUTH0_CLIENT_ID=<YOUR_AUTH0_CLIENT_ID>
-AUTH0_DOMAIN=<YOUR_AUTH0_DOMAIN>
+DATABASE_URL="postgresql:<DB_USER>:<DB_PASSWORD>@localhost:5432/<DB_NAME>?schema=public"
+JWT_SECRET=your_super_secret_string_here
 ```
 
+JWT_SECRET kan du bare føre en tilfeldig og random string/setning som er ønskelig. Du kan generere en tilfeldig en, da det eneste kravet er at den er vanskelig å gjette og er konstant på serveren.
+
 > [!NOTE]
-> Miljøvariablene som trengs for å kjøre applikasjonen kan man finne i vår VM under `/home/jennciad/backend/.env`. Dersom du ønsker å kopiere dette for å bruke lokalt, må du legge de under .env filen i `backend` folder for at ting skal funke.
+> Miljøvariablene som trengs for å kjøre applikasjonen kan man finne i vår VM under `/home/jennicad/backend/backend/.env`. Dersom du ønsker å kopiere dette for å bruke lokalt, må du legge de under .env filen i `backend` folder for at ting skal funke.
+
+<!-- >[!IMPORTANT]
+> Vi har valgt å ta med `DATABASE_URL` i dette README-filen, men dette er en praksis som ellers ikke anbefales å gjøre. Dette er bare for å gjøre det enklere å medstudentvurdere/sensurere. `DATABASE_URL="postgresql://admin:123@localhost:5432/webdev` -->
 
 ## Kjør backend gjennom VM
 

@@ -1,44 +1,52 @@
 import { useNavigate } from "react-router-dom";
 import { LOADINGandERROR } from "../lib/classNames";
-import { useAuth0 } from "@auth0/auth0-react";
-import { useEffect } from "react";
-import { GET_USER_BY_AUTH0_ID } from "../lib/graphql/queries/user";
 import { useQuery } from "@apollo/client/react";
-import type { UserByAuth0IdData } from "../types/User";
 import { Profile } from "../components/User";
+import { GET_USER } from "@/lib/graphql/queries/userQueries";
+import { useAuthStatus } from "@/hooks/useAuthStatus";
+import { client as apolloClient } from "@/lib/apolloClient";
+
+interface User {
+  id: string;
+  username: string;
+  email: string;
+}
+
+interface GetUserData {
+  me: User;
+}
 
 export const UserPage = () => {
-  const { user, logout, isAuthenticated } = useAuth0();
   const navigate = useNavigate();
+  const { setIsLoggedIn } = useAuthStatus();
+  const { data, loading, error } = useQuery<GetUserData>(GET_USER);
 
-  const { data, loading, error } = useQuery<UserByAuth0IdData>(
-    GET_USER_BY_AUTH0_ID,
-    {
-      variables: { auth0Id: user?.sub || "" },
-      skip: !user?.sub,
-    },
-  );
+  const handleLogOut = async () => {
+    try {
+      localStorage.removeItem("token");
 
-  useEffect(() => {
-    if (!isAuthenticated) {
+      try {
+        apolloClient.writeQuery({ query: GET_USER, data: { me: null } });
+      } catch {
+        console.warn("writeQuery failed, clearing Apollo store");
+        await apolloClient.clearStore();
+      }
+
+      setIsLoggedIn(false);
+      window.dispatchEvent(new Event("auth-change"));
+      navigate("/");
+    } catch {
+      // Fallback: ensure token removed and navigate away
+      localStorage.removeItem("token");
+      setIsLoggedIn(false);
+      window.dispatchEvent(new Event("auth-change"));
       navigate("/");
     }
-  }, [isAuthenticated, navigate]);
+  };
 
-  if (!isAuthenticated || loading)
-    return <p className={LOADINGandERROR}>Loading...</p>;
+  if (loading) return <p className={LOADINGandERROR}>Loading...</p>;
   if (error) return <p className={LOADINGandERROR}>Error loading profile</p>;
-  if (!user) return <p className={LOADINGandERROR}>User not found</p>;
+  if (!data?.me) return <p className={LOADINGandERROR}>User not found</p>;
 
-  return (
-    <Profile
-      user={user}
-      dbUser={data?.userByAuth0Id}
-      logout={() =>
-        logout({
-          logoutParams: { returnTo: window.location.origin + "/project2" },
-        })
-      }
-    />
-  );
+  return <Profile user={data.me} handleLogOut={handleLogOut} />;
 };

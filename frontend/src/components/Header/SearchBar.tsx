@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useLazyQuery } from "@apollo/client/react";
 import { SEARCH_GAMES } from "../../lib/graphql/queries/gameQueries";
@@ -48,8 +48,8 @@ export const SearchBar = ({
   const [searchGames, { data }] = useLazyQuery<SearchGamesData>(SEARCH_GAMES);
 
   // Search input processing
-  const normalized = useMemo(() => term.trim().toLowerCase(), [term]);
-  const debounced = useDebouncedValue(normalized, 200);
+  const originalTrimmed = useMemo(() => term.trim(), [term]);
+  const debounced = useDebouncedValue(originalTrimmed, 200);
 
   // Execute search when debounced value changes
   useEffect(() => {
@@ -62,6 +62,23 @@ export const SearchBar = ({
       });
     }
   }, [debounced, searchGames]);
+
+  // Clear the search input when navigating away from any /games route
+  const location = useLocation();
+  // Initialize input from URL when on /games and keep it in sync with the param
+  useEffect(() => {
+    if (location.pathname.startsWith("/games")) {
+      const params = new URLSearchParams(
+        location.search || window.location.search,
+      );
+      const s = params.get("search") || "";
+      setTerm(s);
+    } else {
+      // If not on a games route at all, reset the term
+      setTerm("");
+      setOpen(false);
+    }
+  }, [location.pathname, location.search]);
 
   // Get game suggestions from GraphQL response
   const suggestions: Game[] = useMemo(() => {
@@ -82,15 +99,21 @@ export const SearchBar = ({
   }, []);
 
   // Handles form submission - navigates to result page with search query
+  const performSearch = (searchTerm: string) => {
+    const params = new URLSearchParams(
+      location.search || window.location.search,
+    );
+    params.set("search", searchTerm);
+    params.delete("page");
+    navigate(`/games?${params.toString()}`);
+    setOpen(false);
+    inputRef.current?.blur();
+    onSearchSubmit?.();
+  };
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (term.trim()) {
-      // Navigate to result page with search query
-      navigate(`/games?search=${encodeURIComponent(term.trim())}`);
-      setOpen(false);
-      inputRef.current?.blur(); // Remove focus from input after search
-      onSearchSubmit?.(); // Call optional callback
-    }
+    if (term.trim()) performSearch(term.trim());
   };
 
   /**
@@ -133,15 +156,10 @@ export const SearchBar = ({
       }
     }
 
-    // Default Enter behavior: search current term
+    // Default Enter behavior: search current term (preserve filters)
     if (e.key === "Enter") {
       e.preventDefault();
-      if (term.trim()) {
-        navigate(`/games?search=${encodeURIComponent(term.trim())}`);
-        setOpen(false);
-        inputRef.current?.blur(); // Remove focus from input after search
-        onSearchSubmit?.(); // Call optional callback
-      }
+      if (term.trim()) performSearch(term.trim());
     }
   };
 
@@ -159,6 +177,9 @@ export const SearchBar = ({
     setTerm("");
     setOpen(false);
     inputRef.current?.focus();
+    const params = new URLSearchParams(window.location.search);
+    params.delete("search");
+    navigate(`/games?${params.toString()}`);
   };
 
   return (
@@ -169,7 +190,7 @@ export const SearchBar = ({
         onSubmit={handleSubmit}
         className="relative w-full"
       >
-        <div className="relative flex items-center bg-lightsearchbargray dark:bg-darksearchbargray rounded-full shadow-sm overflow-hidden">
+        <section className="relative flex items-center bg-lightsearchbargray dark:bg-darksearchbargray rounded-full shadow-sm overflow-hidden">
           <input
             ref={inputRef}
             aria-label="Search for games"
@@ -193,7 +214,7 @@ export const SearchBar = ({
               className="flex-shrink-0 p-3 text-lightgray dark:text-darkgray hover:text-black dark:hover:text-white"
               aria-label="Clear search"
             >
-              <XMarkIcon className="w-4 h-4" />
+              <XMarkIcon className={` cursor-pointer w-4 h-4`} />
             </button>
           )}
 
@@ -204,7 +225,7 @@ export const SearchBar = ({
           >
             <MagnifyingGlassIcon className="w-5 h-5" />
           </button>
-        </div>
+        </section>
       </form>
 
       {/* Dropdown with search suggestions - only visible when isOpen is true */}
@@ -215,7 +236,7 @@ export const SearchBar = ({
           className="absolute top-full left-0 right-0 mt-1 rounded-lg shadow-lg overflow-hidden z-50 max-h-80 overflow-y-auto"
         >
           {suggestions.map((game, i) => (
-            <div
+            <span
               key={game.id}
               role="option"
               aria-selected={i === activeIndex}
@@ -231,28 +252,45 @@ export const SearchBar = ({
               {/* Game thumbnail with loading state */}
               <figure className="relative w-12 h-12 flex-shrink-0">
                 {!loadedImages.has(game.id) && (
-                  <div className="absolute inset-0 rounded bg-gray-200 dark:bg-gray-600 animate-pulse" />
+                  <span className="absolute inset-0 rounded bg-gray-200 dark:bg-gray-600 animate-pulse" />
                 )}
-                <img
-                  src={game.image}
-                  alt={game.name}
-                  width={48}
-                  height={48}
-                  className={`w-12 h-12 object-cover rounded duration-200 ${
-                    loadedImages.has(game.id) ? "opacity-100" : "opacity-0"
-                  }`}
-                  onLoad={() =>
-                    setLoadedImages((prev) => {
-                      if (prev.has(game.id)) return prev;
-                      const next = new Set(prev);
-                      next.add(game.id);
-                      return next;
-                    })
-                  }
-                />
+                {game.image ? (
+                  <img
+                    src={`https://images.weserv.nl/?url=${encodeURIComponent(game.image)}&w=96&output=webp`}
+                    srcSet={`https://images.weserv.nl/?url=${encodeURIComponent(game.image)}&w=48&output=webp 1x, https://images.weserv.nl/?url=${encodeURIComponent(game.image)}&w=96&output=webp 2x`}
+                    alt={game.name}
+                    width={48}
+                    height={48}
+                    className={`w-12 h-12 object-cover rounded duration-200 ${
+                      loadedImages.has(game.id) ? "opacity-100" : "opacity-0"
+                    }`}
+                    loading="lazy"
+                    decoding="async"
+                    onLoad={() =>
+                      setLoadedImages((prev) => {
+                        if (prev.has(game.id)) return prev;
+                        const next = new Set(prev);
+                        next.add(game.id);
+                        return next;
+                      })
+                    }
+                    onError={() =>
+                      setLoadedImages((prev) => {
+                        if (prev.has(game.id)) return prev;
+                        const next = new Set(prev);
+                        next.add(game.id);
+                        return next;
+                      })
+                    }
+                  />
+                ) : (
+                  <span className="absolute inset-0 grid place-items-center text-[10px] text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 rounded">
+                    N/A
+                  </span>
+                )}
               </figure>
               {/* Game information display */}
-              <div className="flex-1 min-w-0">
+              <span className="flex-1 min-w-0">
                 <p className="font-medium text-black dark:text-white truncate text-sm">
                   {game.name}
                 </p>
@@ -261,13 +299,11 @@ export const SearchBar = ({
                     {game.publishers[0]}
                   </p>
                 )}
-              </div>
-            </div>
+              </span>
+            </span>
           ))}
         </section>
       )}
     </section>
   );
 };
-
-export default SearchBar;

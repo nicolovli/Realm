@@ -1,11 +1,10 @@
+import { FilterChips } from "@/components/ResultFilters";
 import { render, cleanup } from "@testing-library/react";
 import { vi, type MockedFunction } from "vitest";
 
 vi.mock("../../components/ResultFilters/FilterChips", () => ({
   FilterChips: vi.fn(() => null),
 }));
-
-import { FilterChips } from "../../components/ResultFilters/FilterChips";
 
 const mockFilterChips = FilterChips as MockedFunction<typeof FilterChips>;
 

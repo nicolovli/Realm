@@ -5,5 +5,6 @@ export type ResultsPaginationProps = {
   canNext?: boolean; // default: page < totalPages (or use hasMore)
   onPrev: () => void; // handlePrevPage
   onNext: () => void; // handleNextPage
-  onPage?: (page: number) => void; // optional direct jump (not required now)
+  onPage?: (page: number) => void; // optional direct jump
+  isJumping?: boolean;
 };

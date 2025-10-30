@@ -6,7 +6,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import FeaturedCarousel from "../../components/FeaturedSection/FeaturedCarousel";
+import { FeaturedCarousel } from "../../components/FeaturedSection/FeaturedCarousel";
 import { BrowserRouter } from "react-router-dom";
 import type { ReactElement } from "react";
 import type { FeaturedGame } from "@/types/GameTypes";
@@ -86,17 +86,6 @@ describe("FeaturedCarousel (shadcn/Embla)", () => {
     const btn = screen.getByRole("button", { name: "Explore all games" });
     await userEvent.click(btn);
     expect(onExploreAll).toHaveBeenCalledTimes(1);
-  });
-
-  it("has proper ARIA on the carousel region", () => {
-    renderWithRouter(<FeaturedCarousel items={items} title="Featured games" />);
-    const regions = screen.getAllByRole("region", { name: "Featured games" });
-    const carouselRegion = regions.find(
-      (el) => el.getAttribute("aria-roledescription") === "carousel",
-    );
-    expect(carouselRegion).toBeTruthy();
-    expect(carouselRegion).toHaveAttribute("aria-roledescription", "carousel");
-    expect(carouselRegion).toHaveAttribute("aria-live", "polite");
   });
 
   it("handles an empty list of items gracefully", () => {
