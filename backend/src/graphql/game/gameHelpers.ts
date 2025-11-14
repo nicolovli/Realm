@@ -1,4 +1,4 @@
-import { GameWithRelations, GameFilter } from "./gameTypes.js";
+import { GameWithRelations, GameFilter } from "./index.js";
 import { Prisma } from "@prisma/client";
 
 // Map relations -> names
@@ -9,6 +9,7 @@ export function mapGameRelations<T extends { name: string }>(
 }
 
 export function transformGame(game: GameWithRelations) {
+  // Compact relation payloads: Prisma returns `{ name }[]`; UI expects `string[]`.
   return {
     ...game,
     developers: mapGameRelations(game.developers),
@@ -63,45 +64,41 @@ export function buildWhereFromFilter(
   filter?: GameFilter,
   search?: string,
 ): Prisma.GameWhereInput {
+  // Search combines normalized (symbol-stripped) and raw tokens to catch names
+  // with symbols while still hitting indexed text when possible.
   const where: Prisma.GameWhereInput = {};
 
-  // Search
-  if (search && search.trim().length > 0) {
-    const originalSearch = search.trim();
-    const normalizedSearch = normalizeSearchTerm(search);
-
-    const orConditions = [
-      ...buildSearchConditions(originalSearch),
-      ...buildSearchConditions(normalizedSearch),
+  // Search (normalized + raw if changed)
+  const raw = search?.trim();
+  if (raw) {
+    const norm = normalizeSearchTerm(raw);
+    const orConds = [
+      ...buildSearchConditions(norm),
+      ...(norm !== raw ? buildSearchConditions(raw) : []),
     ];
-
-    if (orConditions.length > 0) {
-      // OR expects Enumerable<GameWhereInput>
-      where.OR = orConditions;
-    }
+    if (orConds.length) where.OR = orConds;
   }
 
   // Filters
   if (filter) {
     const andFilters: Prisma.GameWhereInput[] = [];
-
     const requireAllValues = (
       field: keyof Prisma.GameWhereInput,
       values: string[],
     ) =>
-      values.map<Prisma.GameWhereInput>((v) => {
-        // dynamic relation field objects need a cast through unknown
-        return {
-          [field as string]: { some: { name: v } },
-        } as unknown as Prisma.GameWhereInput;
-      });
+      // For each selected value, require at least one matching relation row.
+      // AND-ing these ensures “must include ALL selected tags/platforms/etc.”.
+      values.map<Prisma.GameWhereInput>(
+        (v) =>
+          ({
+            [field as string]: { some: { name: v } },
+          }) as unknown as Prisma.GameWhereInput,
+      );
 
     if (filter.tags?.length)
       andFilters.push(...requireAllValues("tags", filter.tags));
     if (filter.categories?.length)
       andFilters.push(...requireAllValues("categories", filter.categories));
-    if (filter.developers?.length)
-      andFilters.push(...requireAllValues("developers", filter.developers));
     if (filter.genres?.length)
       andFilters.push(...requireAllValues("genres", filter.genres));
     if (filter.publishers?.length)
@@ -111,15 +108,15 @@ export function buildWhereFromFilter(
     if (filter.languages?.length)
       andFilters.push(...requireAllValues("languages", filter.languages));
 
-    if (andFilters.length > 0) {
-      where.AND = andFilters;
-    }
+    if (andFilters.length) where.AND = andFilters;
   }
 
   return where;
 }
 
 export function planForSort(
+  // Tie-breakers matter for stable pagination: every branch ends with { id: 'desc' }.
+  // Rating sort: put unrated games after rated ones (hasRatings DESC) before sorting by avgRating.
   sortBy?: string | null,
   sortOrder?: "asc" | "desc" | null,
 ): {
@@ -188,14 +185,25 @@ export function planForSort(
   }
 }
 
-export const gameIncludes: Prisma.GameInclude = {
-  developers: true,
-  publishers: true,
-  platforms: true,
-  tags: true,
-  languages: true,
-  categories: true,
-  genres: true,
+export const gameSelect: Prisma.GameSelect = {
+  id: true,
+  sid: true,
+  name: true,
+  image: true,
+  descriptionShort: true,
+  publishedStore: true,
+  avgRating: true,
+  reviewsCount: true,
+  favoritesCount: true,
+  popularityScore: true,
+  hasRatings: true,
+  developers: { select: { name: true } },
+  publishers: { select: { name: true } },
+  platforms: { select: { name: true } },
+  tags: { select: { name: true } },
+  languages: { select: { name: true } },
+  categories: { select: { name: true } },
+  genres: { select: { name: true } },
 };
 
 type SortableField =
@@ -210,8 +218,8 @@ type CursorRow = {
   id: number;
   name?: string | null;
   publishedStore?: Date | null;
-  avgRating?: number | null;
-  popularityScore?: number | null;
+  avgRating?: number | Prisma.Decimal | null;
+  popularityScore?: number | Prisma.Decimal | null;
   hasRatings?: boolean | null;
 };
 
@@ -220,9 +228,9 @@ export const serializeField = (fname: SortableField, g: CursorRow): string => {
     case "publishedStore":
       return g.publishedStore ? g.publishedStore.toISOString() : "";
     case "avgRating":
-      return g.avgRating != null ? String(g.avgRating) : "";
+      return g.avgRating != null ? g.avgRating.toString() : "";
     case "popularityScore":
-      return g.popularityScore != null ? String(g.popularityScore) : "";
+      return g.popularityScore != null ? g.popularityScore.toString() : "";
     case "hasRatings":
       return g.hasRatings ? "1" : "0";
     case "name":
@@ -237,22 +245,25 @@ export const serializeField = (fname: SortableField, g: CursorRow): string => {
 const parseForCompare = (
   fname: SortableField,
   raw: string,
-): string | number | Date | null => {
+): string | number | Date | Prisma.Decimal | null => {
   if (fname === "id") return Number(raw || 0);
   if (fname === "avgRating" || fname === "popularityScore")
-    return raw ? Number(raw) : null;
+    return raw ? new Prisma.Decimal(raw) : null;
   if (fname === "publishedStore") return raw ? new Date(raw) : null;
   return raw;
 };
 
-// Utility: check if a where has an empty AND array (used for skipping branches)
 const hasEmptyAnd = (w: Prisma.GameWhereInput): boolean => {
+  // Helper used by cursor-building to discard no-op boolean branches.
   const maybeAnd = (w as { AND?: unknown }).AND;
   return Array.isArray(maybeAnd) && maybeAnd.length === 0;
 };
 
 // Boolean-aware comparator for hasRatings in the lexicographic chain
 const booleanBranch = (
+  // Special-case boolean in lexicographic comparisons:
+  // hasRatings DESC means true > false; to advance strictly "after", we generate
+  // the appropriate equals/advance limb.
   field: "hasRatings",
   dir: "asc" | "desc",
   raw: string,
@@ -277,8 +288,10 @@ const booleanBranch = (
   }
 };
 
-// Build OR-of-ANDs lexicographic comparator for (after:) respecting dir and types
 export const tupleAfterToWhere = (
+  // Build an OR-of-ANDs that encodes “strictly after (k1,v1),(k2,v2),…”
+  // for mixed-type keys and dir. This mirrors SQL tuple comparison:
+  // (a,b,c) > (va,vb,vc)  =>  a>va OR (a=va AND b>vb) OR (a=va AND b=vb AND c>vc)
   schema: Array<{ field: SortableField; dir: "asc" | "desc" }>,
   values: string[],
 ): Prisma.GameWhereInput => {
@@ -294,9 +307,23 @@ export const tupleAfterToWhere = (
       return booleanBranch("hasRatings", dir, raw, "advance");
     }
     const val = parseForCompare(f, raw);
+
+    if (f === "avgRating" && raw) {
+      console.log(
+        `[cursor] avgRating: raw="${raw}" -> val=${val}, op=${op}, dir=${dir}`,
+      );
+    }
+
+    if (val === null) {
+      if (op === "equals") {
+        return { [f]: { equals: null } } as unknown as Prisma.GameWhereInput;
+      }
+      return { AND: [] } as unknown as Prisma.GameWhereInput;
+    }
+
     return f === "publishedStore"
-      ? ({ publishedStore: { [op]: val } } as unknown as Prisma.GameWhereInput)
-      : ({ [f]: { [op]: val } } as unknown as Prisma.GameWhereInput);
+      ? ({ publishedStore: { [op]: val } } as Prisma.GameWhereInput)
+      : ({ [f]: { [op]: val } } as Prisma.GameWhereInput);
   };
 
   const or: Prisma.GameWhereInput[] = [];
@@ -322,4 +349,19 @@ export const tupleAfterToWhere = (
   return or.length
     ? { OR: or }
     : ({ AND: [{ id: { lt: 0 } }] } as Prisma.GameWhereInput);
+};
+
+const isEmptyWhere = (where?: Prisma.GameWhereInput): boolean =>
+  !where || Object.keys(where as Record<string, unknown>).length === 0;
+
+export const whereClauses = (
+  ...clauses: Array<Prisma.GameWhereInput | null | undefined>
+): Prisma.GameWhereInput => {
+  const filtered = clauses.filter((clause): clause is Prisma.GameWhereInput =>
+    Boolean(clause && !isEmptyWhere(clause)),
+  );
+
+  if (!filtered.length) return {};
+  if (filtered.length === 1) return filtered[0];
+  return { AND: filtered };
 };

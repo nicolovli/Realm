@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { prisma } from "../../db.js";
-import { PrismaError } from "./userTypes.js";
+import { PrismaError } from "./index.js";
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 10);
@@ -22,22 +22,33 @@ export function generateToken(userId: number, username: string): string {
 
 export async function handlePrismaUniqueError(
   error: unknown,
-  username: string,
-  email: string,
+  username?: string | null,
+  email?: string | null,
 ) {
   const prismaError = error as PrismaError;
   if (prismaError.code === "P2002") {
-    const existingUsers = await prisma.user.findMany({
-      where: { OR: [{ username }, { email }] },
-      select: { username: true, email: true },
-    });
+    const conditions = [] as Array<{ username?: string; email?: string }>;
+    const normalizedUsername = username?.toLowerCase();
+    const normalizedEmail = email?.toLowerCase();
 
-    const usernameTaken = existingUsers.some(
-      (u) => u.username.toLowerCase() === username,
-    );
-    const emailTaken = existingUsers.some(
-      (u) => u.email.toLowerCase() === email,
-    );
+    if (normalizedUsername) conditions.push({ username: normalizedUsername });
+    if (normalizedEmail) conditions.push({ email: normalizedEmail });
+
+    const existingUsers = conditions.length
+      ? await prisma.user.findMany({
+          where: { OR: conditions },
+          select: { username: true, email: true },
+        })
+      : [];
+
+    const usernameTaken = normalizedUsername
+      ? existingUsers.some(
+          (u) => u.username.toLowerCase() === normalizedUsername,
+        )
+      : false;
+    const emailTaken = normalizedEmail
+      ? existingUsers.some((u) => u.email.toLowerCase() === normalizedEmail)
+      : false;
 
     if (usernameTaken && emailTaken) {
       throw new Error(

@@ -1,6 +1,6 @@
 import { render, cleanup } from "@testing-library/react";
 import { vi, type MockedFunction } from "vitest";
-import { SortDropdown } from "../../components/ResultFilters";
+import { SortDropdown } from "@/components/ResultFilters";
 
 vi.mock("../../components/ResultFilters", () => ({
   __esModule: true,

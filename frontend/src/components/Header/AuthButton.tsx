@@ -2,19 +2,19 @@ import {
   ArrowRightStartOnRectangleIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
-import { FOCUS_VISIBLE } from "../../lib/classNames";
-import { useState } from "react";
+import { FOCUS_VISIBLE } from "@/lib/classNames";
 import { useNavigate } from "react-router-dom";
-import { AuthDialog } from "../User";
+import { AuthDialog } from "@/components/User";
 import { useAuthStatus } from "@/hooks/useAuthStatus";
+import { useLoginDialog } from "@/hooks/useLoginDialog";
 
 interface AuthButtonProps {
   className?: string;
 }
 
 export const AuthButton = ({ className = "" }: AuthButtonProps) => {
-  const { isLoggedIn, setIsLoggedIn } = useAuthStatus();
-  const [open, setOpen] = useState(false);
+  const { isLoggedIn } = useAuthStatus();
+  const { open, openLogin, handleOpenChange } = useLoginDialog();
   const navigate = useNavigate();
   const loginbutton =
     "flex items-center gap-1 rounded-full cursor-pointer " +
@@ -42,7 +42,7 @@ export const AuthButton = ({ className = "" }: AuthButtonProps) => {
         </button>
       ) : (
         <button
-          onClick={() => setOpen(true)}
+          onClick={openLogin}
           className={
             loginbutton +
             " py-3 px-5 bg-lightbuttonpurple dark:bg-darkbuttonpurple hover:bg-darkbuttonpurple text-white dark:hover:bg-lightbuttonpurple"
@@ -56,16 +56,7 @@ export const AuthButton = ({ className = "" }: AuthButtonProps) => {
           Login
         </button>
       )}
-      <AuthDialog
-        open={open}
-        onOpenChange={(open) => {
-          setOpen(open);
-          if (!open && localStorage.getItem("token")) {
-            setIsLoggedIn(true);
-            window.dispatchEvent(new Event("auth-change"));
-          }
-        }}
-      />
+      <AuthDialog open={open} onOpenChange={handleOpenChange} />
     </>
   );
 };

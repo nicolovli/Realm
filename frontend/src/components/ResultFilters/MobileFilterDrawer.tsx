@@ -1,11 +1,7 @@
 import { useEffect } from "react";
-import { FilterPill } from "./FilterPill";
-import { FOCUS_VISIBLE, HOVER, PILL_TRIGGER_BASE } from "../../lib/classNames";
-import type {
-  FilterKey,
-  FilterGroup,
-  SelectedFilters,
-} from "../../types/FilterTypes";
+import { FilterPill } from "@/components/ResultFilters";
+import { FOCUS_VISIBLE, HOVER, PILL_TRIGGER_BASE } from "@/lib/classNames";
+import type { FilterKey, FilterGroup, SelectedFilters } from "@/types";
 
 interface MobileFilterDrawerProps {
   open: boolean;

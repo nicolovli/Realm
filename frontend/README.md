@@ -6,11 +6,25 @@ En React TS + Vite frontend for Realm
 
 ## Innholdfortegnelse
 
-- [Oppsett](#oppsett)
+- [Frontend for Realm](#frontend-for-realm)
+  - [Innholdfortegnelse](#innholdfortegnelse)
+  - [Kodeorganisering](#kodeorganisering)
+  - [Oppsett](#oppsett)
   - [Installering](#installering)
-  - [Kjør Serveren](#kjør-serveren)
-- [Testing](#testing)
+  - [Kjøre Serveren](#kjøre-serveren)
+  - [Testing](#testing)
   - [Test Struktur](#test-struktur)
+
+## Kodeorganisering
+
+Frontend bruker **absolute imports** (`@/` alias) for cleanere import-paths, **barrel files** (`index.ts`) i alle komponent-mapper for å organisere eksporter, og en dedikert `src/types/` folder for TypeScript-definisjoner. Se root README for detaljer om arkitekturen.
+
+**Hovedstrukturer:**
+
+- `@/components/*/index.ts` - Barrel files for alle komponent-mapper
+- `@/pages/index.ts` - Sentral eksport for sider
+- `@/lib/graphql/index.ts` - Sentral eksport for GraphQL
+- `@/types/` - Centralized TypeScript types
 
 ## Oppsett
 
@@ -44,9 +58,6 @@ Start dev med VM backend med:
 ```bash
 npm run dev:vm
 ```
-
-> [!NOTE]
-> Du har nå muligheten til å teste Auth0 implementasjonen ved å ha frontend lokalt, knyttet til backend i VM.
 
 ### Koblet til lokal backend
 

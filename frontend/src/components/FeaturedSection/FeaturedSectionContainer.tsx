@@ -1,15 +1,15 @@
 import { LOADINGandERROR } from "@/lib/classNames";
-import { FeaturedCarousel } from "./FeaturedCarousel";
-import { GET_FEATURED_GAMES } from "@/lib/graphql/queries/featuredGames";
+import { FeaturedCarousel } from "@/components/FeaturedSection";
+import { GET_FEATURED_GAMES } from "@/lib/graphql";
 import { useQuery } from "@apollo/client/react";
-import type { FeaturedGame, GetFeaturedGamesData } from "@/types/GameTypes";
-import { FeaturedCardSkeleton } from "../Skeletons";
+import type { FeaturedGame, GetFeaturedGamesData } from "@/types";
+import { FeaturedCardSkeleton } from "@/components/Skeletons";
 
 export const FeaturedSection = () => {
   const { loading, error, data } = useQuery<GetFeaturedGamesData>(
     GET_FEATURED_GAMES,
     {
-      variables: { take: 10, filter: { tags: ["Otome"] } },
+      variables: { take: 10, sortBy: "popularity", sortOrder: "desc" },
       fetchPolicy: "cache-first",
     },
   );

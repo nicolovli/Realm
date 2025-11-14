@@ -1,11 +1,11 @@
-import { GET_USER } from "@/lib/graphql/queries/userQueries";
-import { useParams } from "react-router-dom";
+import { GET_USER, GET_GAME } from "@/lib/graphql";
+import { useParams, useLocation } from "react-router-dom";
 import { useQuery } from "@apollo/client/react";
-import { GameDetailCard } from "../components/InformationCards";
-import { GET_GAME } from "../lib/graphql/queries/gameQueries";
+import { GameDetailCard } from "@/components/InformationCards";
 import { GameCardSkeleton } from "@/components/Skeletons";
-import { ReviewList, ReviewForm } from "@/components/Reviews/index.ts";
-import { GET_REVIEWS_META_FOR_GAME } from "../lib/graphql/queries/reviewQueries";
+import { ReviewList, ReviewForm } from "@/components/Reviews";
+import { useEffect } from "react";
+import { useReviewsMeta } from "@/hooks/useReviews";
 
 interface Game {
   id: number;
@@ -14,16 +14,17 @@ interface Game {
   image: string;
   tags?: string[];
   developers?: string[];
+  publishers?: string[];
   platforms?: string[];
   publishedStore?: string | null;
 }
 
-type ReviewsMetaData = {
-  reviewsMetaForGame: { averageStar: number; totalReviews: number };
-};
-type ReviewsMetaVars = { gameId: number };
-
 export const InformationPage = () => {
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, []);
+
   const { data: meData } = useQuery<{
     me: { id: number } | null;
   }>(GET_USER, {
@@ -33,6 +34,10 @@ export const InformationPage = () => {
 
   const { id } = useParams<{ id: string }>();
   const gameId = id ? Number(id) : 0;
+
+  const location = useLocation();
+  const previewImage = (location.state as { previewImage?: string } | null)
+    ?.previewImage;
 
   const { data, loading, error } = useQuery<
     { game: Game | null },
@@ -44,10 +49,7 @@ export const InformationPage = () => {
     nextFetchPolicy: "cache-first",
   });
 
-  const { data: meta } = useQuery<ReviewsMetaData, ReviewsMetaVars>(
-    GET_REVIEWS_META_FOR_GAME,
-    { variables: { gameId } },
-  );
+  const { averageStar } = useReviewsMeta(gameId);
 
   if (loading) {
     return (
@@ -71,8 +73,6 @@ export const InformationPage = () => {
     );
   }
 
-  const avg = meta?.reviewsMetaForGame?.averageStar;
-
   return (
     <main className="w-[min(1600px,92%)] mx-auto !pt-3">
       <section className="flex justify-center">
@@ -81,11 +81,13 @@ export const InformationPage = () => {
           title={game.name ?? ""}
           descriptionShort={game.descriptionShort ?? ""}
           image={game.image ?? ""}
+          initialImage={previewImage}
           tags={game.tags ?? []}
           developers={game.developers ? game.developers.join(", ") : ""}
+          publishers={game.publishers ? game.publishers.join(", ") : ""}
           platforms={game.platforms ? game.platforms.join(", ") : ""}
           publishedStore={game.publishedStore ?? null}
-          rating={typeof avg === "number" ? avg : 0}
+          rating={typeof averageStar === "number" ? averageStar : 0}
         />
       </section>
       <ReviewForm gameId={Number(game.id)} currentUserId={currentUserId} />

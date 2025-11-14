@@ -1,11 +1,7 @@
 import { render, cleanup } from "@testing-library/react";
 import { vi, type MockedFunction } from "vitest";
-import { MobileFilterDrawer } from "../../components/ResultFilters";
-import type {
-  FilterGroup,
-  FilterKey,
-  SelectedFilters,
-} from "../../types/FilterTypes";
+import { MobileFilterDrawer } from "@/components/ResultFilters";
+import type { FilterGroup, FilterKey, SelectedFilters } from "@/types";
 
 vi.mock("../../components/ResultFilters", () => ({
   MobileFilterDrawer: vi.fn(() => null),

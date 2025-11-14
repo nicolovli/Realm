@@ -16,8 +16,8 @@ export interface DeleteReviewArgs {
 
 export interface ReviewsForGameArgs {
   gameId: number;
-  take?: number;
-  skip?: number;
+  first?: number;
+  after?: string;
 }
 
 export interface ReviewsMetaForGameArgs {

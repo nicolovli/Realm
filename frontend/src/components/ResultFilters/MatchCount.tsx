@@ -1,7 +1,7 @@
 // Renders the match count and status message
 
-// Props for the MatchCount component
-interface MatchCountProps {
+// MatchCount component props
+export interface MatchCountProps {
   matchesCount: number;
   countError?: string | null;
 }
@@ -13,6 +13,7 @@ export const MatchCount = ({ matchesCount, countError }: MatchCountProps) => {
       role="status"
       aria-live="polite"
       aria-atomic="true"
+      data-cy="results-count"
       className={`text-sm font-semibold pt-2 ${
         countError
           ? "text-red-600 dark:text-red-400"

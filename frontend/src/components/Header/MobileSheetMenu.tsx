@@ -10,11 +10,11 @@ import {
 import { FOCUS_VISIBLE } from "@/lib/classNames";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
-import type { Item } from "./Header";
+import type { NavigationItem } from "@/components/Header";
 import { AuthButton, ToggleTheme } from ".";
 
 type MobileMenuProps = {
-  navigation: Item[];
+  navigation: NavigationItem[];
 };
 
 export const MobileSheetMenu = ({ navigation }: MobileMenuProps) => {
@@ -43,7 +43,11 @@ export const MobileSheetMenu = ({ navigation }: MobileMenuProps) => {
           personalize your Realm experience.
         </SheetDescription>
         <section className="flex gap-4 items-center">
-          <AuthButton />
+          <SheetClose asChild>
+            <span>
+              <AuthButton />
+            </span>
+          </SheetClose>
           <ToggleTheme />
         </section>
 

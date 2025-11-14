@@ -6,10 +6,10 @@ import {
   waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { FeaturedCarousel } from "../../components/FeaturedSection/FeaturedCarousel";
+import { FeaturedCarousel } from "@/components/FeaturedSection";
 import { BrowserRouter } from "react-router-dom";
 import type { ReactElement } from "react";
-import type { FeaturedGame } from "@/types/GameTypes";
+import type { FeaturedGame } from "@/types";
 
 // Mock FeaturedCard to keep tests focused
 vi.mock("../../components/featured-section/FeaturedCard", () => ({

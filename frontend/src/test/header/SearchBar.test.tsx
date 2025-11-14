@@ -3,8 +3,8 @@ import { render, screen, cleanup, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { MockedProvider } from "@apollo/client/testing/react";
-import { SearchBar } from "../../components/Header/SearchBar";
-import { SEARCH_GAMES } from "../../lib/graphql/queries/gameQueries";
+import { SearchBar } from "@/components/Header";
+import { SEARCH_GAMES } from "@/lib/graphql";
 
 // Mock react-router-dom navigation
 const mockNavigate = vi.fn();
@@ -94,7 +94,7 @@ describe("SearchBar Component", () => {
     await user.type(input, "Test Game");
     await user.click(screen.getByLabelText("Search"));
 
-    expect(mockNavigate).toHaveBeenCalledWith("/games?search=Test+Game");
+    expect(mockNavigate).toHaveBeenCalledWith("/games?search=Test+Game&page=1");
   });
 
   it("navigates to game detail when clicking suggestion", async () => {
@@ -109,7 +109,12 @@ describe("SearchBar Component", () => {
     });
 
     await user.click(screen.getByText("Portal 2"));
-    expect(mockNavigate).toHaveBeenCalledWith("/games/1");
+    expect(mockNavigate).toHaveBeenCalledWith("/games/1", {
+      state: {
+        previewImage:
+          "https://images.weserv.nl/?url=portal2.jpg&w=640&output=webp",
+      },
+    });
   });
 
   it("clears input when clear button is clicked", async () => {
@@ -126,14 +131,21 @@ describe("SearchBar Component", () => {
   it("closes suggestions with Escape key", async () => {
     const user = userEvent.setup();
     renderSearchBar();
-    const input = screen.getByLabelText("Search for games");
+    const input = screen.getByLabelText("Search for games") as HTMLInputElement;
 
+    // Type to trigger search
     await user.type(input, "portal");
+
+    // Wait for listbox to appear with suggestions
     await waitFor(() => {
-      expect(screen.getByRole("listbox")).toBeInTheDocument();
+      expect(screen.getByText("Portal")).toBeInTheDocument();
     });
 
+    // Ensure input has focus and send Escape
+    input.focus();
     await user.keyboard("{Escape}");
+
+    // ListBox should disappear
     await waitFor(() => {
       expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
     });

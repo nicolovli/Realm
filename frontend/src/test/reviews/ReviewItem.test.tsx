@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { MockedProvider } from "@apollo/client/testing/react";
-import { ReviewItem } from "../../components/Reviews/ReviewItem";
-import type { Review } from "../../types/Review";
+import { ReviewItem, type Review } from "@/components/Reviews";
 
 const sampleReview: Review & { user?: { id?: number; username?: string } } = {
   id: 1,

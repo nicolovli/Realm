@@ -1,13 +1,17 @@
-import { GameCardBase } from "./GameCardBase";
-import { CARD_CONTAINER } from "../../lib/classNames";
+import { GameCardBase } from "@/components/InformationCards";
+import { CARD_CONTAINER } from "@/lib/classNames";
 
-interface GameDetailCardProps {
+// GameDetailCard component props
+export interface GameDetailCardProps {
   gameId: number;
   title: string;
   descriptionShort: string;
   image: string;
+  initialImage?: string;
+  finalImage?: string;
   tags?: string[];
   developers?: string;
+  publishers?: string;
   platforms?: string;
   onButtonClick?: () => void;
   rating?: number;
@@ -19,8 +23,11 @@ export const GameDetailCard = ({
   title,
   descriptionShort,
   image,
+  initialImage,
+  finalImage,
   tags = [],
   developers,
+  publishers,
   platforms,
   onButtonClick,
   rating,
@@ -33,9 +40,12 @@ export const GameDetailCard = ({
         title={title}
         descriptionShort={descriptionShort}
         image={image}
+        initialImage={initialImage}
+        finalImage={finalImage}
         imagePosition="right"
         tags={tags}
         developers={developers}
+        publishers={publishers}
         platforms={platforms}
         publishedStore={publishedStore}
         onButtonClick={onButtonClick}

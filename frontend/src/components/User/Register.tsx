@@ -50,6 +50,7 @@ export const Register = ({ onSubmit }: RegisterProps) => {
         Username:
         <input
           type="text"
+          name="username"
           value={formData.username}
           onChange={(e) =>
             setFormData({ ...formData, username: e.target.value.toLowerCase() })
@@ -62,6 +63,7 @@ export const Register = ({ onSubmit }: RegisterProps) => {
         Email:
         <input
           type="email"
+          name="email"
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           className={formDataCSS + FOCUS_VISIBLE}
@@ -72,6 +74,7 @@ export const Register = ({ onSubmit }: RegisterProps) => {
         Password:
         <input
           type="password"
+          name="password"
           value={formData.password}
           onChange={(e) =>
             setFormData({ ...formData, password: e.target.value })
@@ -84,6 +87,7 @@ export const Register = ({ onSubmit }: RegisterProps) => {
         Confirm Password:
         <input
           type="password"
+          name="passwordConfirmation"
           value={formData.passwordConfirm}
           onChange={(e) =>
             setFormData({ ...formData, passwordConfirm: e.target.value })

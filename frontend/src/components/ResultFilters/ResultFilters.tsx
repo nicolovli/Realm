@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { FilterPill } from "./FilterPill";
-import { FilterChips } from "./FilterChips";
-import { MatchCount } from "./MatchCount";
-import { SortDropdown } from "./SortDropdown";
-import { MobileFilterDrawer } from "./MobileFilterDrawer";
-import { useResultFilters } from "../../hooks/useResultFilters";
-import { FOCUS_VISIBLE, PILL_TRIGGER_BASE } from "../../lib/classNames";
-import type { FilterKey, FilterGroup } from "../../types/FilterTypes";
+import {
+  FilterPill,
+  FilterChips,
+  MatchCount,
+  SortDropdown,
+  MobileFilterDrawer,
+} from "@/components/ResultFilters";
+import { useResultFilters } from "@/hooks/resultFilters";
+import { FOCUS_VISIBLE, PILL_TRIGGER_BASE } from "@/lib/classNames";
+import type { FilterKey, FilterGroup } from "@/types";
 
 type ResultFiltersProps = {
   searchQuery?: string;

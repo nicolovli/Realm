@@ -1,14 +1,12 @@
-import { useState } from "react";
-import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
-import { CREATE_REVIEW } from "../../lib/graphql/mutations/reviews";
-import {
-  GET_REVIEWS_FOR_GAME,
-  GET_REVIEWS_META_FOR_GAME,
-} from "../../lib/graphql/queries/reviewQueries";
+import { useCallback, useState } from "react";
+import { useApolloClient, useMutation } from "@apollo/client/react";
+import { CREATE_REVIEW, getReviewRefetchQueries } from "@/lib/graphql";
 import { BUTTON_BASE, FOCUS_VISIBLE, HOVER } from "@/lib/classNames";
-import { StarRating } from "./StarRating";
+import { StarRating, ReviewTextArea, type Review } from "@/components/Reviews";
 import { toast } from "sonner";
-import type { Review } from "../../types/Review";
+import { useReviewsForGame } from "@/hooks/useReviews";
+import { useLoginDialog } from "@/hooks/useLoginDialog";
+import { AuthDialog } from "@/components/User";
 
 export const ReviewForm = ({
   gameId,
@@ -19,30 +17,47 @@ export const ReviewForm = ({
 }) => {
   const [star, setStar] = useState<number>(5);
   const [description, setDescription] = useState("");
+  const { open, openLogin, handleOpenChange } = useLoginDialog();
+
   const apollo = useApolloClient();
+  const invalidateGameLists = useCallback(() => {
+    try {
+      apollo.cache.evict({ fieldName: "gamesConnection" });
+      apollo.cache.gc();
+      const cacheAny = apollo.cache as { broadcastWatches?: () => void };
+      cacheAny.broadcastWatches?.();
+    } catch (error) {
+      console.warn("Failed to invalidate cached game lists", error);
+    }
+  }, [apollo]);
+
   const [createReview, { loading }] = useMutation(CREATE_REVIEW, {
-    refetchQueries: [
-      { query: GET_REVIEWS_FOR_GAME, variables: { gameId } },
-      { query: GET_REVIEWS_META_FOR_GAME, variables: { gameId } },
-    ],
-    awaitRefetchQueries: true,
+    refetchQueries: getReviewRefetchQueries(gameId),
+    errorPolicy: "all",
   });
 
-  const { data: existingData, loading: reviewsLoading } = useQuery<
-    { reviewsForGame: Review[] },
-    { gameId: number; take?: number; skip?: number }
-  >(GET_REVIEWS_FOR_GAME, {
-    variables: { gameId, take: 6, skip: 0 },
-    fetchPolicy: "cache-and-network",
-  });
-
-  if (reviewsLoading && !existingData) return null;
+  const {
+    reviews,
+    loading: reviewsLoading,
+    error: reviewsError,
+  } = useReviewsForGame(gameId, 100);
 
   const myExisting: Review | undefined = currentUserId
-    ? (existingData?.reviewsForGame ?? []).find(
-        (r) => Number(r.user?.id) === Number(currentUserId),
-      )
+    ? reviews.find((r: Review) => Number(r.user?.id) === Number(currentUserId))
     : undefined;
+
+  if (reviewsLoading && reviews.length === 0) return null;
+
+  if (reviewsError) {
+    return (
+      <aside
+        role="alert"
+        className="rounded-[18px] border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 p-4 text-red-700 dark:text-red-300"
+      >
+        Could not check existing reviews. Please try again later.
+      </aside>
+    );
+  }
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,15 +75,25 @@ export const ReviewForm = ({
       );
     try {
       await createReview({ variables: { gameId, star, description } });
+      invalidateGameLists();
+      toast.success("Review posted!");
       setDescription("");
       setStar(5);
-      await apollo.refetchQueries({
-        include: [GET_REVIEWS_FOR_GAME, GET_REVIEWS_META_FOR_GAME],
-      });
-    } catch {
-      toast.error(
-        "Could not submit the review. A user can only submit a review once.",
-      );
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      console.error("Error creating review:", error);
+
+      // Check if it's a unique constraint error
+      if (
+        err?.message?.includes("Unique constraint failed") ||
+        err?.message?.includes("A user can only submit a review once")
+      ) {
+        toast.error(
+          "You already have a review for this game. Edit it instead!",
+        );
+      } else {
+        toast.error("Could not submit the review. Please try again.");
+      }
     }
   };
 
@@ -76,62 +101,84 @@ export const ReviewForm = ({
     return null;
   }
 
-  return (
-    <form
-      onSubmit={onSubmit}
-      className="bg-lightpurple dark:bg-darkpurple rounded-4xl p-6 w-full text-black dark:text-white"
-    >
-      <fieldset disabled={loading} className="contents">
-        <legend className="sr-only">Write a review!</legend>
-
-        <header className="flex flex-wrap items-center justify-between gap-3">
-          <h3 className="text-base md:text-lg font-semibold">
-            <span>{currentUserId ? "You" : "—"}</span>
-          </h3>
-
-          <label className="flex items-center gap-2">
-            <span className="opacity-80">Rating</span>
-            <StarRating value={star} onChange={setStar} />
-          </label>
-        </header>
-
-        <section className="mt-4">
-          <label htmlFor="description" className="sr-only">
-            Review Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-            maxLength={500}
-            rows={4}
-            className={`${FOCUS_VISIBLE} w-full bg-gray-100 dark:bg-white/10 rounded-3xl p-4 leading-relaxed outline-none`}
-            placeholder="Write a review!"
-          />
-        </section>
-
-        <footer className="mt-4 flex items-center justify-end gap-3">
+  if (!currentUserId)
+    return (
+      <>
+        <span
+          data-cy="reviewform_login"
+          className="text-xl text-black dark:text-white bg-lightpurple dark:bg-darkpurple rounded-3xl p-8 justify-center"
+        >
+          If you want to leave a review, you have to{" "}
           <button
             type="button"
-            onClick={() => {
-              setDescription("");
-              setStar(5);
-            }}
-            className={`${FOCUS_VISIBLE} ${HOVER} text-sm px-3 py-1 rounded-full cursor-pointer`}
+            onClick={openLogin}
+            disabled={false}
+            className={`${FOCUS_VISIBLE} hover:underline text-lightbuttonpurple dark:text-darkbuttonpurple font-semibold cursor-pointer`}
           >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            aria-busy={loading}
-            className={`${BUTTON_BASE} ${FOCUS_VISIBLE} ${HOVER} text-white font-medium px-6 py-2 rounded-full dark:bg-darkbuttonpurple bg-lightbuttonpurple `}
-          >
-            {loading ? "Sender…" : "Post"}
-          </button>
-        </footer>
-      </fieldset>
-    </form>
+            log in
+          </button>{" "}
+          first!
+        </span>
+        <AuthDialog open={open} onOpenChange={handleOpenChange} />
+      </>
+    );
+
+  return (
+    <>
+      <form
+        onSubmit={onSubmit}
+        className={`bg-lightpurple dark:bg-darkpurple rounded-4xl p-6 w-full text-black dark:text-white`}
+      >
+        <fieldset disabled={loading} className="contents">
+          <legend className="sr-only">Write a review!</legend>
+
+          <header className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="text-base md:text-lg font-semibold">
+              <span>{currentUserId ? "You" : ""}</span>
+            </h3>
+
+            <label className="flex items-center gap-2">
+              <span className="opacity-80">Rating</span>
+              <StarRating value={star} onChange={setStar} />
+            </label>
+          </header>
+
+          <section className="mt-4">
+            <>
+              <label htmlFor="description" className="sr-only">
+                Review Description
+              </label>
+              <ReviewTextArea
+                value={description}
+                onChange={setDescription}
+                required
+                placeholder="Write a review..."
+              />
+            </>
+          </section>
+
+          <footer className="mt-4 flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setDescription("");
+                setStar(5);
+              }}
+              className={`${FOCUS_VISIBLE} ${HOVER} text-sm px-3 py-1 rounded-full cursor-pointer}`}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              data-cy="submit-review-button"
+              aria-busy={loading}
+              className={`${BUTTON_BASE} ${FOCUS_VISIBLE} ${HOVER} text-white font-medium px-6 py-2 rounded-full dark:bg-darkbuttonpurple bg-lightbuttonpurple `}
+            >
+              {loading ? "Sender…" : "Post"}
+            </button>
+          </footer>
+        </fieldset>
+      </form>
+    </>
   );
 };

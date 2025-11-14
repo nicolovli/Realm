@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Login } from "../../components/User"; // adjust path if needed
+import { Login } from "@/components/User";
 
 describe("Login component", () => {
   it("renders username and password fields and submit button", () => {

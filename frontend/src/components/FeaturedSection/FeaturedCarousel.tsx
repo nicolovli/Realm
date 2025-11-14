@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FeaturedCard } from "./FeaturedCard";
+import { FeaturedCard } from "@/components/FeaturedSection";
 import { Link } from "react-router-dom";
+import type { FeaturedGame } from "@/types";
 
 // ⬇️ shadcn/ui (Embla) carousel
 import {
@@ -11,8 +12,15 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import type { FeaturedGame } from "@/types/GameTypes";
 import { FOCUS_VISIBLE, HOVER } from "@/lib/classNames";
+
+// FeaturedCarousel component props
+export type FeaturedCarouselProps = {
+  items: FeaturedGame[]; // pass up to 10 items (or more, loop handles it)
+  title?: string;
+  onExploreAll?: () => void;
+  itemBasisClassName?: string;
+};
 
 export const arrowClass =
   "absolute top-1/2 -translate-y-1/2 z-20 h-10 w-10 " +
@@ -71,13 +79,6 @@ function useIsCoarsePointer() {
   return coarse;
 }
 
-export type FeaturedCarouselProps = {
-  items: FeaturedGame[]; // pass up to 10 items (or more, loop handles it)
-  title?: string;
-  onExploreAll?: () => void;
-  itemBasisClassName?: string;
-};
-
 export const FeaturedCarousel = ({
   items,
   title = "Featured games",
@@ -119,7 +120,7 @@ export const FeaturedCarousel = ({
   }, [api]);
 
   return (
-    <section className="w-full">
+    <section className="w-full" data-cy="featured-carousel">
       <h2 className="mb-4 text-center text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
         {title}
       </h2>
@@ -152,7 +153,7 @@ export const FeaturedCarousel = ({
                   key={g.id}
                   className={`shrink-0 ${itemBasisClassName}`}
                 >
-                  <FeaturedCard game={g} />
+                  <FeaturedCard data-cy="featured-game-card" game={g} />
                 </CarouselItem>
               ))}
             </CarouselContent>
@@ -161,12 +162,14 @@ export const FeaturedCarousel = ({
             <CarouselPrevious
               aria-label="Previous slide"
               className={`${arrowClass} left-2 ${anyHover ? "flex" : "hidden"}`}
+              data-cy="featured-prev"
             >
               ◀
             </CarouselPrevious>
             <CarouselNext
               aria-label="Next slide"
               className={`${arrowClass} right-2 ${anyHover ? "flex" : "hidden"}`}
+              data-cy="featured-next"
             >
               ▶
             </CarouselNext>

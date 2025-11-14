@@ -5,12 +5,12 @@ import {
   ResultPage,
   UserPage,
   InformationPage,
-} from "./pages";
-import "./index.css";
-import { Header } from "./components/Header";
-import { Breadcrumbs } from "./components/Breadcrumbs";
-import { Footer } from "./components/Footer";
-import { Toaster } from "./components/ui/sonner";
+} from "@/pages";
+import "@/index.css";
+import { Header } from "@/components/Header";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Footer } from "@/components/Footer";
+import { Toaster } from "@/components/ui/sonner";
 
 function App() {
   return (

@@ -2,11 +2,11 @@ name: GitHub CI pipeline - Frontend
 
 on:
   push:
-    branches: [main, dev3]
+    branches: [main, dev4]
     paths:
       - 'frontend/**'
   pull_request:
-    branches: [main, dev3]
+    branches: [main, dev4]
     paths:
       - 'frontend/**'
 

@@ -1,7 +1,8 @@
 import { describe, it, vi, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Profile } from "../../components/User";
+import { MockedProvider } from "@apollo/client/testing/react";
+import { Profile } from "@/components/User";
 
 describe("Profile component", () => {
   const mockHandleLogOut = vi.fn();
@@ -11,8 +12,15 @@ describe("Profile component", () => {
     email: "KariN@example.com",
   };
 
+  const renderProfile = () =>
+    render(
+      <MockedProvider mocks={[]}>
+        <Profile user={mockUser} handleLogOut={mockHandleLogOut} />
+      </MockedProvider>,
+    );
+
   it("renders user information correctly", () => {
-    render(<Profile user={mockUser} handleLogOut={mockHandleLogOut} />);
+    renderProfile();
 
     expect(screen.getByText(`Hi, ${mockUser.username}!`)).toBeInTheDocument();
     expect(screen.getByText("Email:")).toBeInTheDocument();
@@ -20,7 +28,7 @@ describe("Profile component", () => {
   });
 
   it("renders logout button with correct label and style", () => {
-    render(<Profile user={mockUser} handleLogOut={mockHandleLogOut} />);
+    renderProfile();
 
     const button = screen.getByRole("button", { name: /log out/i });
     expect(button).toBeInTheDocument();
@@ -29,7 +37,7 @@ describe("Profile component", () => {
 
   it("calls handleLogOut when logout button is clicked", async () => {
     const user = userEvent.setup();
-    render(<Profile user={mockUser} handleLogOut={mockHandleLogOut} />);
+    renderProfile();
 
     const button = screen.getByRole("button", { name: /log out/i });
     await user.click(button);

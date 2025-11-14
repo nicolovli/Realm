@@ -12,8 +12,9 @@ export const reviewTypeDefs = gql`
   }
 
   extend type Query {
-    reviewsForGame(gameId: Int!, take: Int, skip: Int): [Review!]!
+    reviewsForGame(gameId: Int!, first: Int, after: String): ReviewConnection!
     reviewsMetaForGame(gameId: Int!): ReviewMeta!
+    userReviews(userId: ID!, first: Int, after: String): ReviewConnection!
   }
 
   extend type Mutation {
@@ -25,5 +26,21 @@ export const reviewTypeDefs = gql`
   type ReviewMeta {
     averageStar: Float!
     totalReviews: Int!
+  }
+
+  type ReviewEdge {
+    node: Review!
+    cursor: String!
+  }
+
+  type ReviewConnection {
+    edges: [ReviewEdge!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+  }
+
+  type PageInfo {
+    endCursor: String
+    hasNextPage: Boolean!
   }
 `;

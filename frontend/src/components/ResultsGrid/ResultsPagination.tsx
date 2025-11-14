@@ -1,11 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import type { ResultsPaginationProps } from "@/types/ResultPaginationTypes";
 import {
   DISABLED,
   FOCUS_VISIBLE,
   HOVER,
   PILL_TRIGGER_BASE,
-} from "../../lib/classNames";
+} from "@/lib/classNames";
+
+export type ResultsPaginationProps = {
+  page: number; // currentPage from hook
+  totalPages: number; // from hook
+  canPrev?: boolean; // default: page > 1
+  canNext?: boolean; // default: page < totalPages (or use hasMore)
+  onPrev: () => void; // handlePrevPage
+  onNext: () => void; // handleNextPage
+  onPage?: (page: number) => void; // optional direct jump
+  isJumping?: boolean;
+};
 
 export const ResultsPagination = ({
   page,

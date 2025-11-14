@@ -1,42 +1,32 @@
 import { useState, useEffect } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
-import { HOVER, FOCUS_VISIBLE } from "../../lib/classNames";
-
-import { HeartIcon } from "../HeartIcon";
-import { AuthDialog } from "../User";
+import { HOVER, FOCUS_VISIBLE } from "@/lib/classNames";
+import { toDate } from "@/lib/utils/date";
+import { HeartIcon } from "@/components/HeartIcon";
+import { AuthDialog } from "@/components/User";
 import { useAuthStatus } from "@/hooks/useAuthStatus";
-import { StarRating } from "../Reviews/StarRating";
+import { StarRating } from "@/components/Reviews";
+import { Link } from "react-router-dom";
 
-interface GameCardBaseProps {
+// GameCardBase component props
+export interface GameCardBaseProps {
   gameId: number;
   title: string;
   descriptionShort: string;
   image: string;
+  initialImage?: string;
+  finalImage?: string;
   buttonText?: string;
   onButtonClick?: () => void;
   tags?: string[];
   developers?: string;
+  publishers?: string;
   platforms?: string;
   imagePosition?: "left" | "right";
   rating?: number;
   isPromoCard?: boolean;
   publishedStore?: string | null;
-}
-
-// Robust date parser (gjenbrukt fra ReviewItem)
-function toDate(v: unknown): Date | null {
-  if (v instanceof Date) return v;
-  if (typeof v === "number" && Number.isFinite(v)) return new Date(v);
-  if (typeof v === "string") {
-    const s = v.trim();
-    if (/^\d+$/.test(s)) {
-      const n = Number(s);
-      return Number.isFinite(n) ? new Date(n) : null;
-    }
-    const d = new Date(s);
-    return Number.isNaN(d.getTime()) ? null : d;
-  }
-  return null;
+  "data-cy"?: string;
 }
 
 export const GameCardBase = ({
@@ -44,15 +34,19 @@ export const GameCardBase = ({
   title,
   descriptionShort,
   image,
+  initialImage,
+  finalImage,
   buttonText,
   onButtonClick,
   tags = [],
   developers,
+  publishers,
   platforms,
   imagePosition = "right",
   rating,
   isPromoCard,
   publishedStore,
+  "data-cy": dataCy,
 }: GameCardBaseProps) => {
   const [showAllTags, setShowAllTags] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -81,8 +75,36 @@ export const GameCardBase = ({
       })
     : null;
 
+  const buildProxied = (url: string, width: number) =>
+    `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=${width}&output=webp`;
+
+  const resolvedFinal = finalImage ?? buildProxied(image, 800);
+  const resolvedInitial = initialImage ?? resolvedFinal;
+  const [src, setSrc] = useState(resolvedInitial);
+
+  useEffect(() => {
+    setSrc(resolvedInitial);
+  }, [resolvedInitial]);
+
+  useEffect(() => {
+    if (resolvedInitial === resolvedFinal) return;
+    let canceled = false;
+    const img = new Image();
+    img.src = resolvedFinal;
+    void img
+      .decode()
+      .then(() => {
+        if (!canceled) setSrc(resolvedFinal);
+      })
+      .catch(() => undefined);
+    return () => {
+      canceled = true;
+    };
+  }, [resolvedInitial, resolvedFinal]);
+
   return (
     <section
+      data-cy={dataCy}
       className={`flex flex-col md:flex-row items-center bg-lightpurple dark:bg-darkpurple rounded-4xl p-6 w-full ${
         isReversed ? "md:flex-row-reverse" : ""
       }`}
@@ -90,7 +112,7 @@ export const GameCardBase = ({
       {/* Image */}
       <figure className="md:w-1/2 flex justify-center mb-4 md:mb-0">
         <img
-          src={`https://images.weserv.nl/?url=${encodeURIComponent(image)}&w=800&output=webp`}
+          src={src}
           alt={title}
           sizes="(max-width: 768px) 90vw, 50vw"
           className="rounded-3xl w-full h-full max-h-[25rem] object-cover"
@@ -114,12 +136,13 @@ export const GameCardBase = ({
           {tags.length > 0 && (
             <section className="flex flex-wrap justify-center gap-2 items-center">
               {visibleTags.map((tag) => (
-                <span
+                <Link
                   key={tag}
-                  className="bg-lightdots dark:bg-lightdots text-white dark:text-white px-2 py-1 rounded-full text-xs"
+                  to={`/games?tags=${encodeURIComponent(tag)}`}
+                  className={`bg-lightdots dark:bg-lightdots text-white px-2 py-1 rounded-full text-xs inline-flex items-center ${HOVER} ${FOCUS_VISIBLE}`}
                 >
                   {tag}
-                </span>
+                </Link>
               ))}
 
               {hasExtraTags && (
@@ -173,12 +196,17 @@ export const GameCardBase = ({
           </p>
         </header>
 
-        {/* Developers and platforms */}
-        {(developers || platforms) && (
+        {/* Developers, publishers and platforms */}
+        {(developers || publishers || platforms) && (
           <section className="mt-4 flex flex-wrap justify-center gap-6 text-xs md:text-sm text-gray-800 dark:text-white text-center">
             {developers && (
               <p>
                 <strong>Developer:</strong> {developers}
+              </p>
+            )}
+            {publishers && (
+              <p>
+                <strong>Publisher:</strong> {publishers}
               </p>
             )}
             {platforms && (

@@ -1,6 +1,6 @@
 import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
-import { FOCUS_VISIBLE, ICON_CLASSNAME } from "../../lib/classNames";
+import { FOCUS_VISIBLE, ICON_CLASSNAME } from "@/lib/classNames";
 
 export const ToggleTheme = ({ className = "" }: { className?: string }) => {
   const [theme, setTheme] = useState(() => {

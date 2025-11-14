@@ -3,8 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { vi, describe, it, expect } from "vitest";
 import { MockedProvider } from "@apollo/client/testing/react";
 import { MemoryRouter } from "react-router-dom";
-import { GET_PROMO_GAMES } from "../../lib/graphql/queries/promoGames";
-import { PromoCard } from "../../components/InformationCards";
+import { GET_PROMO_GAMES } from "@/lib/graphql";
+import { PromoCard } from "@/components/InformationCards";
 
 // Mock useNavigate
 const navigateMock = vi.fn();
@@ -109,6 +109,10 @@ describe("PromoCard tests", () => {
 
     const readMoreBtn = screen.getByText("Read more");
     await user.click(readMoreBtn);
-    expect(navigateMock).toHaveBeenCalledWith("/games/1");
+    expect(navigateMock).toHaveBeenCalledWith("/games/1", {
+      state: {
+        previewImage: "https://images.weserv.nl/?url=img1&w=640&output=webp",
+      },
+    });
   });
 });

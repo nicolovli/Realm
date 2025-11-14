@@ -1,4 +1,5 @@
 import { Context } from "../context.js";
+import { Prisma } from "@prisma/client";
 
 export function validateStar(star: number) {
   if (star < 1 || star > 5)
@@ -25,4 +26,36 @@ export async function checkReviewOwnership(
   if (review.userId !== userId)
     throw new Error("You can only modify your own reviews.");
   return review;
+}
+
+// Helper to recompute game aggregates after review changes
+export async function updateGameAggregates(
+  gameId: number,
+  tx: Prisma.TransactionClient,
+) {
+  const [reviewCount, avgAgg, favCount] = await Promise.all([
+    tx.review.count({ where: { gameId } }),
+    tx.review.aggregate({
+      where: { gameId },
+      _avg: { star: true },
+    }),
+    tx.user.count({
+      where: { favorites: { some: { id: gameId } } },
+    }),
+  ]);
+
+  const avg = avgAgg._avg.star ?? 0;
+  const hasRatings = reviewCount > 0;
+  const popularityScore = favCount * 2 + reviewCount;
+
+  await tx.game.update({
+    where: { id: gameId },
+    data: {
+      reviewsCount: reviewCount,
+      avgRating: hasRatings ? avg : null,
+      hasRatings,
+      favoritesCount: favCount,
+      popularityScore,
+    },
+  });
 }

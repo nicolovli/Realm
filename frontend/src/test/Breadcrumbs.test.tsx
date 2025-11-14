@@ -26,7 +26,7 @@ vi.mock("@/components/ui/breadcrumb", () => ({
 }));
 
 const { Breadcrumbs } = await import("@/components/Breadcrumbs");
-const { GET_GAME } = await import("@/lib/graphql/queries/gameQueries");
+const { GET_GAME } = await import("@/lib/graphql");
 
 describe("Breadcrumbs", () => {
   afterEach(() => {
@@ -60,7 +60,31 @@ describe("Breadcrumbs", () => {
     const mocks = [
       {
         request: { query: GET_GAME, variables: { id: "7472" } },
-        result: { data: { game: { id: "7472", name: "Test Game 7472" } } },
+        result: {
+          data: {
+            game: {
+              __typename: "Game",
+              id: "7472",
+              sid: "test-game-7472",
+              name: "Test Game 7472",
+              image: "test.jpg",
+              descriptionShort: "A test game",
+              publishedStore: "2024-01-01",
+              platforms: ["PC"],
+              developers: ["Test Studio"],
+              publishers: ["Test Publisher"],
+              languages: ["English"],
+              categories: ["Action"],
+              genres: ["Action"],
+              tags: ["test"],
+              avgRating: 4.5,
+              reviewsCount: 10,
+              favoritesCount: 5,
+              popularityScore: 20,
+              hasRatings: true,
+            },
+          },
+        },
       },
     ];
 

@@ -31,6 +31,16 @@ export type FeaturedGame = {
   image?: string;
 };
 
+// Promo card game - subset of full Game type
+
+export type PromoGame = {
+  id: string;
+  name: string;
+  descriptionShort: string;
+  image: string;
+  rating?: number;
+};
+
 export type GetFeaturedGamesData = {
   games: FeaturedGame[];
 };

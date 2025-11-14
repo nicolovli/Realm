@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
-import { StarRating } from "../../components/Reviews/StarRating";
+import { StarRating } from "@/components/Reviews";
 
 describe("StarRating", () => {
   it("renders 5 star containers for read-only and supports decimal fill", () => {

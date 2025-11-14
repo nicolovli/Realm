@@ -66,6 +66,8 @@ const defaultProps = {
   canNext: false,
   isPending: false,
   isJumping: false,
+  loadingPage: null,
+  gamesError: "",
   handleNextPage: vi.fn(),
   handlePrevPage: vi.fn(),
   handleGoToPage: vi.fn(),

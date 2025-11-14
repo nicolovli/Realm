@@ -1,17 +1,18 @@
-import { Prisma } from "@prisma/client";
 import { Context } from "../context.js";
 import {
   checkAuthenticated,
   checkReviewOwnership,
   validateDescription,
   validateStar,
-} from "./reviewHelpers.js";
-import {
+  updateGameAggregates,
   DeleteReviewArgs,
   ReviewArgs,
   ReviewsForGameArgs,
   UpdateReviewArgs,
-} from "./reviewTypes.js";
+} from "./index.js";
+import type { Prisma } from "@prisma/client";
+import { clearGamesCache } from "../game/index.js";
+import { clearFilterCache } from "../filter/index.js";
 
 export const reviewResolvers = {
   Query: {
@@ -20,41 +21,65 @@ export const reviewResolvers = {
       args: ReviewsForGameArgs,
       ctx: Context,
     ) => {
-      const { gameId, take = 6, skip = 0 } = args;
+      const { gameId, first = 6, after } = args;
       const userId = ctx.userId ?? null;
 
-      const myReview = userId
-        ? await ctx.prisma.review.findFirst({ where: { gameId, userId } })
-        : null;
+      // If the viewer has their own review, show it first on the first page,
+      // then fill the rest with latest reviews. On subsequent pages we skip over it.
+      // This preserves perceived ownership without breaking pagination math.
 
-      if (!myReview) {
-        return ctx.prisma.review.findMany({
-          where: { gameId },
-          orderBy: { createdAt: "desc" },
-          take,
-          skip,
-        });
-      }
+      const where = { gameId };
 
-      const isFirstPage = skip === 0;
-
-      if (isFirstPage) {
-        const others = await ctx.prisma.review.findMany({
-          where: { gameId, NOT: { id: myReview.id } },
-          orderBy: { createdAt: "desc" },
-          take: Math.max(0, take - 1),
-          skip: 0,
-        });
-        return [myReview, ...others];
-      }
-
-      const effectiveSkip = Math.max(0, skip - 1);
-      return ctx.prisma.review.findMany({
-        where: { gameId, NOT: { id: myReview.id } },
+      // Get all reviews for this game
+      const allReviews = await ctx.prisma.review.findMany({
+        where,
         orderBy: { createdAt: "desc" },
-        take,
-        skip: effectiveSkip,
       });
+
+      // Find user's review if they have one
+      const myReviewIndex = userId
+        ? allReviews.findIndex((r) => r.userId === userId)
+        : -1;
+
+      // Reorder so user's review is first
+      const orderedReviews =
+        myReviewIndex > -1
+          ? [
+              allReviews[myReviewIndex],
+              ...allReviews.slice(0, myReviewIndex),
+              ...allReviews.slice(myReviewIndex + 1),
+            ]
+          : allReviews;
+
+      // Apply cursor-based pagination
+      const startIndex = (() => {
+        if (after) {
+          const decodedCursor = Buffer.from(after, "base64").toString("utf-8");
+          const cursorId = parseInt(decodedCursor, 10);
+          return orderedReviews.findIndex((r) => r.id === cursorId) + 1;
+        }
+        return 0;
+      })();
+
+      const paginatedReviews = orderedReviews.slice(
+        startIndex,
+        startIndex + (first ?? 6),
+      );
+      const hasNextPage = orderedReviews.length > startIndex + (first ?? 6);
+
+      const edges = paginatedReviews.map((review) => ({
+        node: review,
+        cursor: Buffer.from(review.id.toString(), "utf-8").toString("base64"),
+      }));
+
+      return {
+        edges,
+        pageInfo: {
+          endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
+          hasNextPage,
+        },
+        totalCount: orderedReviews.length,
+      };
     },
 
     reviewsMetaForGame: async (
@@ -74,6 +99,63 @@ export const reviewResolvers = {
         totalReviews: count,
       };
     },
+
+    userReviews: async (
+      _parent: unknown,
+      {
+        userId,
+        first = 10,
+        after,
+      }: { userId: string; first?: number; after?: string },
+      ctx: Context,
+    ) => {
+      const numericUserId = parseInt(userId, 10);
+      if (Number.isNaN(numericUserId)) {
+        throw new Error("Invalid userId");
+      }
+
+      const where = { userId: numericUserId };
+      const take = (first ?? 10) + 1; // +1 to check if there's a next page
+      const skip = after ? 1 : 0; // Skip the cursor itself
+      const cursor: { id: number } | undefined = after
+        ? (() => {
+            const decodedCursor = Buffer.from(after, "base64").toString(
+              "utf-8",
+            );
+            return { id: parseInt(decodedCursor, 10) };
+          })()
+        : undefined;
+
+      const reviews = await ctx.prisma.review.findMany({
+        where,
+        take,
+        skip,
+        cursor: cursor ? cursor : undefined,
+        orderBy: { createdAt: "desc" },
+      });
+
+      const pageSize = first ?? 10;
+      const hasNextPage = reviews.length > pageSize;
+      const reviewsToReturn = hasNextPage
+        ? reviews.slice(0, pageSize)
+        : reviews;
+
+      const edges = reviewsToReturn.map((review) => ({
+        node: review,
+        cursor: Buffer.from(review.id.toString(), "utf-8").toString("base64"),
+      }));
+
+      const totalCount = await ctx.prisma.review.count({ where });
+
+      return {
+        edges,
+        pageInfo: {
+          endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
+          hasNextPage,
+        },
+        totalCount,
+      };
+    },
   },
 
   Mutation: {
@@ -82,43 +164,31 @@ export const reviewResolvers = {
       const userId = ctx.userId;
       checkAuthenticated(userId);
 
-      // validations
-      return await ctx.prisma.$transaction(
-        async (tx: Prisma.TransactionClient) => {
-          const review = await tx.review.create({
-            data: {
-              game: { connect: { id: gameId } },
-              user: { connect: { id: userId } },
-              star,
-              description,
-            },
-          });
+      try {
+        const result = await ctx.prisma.$transaction(
+          async (tx: Prisma.TransactionClient) => {
+            const review = await tx.review.create({
+              data: {
+                game: { connect: { id: gameId } },
+                user: { connect: { id: userId } },
+                star,
+                description,
+              },
+            });
 
-          // recompute aggregates
-          const [reviewCount, avgAgg, favCount] = await Promise.all([
-            tx.review.count({ where: { gameId } }),
-            tx.review.aggregate({ where: { gameId }, _avg: { star: true } }),
-            tx.user.count({ where: { favorites: { some: { id: gameId } } } }),
-          ]);
+            await updateGameAggregates(gameId, tx);
 
-          const avg = avgAgg._avg.star ?? 0;
-          const hasRatings = reviewCount > 0;
-          const popularityScore = favCount * 2 + reviewCount;
-
-          await tx.game.update({
-            where: { id: gameId },
-            data: {
-              reviewsCount: reviewCount,
-              avgRating: hasRatings ? avg : null,
-              hasRatings,
-              favoritesCount: favCount,
-              popularityScore,
-            },
-          });
-
-          return review;
-        },
-      );
+            return review;
+          },
+        );
+        return result;
+      } catch (error) {
+        console.error(`[Backend] createReview FAILED:`, error);
+        throw error;
+      } finally {
+        clearGamesCache();
+        clearFilterCache();
+      }
     },
 
     updateReview: async (
@@ -129,18 +199,36 @@ export const reviewResolvers = {
       const { id, star, description } = args;
       const userId = ctx.userId;
       checkAuthenticated(userId);
-      checkReviewOwnership(id, userId!, ctx);
+      await checkReviewOwnership(id, userId!, ctx);
+      await checkReviewOwnership(id, userId!, ctx);
 
       if (star !== undefined) validateStar(star);
       if (description !== undefined) validateDescription(description);
 
-      return ctx.prisma.review.update({
-        where: { id },
-        data: {
-          ...(star !== undefined && { star }),
-          ...(description !== undefined && { description }),
-        },
-      });
+      try {
+        const result = await ctx.prisma.$transaction(
+          async (tx: Prisma.TransactionClient) => {
+            const review = await tx.review.update({
+              where: { id },
+              data: {
+                ...(star !== undefined && { star }),
+                ...(description !== undefined && { description }),
+              },
+            });
+
+            if (star !== undefined) {
+              await updateGameAggregates(review.gameId, tx);
+            }
+            return review;
+          },
+        );
+        return result;
+      } catch (error) {
+        throw error;
+      } finally {
+        clearGamesCache();
+        clearFilterCache();
+      }
     },
 
     deleteReview: async (
@@ -152,8 +240,23 @@ export const reviewResolvers = {
       checkAuthenticated(ctx.userId);
 
       const review = await checkReviewOwnership(id, ctx.userId!, ctx);
-      await ctx.prisma.review.delete({ where: { id: review.id } });
-      return true;
+
+      try {
+        const result = await ctx.prisma.$transaction(
+          async (tx: Prisma.TransactionClient) => {
+            await tx.review.delete({ where: { id: review.id } });
+            await updateGameAggregates(review.gameId, tx);
+            return true;
+          },
+        );
+
+        return result;
+      } catch (error) {
+        throw error;
+      } finally {
+        clearGamesCache();
+        clearFilterCache();
+      }
     },
   },
 

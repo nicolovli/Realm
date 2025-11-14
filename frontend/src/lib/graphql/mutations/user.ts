@@ -20,3 +20,17 @@ export const LOGIN_USER = `
     }
   }
 `;
+
+export const UPDATE_USER = `
+  mutation UpdateUser(
+    $username: String
+    $email: String
+    $password: String
+  ) {
+    updateUser(username: $username, email: $email, password: $password) {
+      id
+      username
+      email
+    }
+  }
+`;

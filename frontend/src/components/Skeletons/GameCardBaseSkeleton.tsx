@@ -4,6 +4,7 @@ interface GameCardSkeletonProps {
   showDevelopers?: boolean;
   showPlatforms?: boolean;
   showButton?: boolean;
+  "data-cy"?: string;
 }
 
 export const GameCardSkeleton = ({
@@ -12,11 +13,13 @@ export const GameCardSkeleton = ({
   showDevelopers = false,
   showPlatforms = false,
   showButton = true,
+  "data-cy": dataCy,
 }: GameCardSkeletonProps) => {
   const isImageRight = imagePosition === "right";
 
   return (
     <section
+      data-cy={dataCy}
       className={`flex flex-col md:flex-row ${
         isImageRight ? "md:flex-row-reverse" : ""
       } items-start bg-lightsearchbargray dark:bg-darksearchbargray rounded-4xl 

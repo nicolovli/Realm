@@ -1,8 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { GameCardBase } from "../../components/InformationCards/GameCardBase";
+import { GameCardBase } from "@/components/InformationCards";
 import { vi, beforeEach, describe, it, expect } from "vitest";
 import { MockedProvider } from "@apollo/client/testing/react";
+import { MemoryRouter } from "react-router-dom";
 
 // Mock auth status hook and components
 vi.mock("@/hooks/useAuthStatus", () => ({
@@ -59,7 +60,9 @@ describe("GameCardBase", () => {
   it("renders title, description, and image", () => {
     render(
       <MockedProvider mocks={[]}>
-        <GameCardBase {...defaultProps} />
+        <MemoryRouter>
+          <GameCardBase {...defaultProps} />
+        </MemoryRouter>
       </MockedProvider>,
     );
 
@@ -76,7 +79,9 @@ describe("GameCardBase", () => {
   it("renders developer and platform info", () => {
     render(
       <MockedProvider mocks={[]}>
-        <GameCardBase {...defaultProps} />
+        <MemoryRouter>
+          <GameCardBase {...defaultProps} />
+        </MemoryRouter>
       </MockedProvider>,
     );
     expect(screen.getByText(/Developer:/i)).toBeInTheDocument();
@@ -86,7 +91,9 @@ describe("GameCardBase", () => {
   it("shows only 5 tags initially (desktop width)", () => {
     render(
       <MockedProvider mocks={[]}>
-        <GameCardBase {...defaultProps} />
+        <MemoryRouter>
+          <GameCardBase {...defaultProps} />
+        </MemoryRouter>
       </MockedProvider>,
     );
     const visibleTags = screen.getAllByText(
@@ -99,7 +106,9 @@ describe("GameCardBase", () => {
     const user = userEvent.setup();
     render(
       <MockedProvider mocks={[]}>
-        <GameCardBase {...defaultProps} />
+        <MemoryRouter>
+          <GameCardBase {...defaultProps} />
+        </MemoryRouter>
       </MockedProvider>,
     );
 
@@ -132,7 +141,9 @@ describe("GameCardBase", () => {
 
     render(
       <MockedProvider mocks={[]}>
-        <GameCardBase {...defaultProps} onButtonClick={mockClick} />
+        <MemoryRouter>
+          <GameCardBase {...defaultProps} onButtonClick={mockClick} />
+        </MemoryRouter>
       </MockedProvider>,
     );
     const button = screen.getByRole("button", { name: /Learn More/i });
@@ -144,7 +155,9 @@ describe("GameCardBase", () => {
   it("applies reversed layout when imagePosition='left'", () => {
     const { container } = render(
       <MockedProvider mocks={[]}>
-        <GameCardBase {...defaultProps} imagePosition="left" />
+        <MemoryRouter>
+          <GameCardBase {...defaultProps} imagePosition="left" />
+        </MemoryRouter>
       </MockedProvider>,
     );
     const section = container.querySelector("section");
@@ -156,7 +169,9 @@ describe("GameCardBase", () => {
 
     render(
       <MockedProvider mocks={[]}>
-        <GameCardBase {...defaultProps} />
+        <MemoryRouter>
+          <GameCardBase {...defaultProps} />
+        </MemoryRouter>
       </MockedProvider>,
     );
 

@@ -1,8 +1,8 @@
 import { ResultFilters } from "@/components/ResultFilters";
-import { ResultsGrid } from "@/components/ResultsGrid/ResultsGrid";
-import { ResultsPagination } from "@/components/ResultsGrid/ResultsPagination";
-import { useResultFilters } from "@/hooks/useResultFilters";
+import { ResultsGrid, ResultsPagination } from "@/components/ResultsGrid";
+import { useResultFilters } from "@/hooks/resultFilters";
 import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 
 export const ResultPage = () => {
   const [searchParams] = useSearchParams();
@@ -10,11 +10,21 @@ export const ResultPage = () => {
 
   const filters = useResultFilters(searchQuery);
 
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
   const busy =
     filters.gamesLoading ||
     filters.isLoading ||
     filters.isJumping ||
     filters.isPending;
+
+  const isPaging = filters.loadingPage !== null;
+  const gamesForGrid = isPaging ? [] : filters.games;
+
+  const showLoadingSkeletons = isPaging || (busy && gamesForGrid.length === 0);
 
   return (
     <main className="!p-0 !gap-8">
@@ -27,8 +37,9 @@ export const ResultPage = () => {
 
       <section className="w-[min(1600px,92%)] mx-auto" aria-label="Game list">
         <ResultsGrid
-          games={filters.games}
-          loading={busy && filters.games.length === 0}
+          games={gamesForGrid}
+          loading={showLoadingSkeletons}
+          error={filters.gamesError}
           emptyState="No games match the current filters."
         />
       </section>

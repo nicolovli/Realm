@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
-import { MobileSheetMenu } from "../../components/Header/MobileSheetMenu";
+import { MobileSheetMenu } from "@/components/Header";
 import type { SVGProps } from "react";
 
 vi.mock("@/components/ui/sheet", () => ({
@@ -27,10 +27,32 @@ vi.mock("@/components/ui/sheet", () => ({
   ),
 }));
 
-vi.mock("@/components/Header", () => ({
+vi.mock("@/components/Header", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/Header")>();
+  return {
+    ...actual,
+    AuthButton: () => <button data-testid="auth-btn">AuthButton</button>,
+    ToggleTheme: () => <button data-testid="toggle-theme">ToggleTheme</button>,
+  };
+});
+
+vi.mock("@/components/Header/AuthButton", () => ({
   AuthButton: () => <button data-testid="auth-btn">AuthButton</button>,
+}));
+
+vi.mock("@/components/Header/ToggleTheme", () => ({
   ToggleTheme: () => <button data-testid="toggle-theme">ToggleTheme</button>,
 }));
+
+vi.mock("@/components/User", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/User")>();
+  return {
+    ...actual,
+    AuthDialog: ({ children }: { children?: React.ReactNode }) => (
+      <div data-testid="auth-dialog">{children}</div>
+    ),
+  };
+});
 
 // --- Mock icons ---
 const MockIcon = (

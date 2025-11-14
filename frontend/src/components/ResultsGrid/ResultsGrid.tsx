@@ -1,20 +1,16 @@
-import type { ResultsGridProps } from "@/types/ResultGridTypes";
+import type { ReactNode } from "react";
+import type { Game } from "@/types";
 import { useEffect, useState } from "react";
-import { Card } from "./ResultsCard";
+import { Card } from "@/components/ResultsGrid";
 import { FOCUS_VISIBLE, HOVER } from "@/lib/classNames";
+import { SkeletonCard } from "@/components/Skeletons";
 
-const CardChrome =
-  "rounded-2xl ring-1 bg-lightpurple ring-gray dark:bg-darkpurple dark:ring-darkgray overflow-hidden";
-
-function SkeletonCard() {
-  return (
-    <li className="list-none" aria-hidden="true">
-      <span className={`${CardChrome} animate-pulse block`}>
-        <section className="relative w-full aspect-[16/9] bg-lightsearchbargray dark:bg-darksearchbargray rounded-xl" />
-      </span>
-    </li>
-  );
-}
+export type ResultsGridProps = {
+  games: Game[];
+  loading: boolean;
+  emptyState?: ReactNode; // optional custom empty UI
+  error?: string | null;
+};
 
 export const ResultsGrid = ({
   games,
@@ -35,12 +31,15 @@ export const ResultsGrid = ({
   };
 
   if (error) {
+    console.error(error);
     return (
       <aside
         role="alert"
         className="rounded-[18px] border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 p-4 text-red-700 dark:text-red-300"
       >
-        {error}
+        {typeof error === "string"
+          ? error
+          : "Error loading games. Please try again later."}
       </aside>
     );
   }
@@ -75,7 +74,9 @@ export const ResultsGrid = ({
     return (
       <li key={`placeholder-${idx}`} className="list-none invisible">
         <div
-          className={`${CardChrome} block w-full`}
+          className={
+            "rounded-2xl ring-1 bg-lightpurple ring-gray dark:bg-darkpurple dark:ring-darkgray overflow-hidden block w-full"
+          }
           style={{ aspectRatio: "16/9" }}
         />
       </li>
@@ -88,6 +89,7 @@ export const ResultsGrid = ({
         className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
         aria-live="polite"
         role="list"
+        data-cy="results-grid"
       >
         {items}
       </ul>
@@ -100,6 +102,7 @@ export const ResultsGrid = ({
               onClick={loadMore}
               className={`text-black dark:text-white px-6 py-2 rounded-full bg-lightpurple dark:bg-darkpurple text-sm md:text-base ${HOVER} ${FOCUS_VISIBLE}`}
               aria-label="Load more games"
+              data-cy="load-more-button"
             >
               Load more favorites
             </button>

@@ -1,7 +1,7 @@
 import { useLocation, Link, useParams } from "react-router-dom";
 import { useQuery } from "@apollo/client/react";
-import { GET_GAME } from "@/lib/graphql/queries/gameQueries";
-import type { GetGameData, GetGameVariables } from "@/types/GraphQLTypes";
+import { GET_GAME } from "@/lib/graphql";
+import type { GetGameData, GetGameVariables } from "@/types";
 import {
   Breadcrumb,
   BreadcrumbItem,

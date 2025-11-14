@@ -1,4 +1,3 @@
-// frontend/src/lib/apolloClient.ts
 import { ApolloClient, InMemoryCache, ApolloLink } from "@apollo/client";
 import { SetContextLink } from "@apollo/client/link/context";
 import { HttpLink } from "@apollo/client/link/http";
@@ -42,6 +41,26 @@ const cache = new InMemoryCache({
             return incoming;
           },
         },
+        reviewsForGame: {
+          keyArgs: ["gameId", "first"],
+          merge(existing, incoming) {
+            if (!existing) return incoming;
+            return {
+              ...incoming,
+              edges: [...(existing.edges || []), ...(incoming.edges || [])],
+            };
+          },
+        },
+        userReviews: {
+          keyArgs: ["userId", "first"],
+          merge(existing, incoming) {
+            if (!existing) return incoming;
+            return {
+              ...incoming,
+              edges: [...(existing.edges || []), ...(incoming.edges || [])],
+            };
+          },
+        },
       },
     },
     Game: {
@@ -58,7 +77,7 @@ export const client = new ApolloClient({
   cache,
   defaultOptions: {
     watchQuery: {
-      fetchPolicy: "cache-first",
+      fetchPolicy: "cache-and-network",
       nextFetchPolicy: "cache-first",
       notifyOnNetworkStatusChange: true,
       returnPartialData: true,

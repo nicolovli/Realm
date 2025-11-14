@@ -4,11 +4,18 @@ export const FOCUS_VISIBLE =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-lightpurple dark:focus-visible:ring-offset-darkpurple ";
 
 //Example: Disabled options in dropdowns
-export const DISABLED = "disabled:opacity-20 disabled:cursor-not-allowed ";
+export const DISABLED =
+  "disabled:opacity-20 disabled:cursor-not-allowed disabled:pointer-events-none ";
 
 //Example: Hover effect on clear all button
 export const HOVER =
-  "relative overflow-hidden before:absolute before:inset-0 before:bg-transparent before:duration-200 hover:before:bg-black/10 dark:hover:before:bg-white/20 before:pointer-events-none ";
+  "relative overflow-hidden " +
+  "before:absolute before:inset-0 before:rounded-inherit before:bg-current before:opacity-0 " +
+  "before:transition-opacity before:duration-150 " +
+  "hover:before:opacity-20 dark:hover:before:opacity-20 " +
+  "active:before:opacity-20 " +
+  "before:pointer-events-none " +
+  "motion-reduce:before:transition-none ";
 
 //Example: clear all button
 export const BUTTON_BASE =

@@ -1,8 +1,8 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import { FeaturedCard } from "../../components/FeaturedSection/index";
+import { FeaturedCard } from "@/components/FeaturedSection";
 import { BrowserRouter } from "react-router-dom";
-import type { FeaturedGame } from "@/types/GameTypes";
+import type { FeaturedGame } from "@/types";
 
 // Typed factory so we don't fight TS on required fields
 const makeGame = (overrides: Partial<FeaturedGame> = {}): FeaturedGame => ({

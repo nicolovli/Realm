@@ -1,7 +1,7 @@
 import { render, screen, cleanup } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { ResultsGrid } from "../../components/ResultsGrid/ResultsGrid";
-import type { Game } from "../../types/GameTypes";
+import { ResultsGrid } from "@/components/ResultsGrid";
+import type { Game } from "@/types";
 
 const makeGame = (overrides: Partial<Game> = {}): Game => ({
   id: "id-" + Math.random().toString(36).slice(2),

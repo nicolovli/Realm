@@ -1,3 +1,3 @@
-export * from "./ResultsCard";
-export * from "./ResultsGrid";
-export * from "./ResultsPagination";
+export * from "@/components/ResultsGrid/ResultsCard";
+export * from "@/components/ResultsGrid/ResultsGrid";
+export * from "@/components/ResultsGrid/ResultsPagination";

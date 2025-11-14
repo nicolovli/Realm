@@ -23,6 +23,7 @@ export const Login = ({ onSubmit }: LoginProps) => {
         Username:
         <input
           type="text"
+          name="username"
           value={formData.username}
           onChange={(e) =>
             setFormData({ ...formData, username: e.target.value.toLowerCase() })
@@ -34,6 +35,7 @@ export const Login = ({ onSubmit }: LoginProps) => {
         Password:
         <input
           type="password"
+          name="password"
           value={formData.password}
           onChange={(e) =>
             setFormData({ ...formData, password: e.target.value })

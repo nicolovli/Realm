@@ -13,7 +13,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier . --write",
-    "format:check": "prettier . --check"
+    "format:check": "prettier . --check",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run"
   },
   "vitest": {
     "environment": "jsdom",

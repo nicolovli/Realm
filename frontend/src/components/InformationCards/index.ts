@@ -1,3 +1,3 @@
-export * from "./GameCardBase";
-export * from "./GameDetailCard";
-export * from "./PromoCard";
+export * from "@/components/InformationCards/GameCardBase";
+export * from "@/components/InformationCards/GameDetailCard";
+export * from "@/components/InformationCards/PromoCard";

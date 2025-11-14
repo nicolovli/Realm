@@ -1,5 +1,6 @@
 // Sort dropdown for result header (desktop and mobile)
 import { ChevronDown } from "lucide-react";
+import type { SortOptionValue } from "@/constants/resultFiltersConstants";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,27 +9,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { FOCUS_VISIBLE, HOVER, PILL_TRIGGER_BASE } from "@/lib/classNames";
 
-// Define the specific values a sort option can have
-type SortOptionValue =
-  | "popularity"
-  | "release-date"
-  | "alphabetical"
-  | "rating";
-
-type sortItem = {
-  value: string;
-  label: string;
-  sortValue: SortOptionValue;
-  order: "asc" | "desc";
-  onSelect: () => void;
-};
-
-// Props for the sort dropdown
-interface SortDropdownProps {
+// SortDropdown component props
+export interface SortDropdownProps {
   sortOption: SortOptionValue;
   order: "asc" | "desc";
   setSortOption: (value: SortOptionValue) => void;
-  sortOptions: sortItem[];
+  sortOptions: Array<{
+    value: string;
+    label: string;
+    sortValue: SortOptionValue;
+    order: "asc" | "desc";
+    onSelect: () => void;
+  }>;
 }
 
 // Renders the sort dropdown trigger and menu
@@ -50,6 +42,7 @@ export const SortDropdown = ({
         className={`${HOVER} ${PILL_TRIGGER_BASE} md:w-[200px] w-[177px] bg-lightpurple dark:bg-darkpurple whitespace-nowrap`}
         aria-haspopup="menu"
         aria-label={`Sort by ${currentLabel}`}
+        data-cy="sort-dropdown-trigger"
       >
         <span className="md:font-medium font-semibold">{currentLabel}</span>
         <ChevronDown className="h-4 w-4" />
@@ -58,6 +51,7 @@ export const SortDropdown = ({
       <DropdownMenuContent
         className=" bg-lightpurple dark:bg-darkpurple border-gray-200 dark:border-gray-700 min-w-[var(--radix-dropdown-menu-trigger-width)]"
         align="end"
+        data-cy="sort-dropdown-menu"
       >
         {sortOptions.map((option) => (
           <DropdownMenuItem
@@ -83,6 +77,7 @@ export const SortDropdown = ({
               ${HOVER} ${FOCUS_VISIBLE} text-black dark:text-white cursor-pointer
               ${option.sortValue === sortOption && option.order === order ? "bg-white/40 dark:bg-black/20 font-semibold" : ""}
             `}
+            data-cy={`sort-option-${option.sortValue}-${option.order}`}
           >
             {option.label}
           </DropdownMenuItem>

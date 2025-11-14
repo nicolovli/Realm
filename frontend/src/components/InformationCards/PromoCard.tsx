@@ -1,25 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@apollo/client/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import { GET_PROMO_GAMES } from "../../lib/graphql/queries/promoGames";
-import { GET_REVIEWS_META_FOR_GAME } from "../../lib/graphql/queries/reviewQueries";
-import { GameCardBase } from "./GameCardBase";
+import { GET_PROMO_GAMES, GET_REVIEWS_META_FOR_GAME } from "@/lib/graphql";
+import { GameCardBase } from "@/components/InformationCards";
 import { useNavigate } from "react-router-dom";
-import { HOVER, FOCUS_VISIBLE, CARD_CONTAINER } from "../../lib/classNames";
-import { LOADINGandERROR } from "@/lib/classNames";
-import { PromoCardSkeleton } from "../Skeletons";
-
-interface Game {
-  id: string;
-  name: string;
-  descriptionShort: string;
-  image: string;
-  rating?: number;
-}
-
-interface GetPromoGamesData {
-  games: Game[];
-}
+import {
+  HOVER,
+  FOCUS_VISIBLE,
+  CARD_CONTAINER,
+  LOADINGandERROR,
+} from "@/lib/classNames";
+import { PromoCardSkeleton } from "@/components/Skeletons";
+import type { GetPromoGamesData } from "@/types";
+import { buildPreviewState } from "@/lib/utils/images";
 
 export const PromoCard = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -80,7 +73,7 @@ export const PromoCard = () => {
   if (loading) {
     return (
       <section aria-label="Loading promotional games">
-        <PromoCardSkeleton />
+        <PromoCardSkeleton data-cy="loading-skeleton" />
       </section>
     );
   }
@@ -89,20 +82,34 @@ export const PromoCard = () => {
   if (!games.length)
     return <p className={LOADINGandERROR}>No games available.</p>;
 
+  if (
+    !currentGame?.name ||
+    !currentGame?.descriptionShort ||
+    !currentGame?.image
+  ) {
+    return <p className={LOADINGandERROR}>Game data incomplete.</p>;
+  }
+
   return (
     <section
       ref={carouselRef}
       className={CARD_CONTAINER}
       aria-label="Promotional games carousel"
       tabIndex={0}
+      data-cy="promo-carousel"
     >
       <GameCardBase
+        data-cy="promo-card"
         gameId={Number(currentGame.id)}
         title={currentGame.name}
         descriptionShort={currentGame.descriptionShort}
         image={currentGame.image}
         buttonText="Read more"
-        onButtonClick={() => navigate(`/games/${currentGame.id}`)}
+        onButtonClick={() =>
+          navigate(`/games/${currentGame.id}`, {
+            state: buildPreviewState(currentGame.image),
+          })
+        }
         imagePosition="left"
         rating={
           typeof avgRating === "number" ? avgRating : (currentGame.rating ?? 0)
@@ -120,6 +127,7 @@ export const PromoCard = () => {
           onClick={prevSlide}
           className={`text-text cursor-pointer ${HOVER} ${FOCUS_VISIBLE} p-2 rounded-full`}
           aria-label="Previous slide"
+          data-cy="promo-prev"
         >
           <ChevronLeftIcon className="w-6 h-6 dark:text-white" />
         </button>
@@ -152,6 +160,7 @@ export const PromoCard = () => {
           onClick={nextSlide}
           className={`text-text cursor-pointer ${HOVER} ${FOCUS_VISIBLE} p-2 rounded-full`}
           aria-label="Next slide"
+          data-cy="promo-next"
         >
           <ChevronRightIcon className="w-6 h-6 dark:text-white" />
         </button>

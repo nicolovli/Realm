@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MockedProvider } from "@apollo/client/testing/react";
-import { ReviewForm } from "../../components/Reviews/ReviewForm";
-import { GET_REVIEWS_FOR_GAME } from "../../lib/graphql/queries/reviewQueries";
+import { ReviewForm } from "@/components/Reviews";
+import { GET_REVIEWS_FOR_GAME, GET_REVIEWS_META_FOR_GAME } from "@/lib/graphql";
 
 describe("ReviewForm", () => {
   it("renders form fields and allows rating selection when user is provided", async () => {
@@ -12,11 +12,35 @@ describe("ReviewForm", () => {
       {
         request: {
           query: GET_REVIEWS_FOR_GAME,
-          variables: { gameId: 1, take: 6, skip: 0 },
+          variables: { gameId: 1, first: 100 },
         },
         result: {
           data: {
-            reviewsForGame: [],
+            reviewsForGame: {
+              __typename: "ReviewsConnection",
+              edges: [],
+              pageInfo: {
+                __typename: "PageInfo",
+                endCursor: null,
+                hasNextPage: false,
+              },
+              totalCount: 0,
+            },
+          },
+        },
+      },
+      {
+        request: {
+          query: GET_REVIEWS_META_FOR_GAME,
+          variables: { gameId: 1 },
+        },
+        result: {
+          data: {
+            reviewsMetaForGame: {
+              __typename: "ReviewsMeta",
+              averageStar: 0,
+              totalReviews: 0,
+            },
           },
         },
       },

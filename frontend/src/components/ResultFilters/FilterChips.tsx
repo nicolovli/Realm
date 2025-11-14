@@ -1,4 +1,4 @@
-import { FOCUS_VISIBLE, HOVER } from "../../lib/classNames";
+import { FOCUS_VISIBLE, HOVER } from "@/lib/classNames";
 
 interface FilterChipsProps {
   activeFilters: Array<{ key: string; value: string; label: string }>;

@@ -4,13 +4,21 @@ import {
   handlePrismaUniqueError,
   hashPassword,
   verifyPassword,
-} from "./userHelpers.js";
-import { CreateUserArgs, LoginArgs, AuthPayload } from "./userTypes.js";
+  CreateUserArgs,
+  LoginArgs,
+  AuthPayload,
+  UpdateUserArgs,
+} from "./index.js";
+import { clearGamesCache } from "../game/index.js";
+import { clearFilterCache } from "../filter/index.js";
 
 export const userResolvers = {
   Query: {
     users: async () => {
-      return prisma.user.findMany();
+      // minimal projection
+      return prisma.user.findMany({
+        select: { id: true, username: true, email: true },
+      });
     },
     me: async (
       _parent: unknown,
@@ -20,8 +28,38 @@ export const userResolvers = {
       if (!context.userId) return null;
       return prisma.user.findUnique({
         where: { id: context.userId },
-        include: { favorites: true },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          favorites: {
+            select: {
+              id: true,
+              sid: true,
+              name: true,
+              image: true,
+              descriptionShort: true,
+            },
+          },
+        },
       });
+    },
+    userFavorites: async (_p: unknown, { userId }: { userId: number }) => {
+      const user = await prisma.user.findUnique({
+        where: { id: Number(userId) },
+        select: {
+          favorites: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+              descriptionShort: true,
+              publishedStore: true,
+            },
+          },
+        },
+      });
+      return user?.favorites ?? [];
     },
   },
   Mutation: {
@@ -74,7 +112,6 @@ export const userResolvers = {
       const { userId } = context;
       if (!userId) throw new Error("You must be logged in to favorite games!");
 
-      // Use transaction to update user favorites and recompute counts
       const result = await prisma.$transaction(async (tx) => {
         const user = await tx.user.update({
           where: { id: userId },
@@ -83,7 +120,20 @@ export const userResolvers = {
               [liked ? "connect" : "disconnect"]: { id: Number(gameId) },
             },
           },
-          include: { favorites: true },
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            favorites: {
+              select: {
+                id: true,
+                name: true,
+                sid: true,
+                image: true,
+                descriptionShort: true,
+              },
+            },
+          },
         });
 
         const favCount = await tx.user.count({
@@ -115,13 +165,101 @@ export const userResolvers = {
         return user;
       });
 
+      // invalidate caches so rating/popularity sorts update immediately
+      clearGamesCache();
+      clearFilterCache();
+
       return result;
     },
+    updateUser: async (
+      _parent: unknown,
+      { username, email, password }: UpdateUserArgs,
+      context: { userId?: number },
+    ) => {
+      const { userId } = context;
+      if (!userId)
+        throw new Error("You must be logged in to update your profile.");
+
+      const existingUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { username: true, email: true },
+      });
+
+      if (!existingUser)
+        throw new Error("Hmm… we can’t seem to find a player by that name.");
+
+      const updates: {
+        username?: string;
+        email?: string;
+        password?: string;
+      } = {};
+
+      if (username !== undefined && username !== null) {
+        const normalizedUsername = username.trim().toLowerCase();
+        if (!normalizedUsername)
+          throw new Error("Username cannot be empty. Time to get creative!");
+        if (normalizedUsername.length < 3)
+          throw new Error("Username must be at least 3 characters long.");
+
+        if (normalizedUsername !== existingUser.username.toLowerCase()) {
+          updates.username = normalizedUsername;
+        }
+      }
+
+      if (email !== undefined && email !== null) {
+        const normalizedEmail = email.trim().toLowerCase();
+        if (!normalizedEmail)
+          throw new Error("Email cannot be empty. Try another one!");
+
+        if (normalizedEmail !== existingUser.email.toLowerCase()) {
+          updates.email = normalizedEmail;
+        }
+      }
+
+      if (password !== undefined && password !== null) {
+        const trimmedPassword = password.trim();
+        if (!trimmedPassword)
+          throw new Error(
+            "Password cannot be empty. Please enter a valid password.",
+          );
+        if (trimmedPassword.length < 6)
+          throw new Error("Password must be at least 6 characters long.");
+
+        updates.password = await hashPassword(trimmedPassword);
+      }
+
+      if (!Object.keys(updates).length)
+        throw new Error("No changes were provided to update.");
+
+      try {
+        return await prisma.user.update({
+          where: { id: userId },
+          data: updates,
+          select: { id: true, username: true, email: true },
+        });
+      } catch (error) {
+        await handlePrismaUniqueError(
+          error,
+          updates.username ?? existingUser.username.toLowerCase(),
+          updates.email ?? existingUser.email.toLowerCase(),
+        );
+        throw new Error("Unable to update profile. Please try again later.");
+      }
+    },
   },
+
   User: {
     reviews: (parent: { id: number }) => {
       return prisma.review.findMany({
         where: { userId: parent.id },
+        select: {
+          id: true,
+          description: true,
+          star: true,
+          gameId: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
     },
   },

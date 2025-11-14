@@ -14,11 +14,6 @@ export const userTypeDefs = gql`
     user: User!
   }
 
-  type AuthPayload {
-    token: String!
-    user: User!
-  }
-
   extend type Query {
     users: [User!]!
     me: User
@@ -29,5 +24,6 @@ export const userTypeDefs = gql`
     createUser(username: String!, email: String!, password: String!): User!
     loginUser(username: String!, password: String!): AuthPayload!
     toggleFavorite(gameId: Int!, liked: Boolean!): User!
+    updateUser(username: String, email: String, password: String): User!
   }
 `;

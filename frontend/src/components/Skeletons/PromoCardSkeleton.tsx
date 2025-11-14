@@ -1,5 +1,11 @@
-import { GameCardSkeleton } from "./GameCardBaseSkeleton";
+import { GameCardSkeleton } from "@/components/Skeletons";
 
-export const PromoCardSkeleton = () => {
-  return <GameCardSkeleton imagePosition="right" />;
+interface PromoCardSkeletonProps {
+  "data-cy"?: string;
+}
+
+export const PromoCardSkeleton = ({
+  "data-cy": dataCy,
+}: PromoCardSkeletonProps) => {
+  return <GameCardSkeleton imagePosition="right" data-cy={dataCy} />;
 };

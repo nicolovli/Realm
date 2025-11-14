@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { GameDetailCard } from "../../components/InformationCards";
+import { GameDetailCard } from "@/components/InformationCards";
 import { MockedProvider } from "@apollo/client/testing/react";
+import { MemoryRouter } from "react-router-dom";
 
 // Mock auth status hook and components
 vi.mock("@/hooks/useAuthStatus", () => ({
@@ -48,7 +49,9 @@ describe("GameDetailCard", () => {
   it("renders the component with required props", () => {
     render(
       <MockedProvider mocks={[]}>
-        <GameDetailCard {...mockProps} />
+        <MemoryRouter>
+          <GameDetailCard {...mockProps} />
+        </MemoryRouter>
       </MockedProvider>,
     );
 
@@ -72,7 +75,9 @@ describe("GameDetailCard", () => {
 
     render(
       <MockedProvider mocks={[]}>
-        <GameDetailCard {...propsWithOptional} />
+        <MemoryRouter>
+          <GameDetailCard {...propsWithOptional} />
+        </MemoryRouter>
       </MockedProvider>,
     );
 
@@ -91,7 +96,9 @@ describe("GameDetailCard", () => {
 
     render(
       <MockedProvider mocks={[]}>
-        <GameDetailCard {...propsWithTags} />
+        <MemoryRouter>
+          <GameDetailCard {...propsWithTags} />
+        </MemoryRouter>
       </MockedProvider>,
     );
 
@@ -107,7 +114,9 @@ describe("GameDetailCard", () => {
 
     render(
       <MockedProvider mocks={[]}>
-        <GameDetailCard {...propsWithDeveloper} />
+        <MemoryRouter>
+          <GameDetailCard {...propsWithDeveloper} />
+        </MemoryRouter>
       </MockedProvider>,
     );
 
@@ -122,7 +131,9 @@ describe("GameDetailCard", () => {
 
     render(
       <MockedProvider mocks={[]}>
-        <GameDetailCard {...propsWithPlatforms} />
+        <MemoryRouter>
+          <GameDetailCard {...propsWithPlatforms} />
+        </MemoryRouter>
       </MockedProvider>,
     );
 
@@ -132,7 +143,9 @@ describe("GameDetailCard", () => {
   it("applies correct CSS classes to section", () => {
     const { container } = render(
       <MockedProvider mocks={[]}>
-        <GameDetailCard {...mockProps} />
+        <MemoryRouter>
+          <GameDetailCard {...mockProps} />
+        </MemoryRouter>
       </MockedProvider>,
     );
 
@@ -150,7 +163,9 @@ describe("GameDetailCard", () => {
   it("renders the image in the correct position", () => {
     const { container } = render(
       <MockedProvider mocks={[]}>
-        <GameDetailCard {...mockProps} />
+        <MemoryRouter>
+          <GameDetailCard {...mockProps} />
+        </MemoryRouter>
       </MockedProvider>,
     );
 
@@ -163,7 +178,9 @@ describe("GameDetailCard", () => {
 
     render(
       <MockedProvider mocks={[]}>
-        <GameDetailCard {...mockProps} />
+        <MemoryRouter>
+          <GameDetailCard {...mockProps} />
+        </MemoryRouter>
       </MockedProvider>,
     );
     expect(screen.getByText("Test Game")).toBeInTheDocument();
@@ -184,7 +201,9 @@ describe("GameDetailCard", () => {
 
     render(
       <MockedProvider mocks={[]}>
-        <GameDetailCard {...fullProps} />
+        <MemoryRouter>
+          <GameDetailCard {...fullProps} />
+        </MemoryRouter>
       </MockedProvider>,
     );
 

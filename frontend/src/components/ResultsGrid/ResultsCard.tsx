@@ -1,10 +1,8 @@
-import type { Game } from "../../types/GameTypes";
-import { HOVER, FOCUS_VISIBLE } from "../../lib/classNames";
+import type { Game } from "@/types";
+import { HOVER, FOCUS_VISIBLE } from "@/lib/classNames";
 import { Link } from "react-router-dom";
 import { useMemo, useState } from "react";
-
-const CardChrome =
-  "rounded-2xl ring-1 bg-lightpurple ring-gray dark:bg-darkpurple dark:ring-darkgray overflow-hidden";
+import { buildPreviewState } from "@/lib/utils/images";
 
 export const Card = ({
   game,
@@ -31,13 +29,18 @@ export const Card = ({
 
   return (
     <li className="list-none">
-      <article className={CardChrome}>
+      <article
+        className={
+          "rounded-2xl ring-1 bg-lightpurple ring-gray dark:bg-darkpurple dark:ring-darkgray overflow-hidden"
+        }
+      >
         {onClick ? (
           <button
             type="button"
             onClick={() => onClick(game)}
             className={`${HOVER} ${FOCUS_VISIBLE} group relative block w-full text-left cursor-pointer`}
             aria-label={`Open ${game.name}`}
+            data-cy="result-card"
           >
             <figure className="relative w-full aspect-[16/9]">
               {/* loading shimmer  */}
@@ -89,8 +92,10 @@ export const Card = ({
         ) : (
           <Link
             to={`/games/${game.id}`}
+            state={buildPreviewState(game.image)}
             className={`${HOVER} ${FOCUS_VISIBLE} group relative block cursor-pointer`}
             aria-label={`Open ${game.name}`}
+            data-cy="result-card"
           >
             <figure className="relative w-full aspect-[16/9]">
               {!loaded && !errored && (

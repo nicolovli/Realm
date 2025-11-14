@@ -8,6 +8,7 @@ En Apollo Server backend, med Express, Prisma og PostgreSQL som database
 
 - [Backend for Realm](#backend-for-realm)
   - [Innholdfortegnelse](#innholdfortegnelse)
+  - [Kodeorganisering](#kodeorganisering)
   - [Oppsett](#oppsett)
   - [Konfigurer Miljøvariabler](#konfigurer-miljøvariabler)
   - [Kjør backend gjennom VM](#kjør-backend-gjennom-vm)

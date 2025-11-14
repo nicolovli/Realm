@@ -1,4 +1,4 @@
-import { GameCardSkeleton } from "./GameCardBaseSkeleton";
+import { GameCardSkeleton } from "@/components/Skeletons";
 
 export const GameDetailCardSkeleton = () => {
   return (

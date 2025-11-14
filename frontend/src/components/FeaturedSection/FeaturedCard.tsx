@@ -1,5 +1,6 @@
 import { FOCUS_VISIBLE } from "@/lib/classNames";
-import type { FeaturedGame } from "@/types/GameTypes";
+import { buildPreviewState } from "@/lib/utils/images";
+import type { FeaturedGame } from "@/types";
 import { memo, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -13,7 +14,7 @@ const titleClass =
   "mt-3 line-clamp-1 text-sm font-medium  text-zinc-900 dark:text-zinc-100 text-center";
 
 export const FeaturedCard = memo(
-  ({ game }: { game: FeaturedGame }) => {
+  ({ game, "data-cy": dataCy }: { game: FeaturedGame; "data-cy"?: string }) => {
     const [loaded, setLoaded] = useState(false);
     const [errored, setErrored] = useState(false);
 
@@ -25,7 +26,9 @@ export const FeaturedCard = memo(
     return (
       <Link
         to={`/games/${game.id}`}
+        state={buildPreviewState(game.image, 800)}
         aria-label={game.name}
+        data-cy={dataCy}
         className={
           `group relative block w-full mx-auto select-none cursor-pointer
              max-w-[420px] sm:max-w-none max-[380px]:max-w-[300px] rounded-2xl

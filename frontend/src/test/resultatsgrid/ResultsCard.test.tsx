@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import type { Game } from "../../types/GameTypes";
-import { Card } from "@/components/ResultsGrid/ResultsCard";
+import type { Game } from "@/types";
+import { Card } from "@/components/ResultsGrid";
 
 const mockGame: Game = {
   id: "1",

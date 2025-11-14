@@ -2,9 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, cleanup, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MockedProvider } from "@apollo/client/testing/react";
-import { HeartIcon } from "../components/HeartIcon";
-import { GET_USER_WITH_FAV } from "@/lib/graphql/queries/userQueries";
-import { TOGGLE_FAVORITE } from "@/lib/graphql/mutations/favorites";
+import { HeartIcon } from "@/components/HeartIcon";
+import { GET_USER_WITH_FAV, TOGGLE_FAVORITE } from "@/lib/graphql";
 import * as authHook from "@/hooks/useAuthStatus";
 
 vi.mock("@/hooks/useAuthStatus");

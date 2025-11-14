@@ -1,6 +1,6 @@
 import { render, cleanup } from "@testing-library/react";
 import { vi, type MockedFunction } from "vitest";
-import { MatchCount } from "../../components/ResultFilters";
+import { MatchCount } from "@/components/ResultFilters";
 
 vi.mock("../../components/ResultFilters/MatchCount", () => ({
   MatchCount: vi.fn(() => null),

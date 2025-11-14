@@ -1,9 +1,12 @@
 import { useEffect } from "react";
 import { useQuery } from "@apollo/client/react";
+import { GET_USER_WITH_FAV } from "@/lib/graphql";
+import type { Game } from "@/types";
 import { ResultsGrid } from "@/components/ResultsGrid";
-import type { Game } from "@/types/GameTypes";
-import { GET_USER_WITH_FAV } from "@/lib/graphql/queries/userQueries";
 import { useAuthStatus } from "@/hooks/useAuthStatus";
+import { useLoginDialog } from "@/hooks/useLoginDialog";
+import { FOCUS_VISIBLE } from "@/lib/classNames";
+import { AuthDialog } from "@/components/User";
 
 interface GetMeWithFavoritesData {
   me: {
@@ -14,7 +17,13 @@ interface GetMeWithFavoritesData {
 }
 
 export const FavoritePage = () => {
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, []);
+
   const { isLoggedIn } = useAuthStatus();
+  const { open, openLogin, handleOpenChange } = useLoginDialog();
 
   const {
     data: userData,
@@ -36,48 +45,63 @@ export const FavoritePage = () => {
   // Show this if user is not logged in
   if (!isLoggedIn) {
     return (
-      <main className="flex flex-col items-center justify-center min-h-screen p-6">
-        <section className="text-center space-y-4 -mt-20">
-          <h1 className="text-3xl font-bold dark:text-white">
-            You have no favorites yet :/
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Log in and start favoriting games to see them here!
-          </p>
-          <p className="text-sm text-yellow-600 dark:text-yellow-400">
-            (You can favorite games by clicking on the heart on a game's
-            specific page)
-          </p>
-        </section>
-      </main>
+      <>
+        <main className="flex flex-col items-center justify-center min-h-screen p-6">
+          <section className="text-center space-y-4 -mt-20">
+            <h1 className="text-3xl font-bold dark:text-white">
+              You have no favorites yet :/
+            </h1>
+            <section className="flex !flex-row gap-2 justify-center">
+              <button
+                type="button"
+                onClick={openLogin}
+                className={`${FOCUS_VISIBLE} hover:underline text-lightbuttonpurple dark:text-lightpurple font-semibold cursor-pointer whitespace-nowrap`}
+              >
+                Log in
+              </button>
+              <p className="text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                and start favoriting games to see them here!
+              </p>
+            </section>
+            <p className="text-sm text-yellow-600 dark:text-yellow-400">
+              (You can favorite games by clicking on the heart on a game's
+              specific page)
+            </p>
+          </section>
+        </main>
+        <AuthDialog open={open} onOpenChange={handleOpenChange} />
+      </>
     );
   }
 
   return (
-    <main>
-      <header className="w-[min(1600px,92%)] mx-auto text-center py-6">
-        <h1 className="text-3xl font-bold dark:text-white mb-2">
-          My Favorites
-        </h1>
-        {favorites.length > 0 && !loading && (
-          <p className="text-gray-600 dark:text-gray-400">
-            {favorites.length} game{favorites.length !== 1 ? "s" : ""} in your
-            collection
-          </p>
-        )}
-      </header>
+    <>
+      <main>
+        <header className="w-[min(1600px,92%)] mx-auto text-center py-6">
+          <h1 className="text-3xl font-bold dark:text-white mb-2">
+            My Favorites
+          </h1>
+          {favorites.length > 0 && !loading && (
+            <p className="text-gray-600 dark:text-gray-400">
+              {favorites.length} game{favorites.length !== 1 ? "s" : ""} in your
+              collection
+            </p>
+          )}
+        </header>
 
-      <section
-        className="w-[min(1600px,92%)] mx-auto"
-        aria-label="Favorite games list"
-      >
-        <ResultsGrid
-          games={favorites}
-          loading={loading}
-          error={error?.message}
-          emptyState="No favorite games yet. Start exploring and favorite some games!"
-        />
-      </section>
-    </main>
+        <section
+          className="w-[min(1600px,92%)] mx-auto"
+          aria-label="Favorite games list"
+        >
+          <ResultsGrid
+            games={favorites}
+            loading={loading}
+            error={error?.message}
+            emptyState="No favorite games yet. Start exploring and favorite some games!"
+          />
+        </section>
+      </main>
+      <AuthDialog open={open} onOpenChange={handleOpenChange} />
+    </>
   );
 };

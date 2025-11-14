@@ -37,6 +37,8 @@ model Game {
   @@index([popularityScore], map: "idx_game_popularity")
   @@index([avgRating], map: "idx_game_avg_rating")
   @@index([publishedStore], map: "idx_game_published")
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "idx_game_name_trgm")
+  @@index([name], map: "idx_game_name")
 }
 
 model Platform {
@@ -52,7 +54,9 @@ model Tag {
   name  String @unique
   games Game[] @relation("GameTags")
 
+
   @@index([name], map: "idx_tag_name")
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "idx_tag_name_trgm")
 }
 
 model Language {
@@ -93,6 +97,7 @@ model Publisher {
   games Game[] @relation("GamePublishers")
 
   @@index([name], map: "idx_publisher_name")
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "idx_publisher_name_trgm")
 }
 
 model User {
@@ -102,7 +107,7 @@ model User {
   password String
   reviews  Review[]
   favorites Game[]   @relation("Favorites") //many-to-many relation between user and games
-}
+} 
 
 model Review {
   id          Int      @id @default(autoincrement())

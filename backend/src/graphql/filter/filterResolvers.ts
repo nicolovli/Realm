@@ -1,16 +1,14 @@
 import { prisma } from "../../db.js";
 import { TOP_PUBLISHERS } from "../../constants/topPublishers.js";
 import {
-  normalizeSearchTerm,
-  buildGameWhereExcludingType,
-} from "./filterHelpers.js";
-import {
   getCacheKey,
   getCachedResult,
   setCachedResult,
-} from "./filterCache.js";
-import { GameFilter, AvailableFilterOptions } from "./filterTypes.js";
+  GameFilter,
+  AvailableFilterOptions,
+} from "./index.js";
 import { Prisma } from "@prisma/client";
+import { buildWhereFromFilter, buildSearchWhere } from "../game/index.js";
 
 export const filterResolvers = {
   Query: {
@@ -40,42 +38,44 @@ export const filterResolvers = {
       const { filter, search } = args;
       const cacheKey = getCacheKey(filter, search);
 
-      // Check cache first
       const cached = getCachedResult(cacheKey);
       if (cached) return cached;
 
-      // Normalize search and prefetch relation ids for prefix matches (used in building game WHERE)
-      const q: string | undefined =
-        search && search.trim() ? normalizeSearchTerm(search) : undefined;
+      // Build search WHERE once (contains + startsWith + relation-aware from unified search.ts)
+      const trimmed = search?.trim();
+      const searchWhere: Prisma.GameWhereInput = trimmed
+        ? await buildSearchWhere(trimmed, "containsIds")
+        : {};
 
-      const [matchingPublisherIds, matchingTagIds] = await (q
-        ? Promise.all([
-            prisma.publisher.findMany({
-              where: { name: { startsWith: q, mode: "insensitive" } },
-              select: { id: true },
-            }),
-            prisma.tag.findMany({
-              where: { name: { startsWith: q, mode: "insensitive" } },
-              select: { id: true },
-            }),
-          ])
-        : Promise.resolve([[], []]));
+      // Helper: base filters, optionally excluding one relation type
+      function whereExcluding(
+        f: GameFilter | undefined,
+        exclude?: keyof GameFilter,
+      ): Prisma.GameWhereInput {
+        // When computing “available options” for type T, exclude T from the base
+        // filter so we can "discover" remaining values, unless the user already
+        // selected some T (then we keep it to narrow within their choices)
+        if (!f || !exclude) {
+          return buildWhereFromFilter(f, undefined) as Prisma.GameWhereInput;
+        }
+        const rest: Partial<GameFilter> = { ...f };
+        delete (rest as Record<string, unknown>)[exclude];
+        return buildWhereFromFilter(
+          rest as GameFilter,
+          undefined,
+        ) as Prisma.GameWhereInput;
+      }
 
-      const pubIds = matchingPublisherIds.map((p) => p.id);
-      const tagIds = matchingTagIds.map((t) => t.id);
-
-      // For each relation type: get game ids matching all other filters + search,
-      // then fetch distinct relation names for those games.
+      // For each relation type: fetch distinct names among relations whose games match
       async function getOptionsForType(
         type: keyof GameFilter,
       ): Promise<string[]> {
-        // If no filters/search at all and no selected for this type, return all names for speed
         const noFilters =
           !filter || Object.values(filter).every((v) => !v?.length);
         const selected = filter?.[type] || [];
 
-        if (noFilters && !q && !selected.length) {
-          // quick path: return all possible values ordered
+        // Fast path when nothing is selected or searched
+        if (noFilters && !trimmed && !selected.length) {
           if (type === "genres")
             return (
               await prisma.genre.findMany({ orderBy: { name: "asc" } })
@@ -99,72 +99,52 @@ export const filterResolvers = {
           return [];
         }
 
-        // 1) get game ids that match filters.
-        // If the user has selected values in this same type, include them in the WHERE
-        let whereForGames: Prisma.GameWhereInput;
-        if (selected.length) {
-          // include selections for this type when computing available options
-          whereForGames = buildGameWhereExcludingType(
-            filter,
-            undefined,
-            q,
-            pubIds,
-            tagIds,
-          );
-        } else {
-          // exclude this type from filters when computing available options (quick-path)
-          whereForGames = buildGameWhereExcludingType(
-            filter,
-            type,
-            q,
-            pubIds,
-            tagIds,
-          );
+        // Build the game WHERE used to constrain each relation query
+        const baseFilterWhere = selected.length
+          ? whereExcluding(filter, undefined) // include this type if user already picked some
+          : whereExcluding(filter, type); // otherwise exclude this type to discover options
+
+        const whereForGames: Prisma.GameWhereInput = Object.keys(searchWhere)
+          .length
+          ? { AND: [baseFilterWhere, searchWhere] }
+          : baseFilterWhere;
+
+        // Query relations directly with `where: { games: { some: <gameWhere> } }`.
+        // This avoids the slow pattern of “fetch game IDs → filter relations in app”.
+        let rows: Array<{ name: string }> = [];
+        if (type === "genres") {
+          rows = await prisma.genre.findMany({
+            where: { games: { some: whereForGames } },
+            select: { name: true },
+            orderBy: { name: "asc" },
+          });
+        } else if (type === "categories") {
+          rows = await prisma.category.findMany({
+            where: { games: { some: whereForGames } },
+            select: { name: true },
+            orderBy: { name: "asc" },
+          });
+        } else if (type === "platforms") {
+          rows = await prisma.platform.findMany({
+            where: { games: { some: whereForGames } },
+            select: { name: true },
+            orderBy: { name: "asc" },
+          });
+        } else if (type === "publishers") {
+          rows = await prisma.publisher.findMany({
+            where: { games: { some: whereForGames } },
+            select: { name: true },
+            orderBy: { name: "asc" },
+          });
+        } else if (type === "tags") {
+          rows = await prisma.tag.findMany({
+            where: { games: { some: whereForGames } },
+            select: { name: true },
+            orderBy: { name: "asc" },
+          });
         }
 
-        const gameRows = await prisma.game.findMany({
-          where: whereForGames,
-          select: { id: true },
-          take: 5000,
-        }); // safety cap
-        const gameIds = gameRows.map((r) => r.id);
-        if (!gameIds.length) return [];
-
-        // 2) get distinct relation names for those game ids
-        let rows: Array<{ name: string }> = [];
-        if (type === "genres")
-          rows = await prisma.genre.findMany({
-            where: { games: { some: { id: { in: gameIds } } } },
-            select: { name: true },
-            orderBy: { name: "asc" },
-          });
-        else if (type === "categories")
-          rows = await prisma.category.findMany({
-            where: { games: { some: { id: { in: gameIds } } } },
-            select: { name: true },
-            orderBy: { name: "asc" },
-          });
-        else if (type === "platforms")
-          rows = await prisma.platform.findMany({
-            where: { games: { some: { id: { in: gameIds } } } },
-            select: { name: true },
-            orderBy: { name: "asc" },
-          });
-        else if (type === "publishers")
-          rows = await prisma.publisher.findMany({
-            where: { games: { some: { id: { in: gameIds } } } },
-            select: { name: true },
-            orderBy: { name: "asc" },
-          });
-        else if (type === "tags")
-          rows = await prisma.tag.findMany({
-            where: { games: { some: { id: { in: gameIds } } } },
-            select: { name: true },
-            orderBy: { name: "asc" },
-          });
-
         const names = Array.from(new Set(rows.map((r) => r.name))).sort();
-        // If user already selected values for this type, return only the remaining possible options
         return selected.length
           ? names.filter((n) => !selected.includes(n))
           : names;

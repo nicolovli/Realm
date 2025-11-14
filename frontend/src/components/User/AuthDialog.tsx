@@ -4,14 +4,15 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from "../ui/dialog";
-import { CREATE_USER, LOGIN_USER } from "@/lib/graphql/mutations/user";
+} from "@/components/ui/dialog";
+import { CREATE_USER, LOGIN_USER } from "@/lib/graphql";
 import { useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { toast } from "sonner";
-import { Login, Register } from ".";
+import { Login, Register } from "@/components/User";
 
-interface AuthDialogProps {
+// AuthDialog component props
+export interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }

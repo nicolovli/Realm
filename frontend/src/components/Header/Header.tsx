@@ -1,17 +1,23 @@
-import { type ComponentType, type SVGProps } from "react";
-import { Logo } from "../../assets/Logo";
+import { Logo } from "@/assets/Logo";
 import { GlobeEuropeAfricaIcon, HeartIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
-import { AuthButton, MobileSheetMenu, SearchBar, ToggleTheme } from "./";
-import { FOCUS_VISIBLE } from "../../lib/classNames";
+import type { ComponentType, SVGProps } from "react";
+import {
+  AuthButton,
+  MobileSheetMenu,
+  SearchBar,
+  ToggleTheme,
+} from "@/components/Header";
+import { FOCUS_VISIBLE } from "@/lib/classNames";
 
-export type Item = {
+// Navigation Item type for Header component
+export type NavigationItem = {
   title: string;
   href: string;
   icon: ComponentType<SVGProps<SVGSVGElement>>;
 };
 
-const navigation: Item[] = [
+const navigation: NavigationItem[] = [
   {
     title: "Favorites",
     href: "/favorites",

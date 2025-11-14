@@ -4,25 +4,29 @@ import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
 import { FOCUS_VISIBLE } from "@/lib/classNames";
 
-type BaseProps = {
+// StarRating component props
+// Supports both read-only and interactive modes
+type StarRatingBaseProps = {
   value: number;
   size?: number;
   ariaLabel?: string;
 };
 
-type ReadOnlyProps = BaseProps & {
+type StarRatingReadOnlyProps = StarRatingBaseProps & {
   readOnly?: true;
   onChange?: never;
   name?: never;
 };
 
-type InteractiveProps = BaseProps & {
+type StarRatingInteractiveProps = StarRatingBaseProps & {
   readOnly?: false;
   onChange: (n: number) => void;
   name?: string;
 };
 
-export type StarRatingProps = ReadOnlyProps | InteractiveProps;
+export type StarRatingProps =
+  | StarRatingReadOnlyProps
+  | StarRatingInteractiveProps;
 
 export const StarRating = (props: StarRatingProps) => {
   const { value, size = 25, ariaLabel = "Star rating" } = props;

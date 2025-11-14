@@ -1,5 +1,5 @@
 import { render, screen, cleanup } from "@testing-library/react";
-import { ResultsPagination } from "../../components/ResultsGrid/ResultsPagination";
+import { ResultsPagination } from "@/components/ResultsGrid";
 import { vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 

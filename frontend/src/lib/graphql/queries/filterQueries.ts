@@ -33,44 +33,6 @@ export const GET_TOTAL_GAMES_COUNT = gql`
   }
 `;
 
-export const GET_FILTERED_GAMES = gql`
-  query GetFilteredGames(
-    $filter: GameFilter
-    $search: String
-    $take: Int = 9
-    $after: Int
-    $sortBy: String
-    $sortOrder: SortOrder
-  ) {
-    games(
-      filter: $filter
-      search: $search
-      take: $take
-      after: $after
-      sortBy: $sortBy
-      sortOrder: $sortOrder
-    ) {
-      id
-      name
-      image
-      descriptionShort
-      publishedStore
-      platforms
-      developers
-      publishers
-      genres
-      tags
-      categories
-
-      avgRating
-      reviewsCount
-      favoritesCount
-      popularityScore
-      hasRatings
-    }
-  }
-`;
-
 export const GET_AVAILABLE_FILTER_OPTIONS = gql`
   query GetAvailableFilterOptions(
     $currentFilter: GameFilter!
@@ -84,4 +46,47 @@ export const GET_AVAILABLE_FILTER_OPTIONS = gql`
       tags
     }
   }
+`;
+
+export const GAME_LIST_CARD_FRAGMENT = gql`
+  fragment GameListCard on Game {
+    id
+    name
+    image
+    descriptionShort
+    publishedStore
+  }
+`;
+
+export const GET_FILTERED_GAMES = gql`
+  query GetFilteredGames(
+    $filter: GameFilter
+    $search: String
+    $sortBy: String
+    $sortOrder: SortOrder # <-- enum, not String
+    $first: Int!
+    $after: String
+  ) {
+    gamesConnection(
+      filter: $filter
+      search: $search
+      sortBy: $sortBy
+      sortOrder: $sortOrder
+      first: $first
+      after: $after
+    ) {
+      totalCount
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          ...GameListCard
+        }
+      }
+    }
+  }
+  ${GAME_LIST_CARD_FRAGMENT}
 `;

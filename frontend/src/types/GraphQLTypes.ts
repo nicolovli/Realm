@@ -1,5 +1,36 @@
-import type { Game, GameFilter } from "./GameTypes";
-import type { FilterOption } from "./FilterTypes";
+import type { DocumentNode } from "graphql";
+import type { Game, GameFilter, FilterOption } from "@/types";
+
+// Refetch configuration for Apollo mutations
+// Used to specify which queries should be refetched after a mutation
+
+export type RefetchConfig =
+  | string
+  | {
+      query: DocumentNode;
+      variables?: Record<string, unknown>;
+    };
+
+// Filter variables for GraphQL queries
+// Extends generic variables with filter-specific fields
+
+export interface FilterVariables extends Record<string, unknown> {
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  filter?: Record<string, unknown>;
+  search?: string;
+}
+
+// User data from GET_USER_WITH_FAV query
+// Contains user ID, username, and favorite games list
+
+export type UserData = {
+  me: {
+    id: string;
+    username: string;
+    favorites: { id: string }[];
+  } | null;
+};
 
 export type GetGamesData = {
   games: Game[];
@@ -38,7 +69,13 @@ export type GamesCountData = {
 };
 
 export type GetPromoGamesData = {
-  games: Game[];
+  games: Array<{
+    id: string;
+    name: string;
+    descriptionShort?: string;
+    image?: string;
+    rating?: number;
+  }>;
 };
 
 export type AvailableFilterOptionsData = {
@@ -75,7 +112,7 @@ export type GamesConnectionData = {
   };
 };
 
-export type GetFilteredGamesCursorVars = {
+export type GetFilteredGamesVars = {
   filter: GameFilter | Record<string, never>;
   search?: string;
   sortBy: string;

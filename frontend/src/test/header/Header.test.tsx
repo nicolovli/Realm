@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import { Header } from "../../components/Header";
+import { Header } from "@/components/Header";
 import { MemoryRouter } from "react-router-dom";
 import { MockedProvider } from "@apollo/client/testing/react";
 import * as useAuthStatusModule from "@/hooks/useAuthStatus";

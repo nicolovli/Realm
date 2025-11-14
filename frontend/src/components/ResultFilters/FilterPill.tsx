@@ -58,6 +58,7 @@ export const FilterPill = ({
           ${DISABLED}
           md:bg-lightpurple md:dark:bg-darkpurple
         `}
+        data-cy={`filter-pill-${label}`}
       >
         <span className="font-medium flex items-center gap-2">{label}</span>
         <ChevronDown className="h-4 w-4" />
@@ -68,6 +69,7 @@ export const FilterPill = ({
           className="min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-80 overflow-y-auto bg-lightpurple dark:bg-darkpurple border-none z-100"
           align="start"
           onCloseAutoFocus={(e) => e.preventDefault()}
+          data-cy={`filter-pill-menu-${label}`}
         >
           {optionsWithAll.map((option) => {
             const isSelected =
@@ -102,6 +104,7 @@ export const FilterPill = ({
                   ${disabledClass}
                   ${isSelected ? "bg-white/40 dark:bg-black/20 font-bold" : ""}
                 `}
+                data-cy={`filter-option-${label}-${option.name}`}
               >
                 <span>{option.name}</span>
               </DropdownMenuCheckboxItem>

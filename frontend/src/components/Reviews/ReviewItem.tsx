@@ -1,65 +1,29 @@
-import { useState } from "react";
-import { StarRating } from "./StarRating";
-import type { Review } from "../../types/Review";
+import { useCallback, useState } from "react";
+import { StarRating, ReviewTextArea, type Review } from "@/components/Reviews";
 import { toast } from "sonner";
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import {
+  getReviewRefetchQueries,
+  getUserReviewsRefetchQueries,
   UPDATE_REVIEW,
   DELETE_REVIEW,
-} from "../../lib/graphql/mutations/reviews";
-import {
-  GET_REVIEWS_FOR_GAME,
-  GET_REVIEWS_META_FOR_GAME,
-} from "@/lib/graphql/queries/reviewQueries";
+} from "@/lib/graphql";
 import { FOCUS_VISIBLE, HOVER } from "@/lib/classNames";
-
-// Helper function to parse various date formats
-const toDate = (v: unknown): Date | null => {
-  if (v instanceof Date) return v;
-  if (typeof v === "number" && Number.isFinite(v)) return new Date(v);
-  if (typeof v === "string") {
-    const s = v.trim();
-    // epoch i ms som string → number
-    if (/^\d+$/.test(s)) {
-      const n = Number(s);
-      return Number.isFinite(n) ? new Date(n) : null;
-    }
-    const d = new Date(s);
-    return Number.isNaN(d.getTime()) ? null : d;
-  }
-  return null;
-};
-
-// Helper function to format date in a pretty way
-const formatPretty = (d: Date) => {
-  const now = new Date().getTime();
-  const diffSec = Math.round((now - d.getTime()) / 1000);
-
-  if (diffSec < 60) return "now";
-  if (diffSec < 3600) return `${Math.round(diffSec / 60)} minutes ago`;
-  if (diffSec < 86400) return `${Math.round(diffSec / 3600)} hours ago`;
-  if (diffSec < 30 * 86400) return `${Math.round(diffSec / 86400)} days ago`;
-
-  const date = d.toLocaleDateString("nb-NO", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-  const time = d.toLocaleTimeString("nb-NO", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  return `${date}, ${time}`;
-};
+import { toDate } from "@/lib/utils/date";
+import { formatPretty } from "@/lib/utils/formatPretty";
 
 export const ReviewItem = ({
   review,
   currentUserId,
   gameId,
+  isUserContext = false,
+  userId,
 }: {
   review: Review & { user?: { id?: number; username?: string } | null };
   currentUserId?: number;
   gameId: number;
+  isUserContext?: boolean;
+  userId?: string;
 }) => {
   const isMine = Number(review.user?.id) === Number(currentUserId);
 
@@ -75,21 +39,30 @@ export const ReviewItem = ({
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  const refetchQueries = isUserContext
+    ? getUserReviewsRefetchQueries(userId!)
+    : getReviewRefetchQueries(gameId);
+
   const apollo = useApolloClient();
+  const invalidateGameLists = useCallback(() => {
+    try {
+      apollo.cache.evict({ fieldName: "gamesConnection" });
+      apollo.cache.gc();
+      const cacheAny = apollo.cache as { broadcastWatches?: () => void };
+      cacheAny.broadcastWatches?.();
+    } catch (error) {
+      console.warn("Failed to invalidate cached game lists", error);
+    }
+  }, [apollo]);
+
   const [updateReview, { loading: updating }] = useMutation(UPDATE_REVIEW, {
-    refetchQueries: [
-      { query: GET_REVIEWS_FOR_GAME, variables: { gameId } },
-      { query: GET_REVIEWS_META_FOR_GAME, variables: { gameId } },
-    ],
-    awaitRefetchQueries: true,
+    refetchQueries,
+    errorPolicy: "all",
   });
 
   const [deleteReview, { loading: deleting }] = useMutation(DELETE_REVIEW, {
-    refetchQueries: [
-      { query: GET_REVIEWS_FOR_GAME, variables: { gameId } },
-      { query: GET_REVIEWS_META_FOR_GAME, variables: { gameId } },
-    ],
-    awaitRefetchQueries: true,
+    refetchQueries,
+    errorPolicy: "all",
   });
 
   const onSave = async () => {
@@ -111,12 +84,11 @@ export const ReviewItem = ({
           description: draftDesc,
         },
       });
-      toast.success("Review updated");
+      invalidateGameLists();
+      toast.success("Review updated!");
       setEditing(false);
-      await apollo.refetchQueries({
-        include: [GET_REVIEWS_FOR_GAME, GET_REVIEWS_META_FOR_GAME],
-      });
-    } catch {
+    } catch (error) {
+      console.error(`[Frontend] Error updating review:`, error);
       toast.error("Could not update the review.");
     }
   };
@@ -132,11 +104,10 @@ export const ReviewItem = ({
 
     try {
       await deleteReview({ variables: { id: Number(review.id) } });
+      invalidateGameLists();
       toast.success("Review deleted");
-      await apollo.refetchQueries({
-        include: [GET_REVIEWS_FOR_GAME, GET_REVIEWS_META_FOR_GAME],
-      });
-    } catch {
+    } catch (error) {
+      console.error(`[Frontend] Error deleting review:`, error);
       toast.error("Could not delete the review.");
     }
   };
@@ -173,7 +144,7 @@ export const ReviewItem = ({
       {!editing ? (
         <section className="mt-4">
           <h4 className="sr-only">Review</h4>
-          <p className="bg-gray-100 dark:bg-white/10 rounded-3xl p-4 leading-relaxed outline-none">
+          <p className="bg-gray-100 dark:bg-white/10 rounded-3xl p-4 leading-relaxed outline-none break-words overflow-wrap-break-word">
             {review.description}
           </p>
         </section>
@@ -182,13 +153,11 @@ export const ReviewItem = ({
           <label htmlFor={`edit-review-${review.id}`} className="sr-only">
             Edit your review
           </label>
-          <textarea
+          <ReviewTextArea
             id={`edit-review-${review.id}`}
             value={draftDesc}
-            onChange={(e) => setDraftDesc(e.target.value)}
-            maxLength={500}
-            rows={4}
-            className={`${FOCUS_VISIBLE} w-full bg-gray-100 dark:bg-white/10 rounded-3xl p-4 leading-relaxed outline-none`}
+            onChange={setDraftDesc}
+            required
           />
         </section>
       )}
@@ -212,7 +181,7 @@ export const ReviewItem = ({
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
                     disabled={deleting}
-                    className={`${FOCUS_VISIBLE} ${HOVER} mt-3 text-lg px-4 py-1 rounded-full cursor-pointer text-black dark:text-white`}
+                    className={`${FOCUS_VISIBLE} ${HOVER} mt-3 text-lg px-4 py-1 rounded-full cursor-pointer text-white dark:text-white bg-black/20 dark:bg-white/20`}
                     aria-label="Delete review"
                     title="Delete review"
                   >
@@ -252,8 +221,9 @@ export const ReviewItem = ({
 
                 <button
                   onClick={() => setEditing(true)}
+                  data-cy="edit-review-button"
                   disabled={updating}
-                  className={`${FOCUS_VISIBLE} ${HOVER} mt-3 font-semibold text-lg px-4 py-1 rounded-full cursor-pointer text-white bg-lightbuttonpurple dark:bg-darkbuttonpurple whitespace-nowrap ${showDeleteConfirm && "hidden md:inline-flex"}`}
+                  className={`${FOCUS_VISIBLE} ${HOVER} mt-3 text-lg px-4 py-1 rounded-full cursor-pointer text-white bg-lightbuttonpurple dark:bg-darkbuttonpurple whitespace-nowrap ${showDeleteConfirm && "hidden md:inline-flex"}`}
                 >
                   Edit your review
                 </button>
@@ -269,6 +239,7 @@ export const ReviewItem = ({
                   Cancel
                 </button>
                 <button
+                  data-cy="save-review-button"
                   type="button"
                   onClick={onSave}
                   disabled={updating}
@@ -284,5 +255,3 @@ export const ReviewItem = ({
     </article>
   );
 };
-
-export default ReviewItem;

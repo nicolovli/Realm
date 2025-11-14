@@ -24,3 +24,9 @@ export interface PrismaError {
     target?: string[];
   };
 }
+
+export interface UpdateUserArgs {
+  username?: string | null;
+  email?: string | null;
+  password?: string | null;
+}
