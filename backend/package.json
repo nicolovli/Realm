@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "start": "cross-env NODE_ENV=production tsx ./src/server.ts",
     "dev": "nodemon --exec tsx ./src/server.ts",
-    "dist": "node dist/server.js"
+    "dist": "node dist/server.js",
+    "seed": "prisma db seed"
   },
   "keywords": [],
   "author": "",
@@ -22,7 +23,6 @@
     "@as-integrations/express5": "^1.1.2",
     "@graphql-tools/merge": "^9.1.1",
     "@prisma/client": "^6.17.1",
-    "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
@@ -44,6 +44,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.8.1",
     "@types/sanitize-html": "^2.16.0",
+    "bcryptjs": "^2.4.3",
     "cross-env": "^10.1.0",
     "eslint": "^9.36.0",
     "eslint-plugin-react": "^7.37.5",
@@ -55,5 +56,8 @@
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.45.0"
+  },
+  "prisma": {
+    "seed": "tsx src/scripts/seed.ts"
   }
 }
