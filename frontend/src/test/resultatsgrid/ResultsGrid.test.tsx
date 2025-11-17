@@ -25,9 +25,9 @@ describe("ResultsGrid", () => {
     cleanup();
   });
 
-  it("renders 9 skeletons while loading", () => {
+  it("renders 12 skeletons while loading", () => {
     const { container } = render(<ResultsGrid games={[]} loading={true} />);
-    expect(container.querySelectorAll(".animate-pulse").length).toBe(9);
+    expect(container.querySelectorAll(".animate-pulse").length).toBe(12);
   });
 
   it("renders one link per game when not loading", async () => {

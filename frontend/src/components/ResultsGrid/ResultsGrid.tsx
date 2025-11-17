@@ -18,7 +18,7 @@ export const ResultsGrid = ({
   emptyState,
   error,
 }: ResultsGridProps) => {
-  const PAGE_SIZE = 9;
+  const PAGE_SIZE = 12;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   // Reset visible slice when the dataset length changes
@@ -86,7 +86,7 @@ export const ResultsGrid = ({
   return (
     <>
       <ul
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+        className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4"
         aria-live="polite"
         role="list"
         data-cy="results-grid"

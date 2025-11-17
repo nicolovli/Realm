@@ -156,7 +156,7 @@ export const gameResolvers = {
         offset?: number | null;
       },
     ) => {
-      const first = Math.min(args.first ?? 9, MAX_TAKE);
+      const first = Math.min(args.first ?? 12, MAX_TAKE);
 
       // Build base WHERE from filters only (no search here)
       const baseWhere = buildWhereFromFilter(

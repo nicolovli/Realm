@@ -19,7 +19,7 @@ export const SORT_OPTIONS = [
 
 export type SortOptionValue = (typeof SORT_OPTIONS)[number]["value"];
 
-export const PAGE_SIZE = 9;
+export const PAGE_SIZE = 12;
 export const STORAGE_PREFIX = "results-pagination::";
 export const CACHE_TTL_MS = 1000 * 60 * 15;
 

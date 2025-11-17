@@ -52,7 +52,7 @@ const defaultProps = {
   setSortOption: vi.fn(),
   order: "desc" as const,
   setOrder: vi.fn(),
-  pageSize: 9,
+  pageSize: 12,
   matchesCount: 0,
   filtersReady: true,
   filterError: undefined,
