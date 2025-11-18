@@ -334,18 +334,29 @@ Vi har full forståelse dersom man ikke ønsker å lage en bruker i vår databas
 
 ### End to end tester
 
-For å teste ende-til-ende testing er det viktig å ha både frontend og backend kjørende.
+For å teste ende-til-ende testing er det viktig å ha både frontend kjørende.
 For å kjøre kun testene uten å visualisere brukerinteraksjon kjør følgende kode i mappen `frontend`:
 
+>[NOTE]
+>Benytt split terminals, altså split terminalen i to, ha frontend kjørende på den ene terminalen og cypress på den andre. Begge i `cd frontend`.
+>Det trengs ikke å kjøre backend, da du kobler frontend localhost med backend VM. 
+
 ```bash
+# På den ene terminalen kjør: 
+cd frontend
 npm run dev:vm
+# Vent til frontend localhost er klar før du kjører neste kode.
+# På den andre terminalen kjør: 
+cd frontend
 npm run cy:run
 ```
 
 For å kjøre koden med visualisering kjør:
 
 ```bash
+# På den ene terminalen kjør:
 npm run dev:vm
+# På den andre terminalen kjør:
 npm run cy:open
 ```
 
