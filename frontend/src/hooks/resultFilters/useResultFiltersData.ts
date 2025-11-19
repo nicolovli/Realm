@@ -1,14 +1,7 @@
-// Fetches filter metadata and derived availability for the current selection context.
 import { useMemo } from "react";
 import { useQuery } from "@apollo/client/react";
-import {
-  GET_AVAILABLE_FILTER_OPTIONS,
-  GET_FILTER_OPTIONS,
-  GET_TOTAL_GAMES_COUNT,
-} from "@/lib/graphql";
+import { GET_FILTER_OPTIONS, GET_TOTAL_GAMES_COUNT } from "@/lib/graphql";
 import type {
-  AvailableFilterOptionsData,
-  AvailableFilterOptionsVariables,
   FilterOptionsData,
   GamesCountData,
   FiltersMap,
@@ -36,16 +29,6 @@ export const useResultFiltersData = ({
       fetchPolicy: "cache-first",
       errorPolicy: "ignore",
     });
-
-  const { data: availableOptionsData } = useQuery<
-    AvailableFilterOptionsData,
-    AvailableFilterOptionsVariables
-  >(GET_AVAILABLE_FILTER_OPTIONS, {
-    variables: { currentFilter: currentFilter || {}, search: searchQuery },
-    skip: !currentFilter && !searchQuery,
-    fetchPolicy: "cache-first",
-    errorPolicy: "ignore",
-  });
 
   const { data: countData, loading: loadingCount } = useQuery<GamesCountData>(
     GET_TOTAL_GAMES_COUNT,
@@ -85,45 +68,19 @@ export const useResultFiltersData = ({
     } satisfies FiltersMap;
   }, [filterData]);
 
-  const filtersWithAvailability: FiltersWithAvailability = useMemo(() => {
-    if (!availableOptionsData?.availableFilterOptions) {
-      const defaultDisabled = !!searchQuery;
-      return (
+  const filtersWithAvailability: FiltersWithAvailability = useMemo(
+    () =>
+      (
         Object.entries(filters) as Array<[FilterKey, FiltersMap[FilterKey]]>
       ).reduce((acc, [key, options]) => {
         acc[key] = options.map((name) => ({
           name,
-          disabled: defaultDisabled,
+          disabled: false,
         }));
         return acc;
-      }, {} as FiltersWithAvailability);
-    }
-
-    const available = availableOptionsData.availableFilterOptions as Record<
-      string,
-      string[] | undefined
-    >;
-
-    return (
-      Object.entries(filters) as Array<[FilterKey, FiltersMap[FilterKey]]>
-    ).reduce((acc, [key, options]) => {
-      const backendKey = key === "publisher" ? "publishers" : key;
-      const enabledSet = new Set(available[backendKey] ?? []);
-      acc[key] = options.map((name) => {
-        const selected = selectedFilters[key];
-        if (selected.length === 0)
-          return {
-            name,
-            disabled: !enabledSet.has(name),
-          };
-        return {
-          name,
-          disabled: !selected.includes(name) && !enabledSet.has(name),
-        };
-      });
-      return acc;
-    }, {} as FiltersWithAvailability);
-  }, [filters, availableOptionsData, searchQuery, selectedFilters]);
+      }, {} as FiltersWithAvailability),
+    [filters],
+  );
 
   const activeFilterEntries = useMemo(
     () =>

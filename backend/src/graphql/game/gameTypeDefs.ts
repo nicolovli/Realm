@@ -53,7 +53,6 @@ export const gameTypeDefs = gql`
   type GamesConnection {
     edges: [GameEdge!]!
     pageInfo: PageInfo!
-    totalCount: Int!
   }
 
   extend type Query {

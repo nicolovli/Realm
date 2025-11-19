@@ -109,6 +109,8 @@ export const useResultFilters = (searchQuery?: string) => {
     setSelectedFilters(defaultSelection());
   }, [setSelectedFilters]);
 
+  const countLoading = loadingCount;
+
   const isLoading = loadingFilters || loadingCount || gamesLoading;
 
   return {
@@ -145,5 +147,6 @@ export const useResultFilters = (searchQuery?: string) => {
     filterError: undefined,
     countError: undefined,
     gamesError,
+    countLoading,
   };
 };

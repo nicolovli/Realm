@@ -4,7 +4,8 @@ import {
   buildWhereFromFilter,
   transformGame,
   planForSort,
-  gameSelect,
+  gameListSelect,
+  gameDetailSelect,
   serializeField,
   tupleAfterToWhere,
   whereClauses,
@@ -24,7 +25,7 @@ import {
   CursorField,
 } from "../utils/cursor.js";
 
-type GameRow = Prisma.GameGetPayload<{ select: typeof gameSelect }>;
+type GameRow = Prisma.GameGetPayload<{ select: typeof gameListSelect }>;
 
 const MAX_TAKE = 50;
 
@@ -44,7 +45,6 @@ export const gameResolvers = {
       const trimmedSearch = search?.trim();
       const page = Math.max(0, Number(after ?? 0));
       const pageSize = Math.min(Math.max(1, take), MAX_TAKE);
-      // Clamp inputs defensively to avoid accidental large scans / negative skips
 
       const baseWhere = buildWhereFromFilter(
         filter,
@@ -64,10 +64,8 @@ export const gameResolvers = {
 
       const cached = getGamesCache(cacheKey);
       if (cached) return cached.map(transformGame);
-      // Cache stores raw rows (select shape). Transform on the way out for UI types.
 
-      const searchWhere = await buildSearchWhere(trimmedSearch, "containsIds");
-
+      const searchWhere = await buildSearchWhere(trimmedSearch, "none");
       const where = whereClauses(
         baseWhere,
         searchWhere,
@@ -75,11 +73,11 @@ export const gameResolvers = {
       );
 
       const rows = await prisma.game.findMany({
-        take: pageSize,
-        skip: page * pageSize,
         where,
         orderBy,
-        select: gameSelect,
+        skip: page * pageSize,
+        take: pageSize,
+        select: gameListSelect,
       });
 
       setGamesCache(cacheKey, rows);
@@ -92,7 +90,7 @@ export const gameResolvers = {
 
       const g = await prisma.game.findUnique({
         where: { id: numericId as number },
-        select: gameSelect,
+        select: gameDetailSelect,
       });
       return g ? transformGame(g) : null;
     },
@@ -102,12 +100,12 @@ export const gameResolvers = {
       args: { filter?: GameFilter; search?: string },
     ) => {
       const trimmed = args.search?.trim();
+
       const baseWhere = buildWhereFromFilter(
         args.filter,
         undefined,
       ) as Prisma.GameWhereInput;
-      const searchWhere = await buildSearchWhere(trimmed, "containsIds");
-
+      const searchWhere = await buildSearchWhere(trimmed, "none");
       return prisma.game.count({ where: whereClauses(baseWhere, searchWhere) });
     },
 
@@ -119,10 +117,10 @@ export const gameResolvers = {
       if (!q) return [];
 
       const where = await buildSearchWhere(q, "containsIds");
-
+      const clampedLimit = Math.min(Math.max(1, limit ?? 6), 20);
       const rows = await prisma.game.findMany({
         where,
-        take: Math.min(limit, 20),
+        take: clampedLimit + 1,
         orderBy: [{ popularityScore: "desc" }, { name: "asc" }],
         select: {
           id: true,
@@ -133,12 +131,15 @@ export const gameResolvers = {
         },
       });
 
-      return rows.map((r) => ({
-        id: r.id,
-        sid: r.sid,
-        name: r.name,
-        image: r.image,
-        publishers: r.publishers.map((p) => p.name),
+      const truncated = rows.length > clampedLimit;
+      const games = truncated ? rows.slice(0, clampedLimit) : rows;
+
+      return games.map((g) => ({
+        id: g.id,
+        sid: g.sid,
+        name: g.name,
+        image: g.image,
+        publishers: g.publishers.map((p) => p.name),
       }));
     },
 
@@ -158,18 +159,14 @@ export const gameResolvers = {
     ) => {
       const first = Math.min(args.first ?? 12, MAX_TAKE);
 
-      // Build base WHERE from filters only (no search here)
       const baseWhere = buildWhereFromFilter(
         args.filter,
         undefined,
       ) as Prisma.GameWhereInput;
 
-      // Build rich search WHERE (contains + startsWith + relation-ID boosts)
       const trimmed = args.search?.trim();
-      const searchWhere = await buildSearchWhere(trimmed, "containsIds");
-
-      // Combine filters + search
-      const where = whereClauses(baseWhere, searchWhere);
+      const searchWhere = await buildSearchWhere(trimmed, "none");
+      const where: Prisma.GameWhereInput = whereClauses(baseWhere, searchWhere);
 
       const { orderBy, fields } = planForSort(args.sortBy, args.sortOrder);
 
@@ -182,12 +179,11 @@ export const gameResolvers = {
         mergedWhere = { AND: [where, extra] };
       }
 
-      // Fetch page (+1 for hasNextPage)
       const rows = await prisma.game.findMany({
         where: mergedWhere,
         orderBy,
         take: first + 1,
-        select: gameSelect,
+        select: gameListSelect,
       });
 
       const hasNextPage = rows.length > first;
@@ -211,9 +207,7 @@ export const gameResolvers = {
         endCursor: edges.length ? edges[edges.length - 1].cursor : null,
       };
 
-      const totalCount = await prisma.game.count({ where });
-
-      return { edges, pageInfo, totalCount };
+      return { edges, pageInfo };
     },
   },
 };

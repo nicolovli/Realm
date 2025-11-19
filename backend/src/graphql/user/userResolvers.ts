@@ -10,7 +10,6 @@ import {
   UpdateUserArgs,
 } from "./index.js";
 import { clearGamesCache } from "../game/index.js";
-import { clearFilterCache } from "../filter/index.js";
 
 export const userResolvers = {
   Query: {
@@ -62,6 +61,7 @@ export const userResolvers = {
       return user?.favorites ?? [];
     },
   },
+
   Mutation: {
     createUser: async (_: unknown, args: CreateUserArgs) => {
       const handleUsername = args.username.toLowerCase();
@@ -79,6 +79,7 @@ export const userResolvers = {
         await handlePrismaUniqueError(error, handleUsername, handleEmail);
       }
     },
+
     loginUser: async (
       _: unknown,
       { username, password }: LoginArgs,
@@ -104,6 +105,7 @@ export const userResolvers = {
         },
       };
     },
+
     toggleFavorite: async (
       _: unknown,
       { gameId, liked }: { gameId: number; liked: boolean },
@@ -165,12 +167,12 @@ export const userResolvers = {
         return user;
       });
 
-      // invalidate caches so rating/popularity sorts update immediately
+      // invalidate game cache so rating/popularity updates are reflected immediately
       clearGamesCache();
-      clearFilterCache();
 
       return result;
     },
+
     updateUser: async (
       _parent: unknown,
       { username, email, password }: UpdateUserArgs,

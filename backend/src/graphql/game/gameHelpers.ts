@@ -8,17 +8,19 @@ export function mapGameRelations<T extends { name: string }>(
   return relations.map((r) => r.name);
 }
 
+const safeMap = <T extends { name: string }>(rel?: T[]) =>
+  Array.isArray(rel) ? rel.map((r) => r.name) : [];
+
 export function transformGame(game: GameWithRelations) {
-  // Compact relation payloads: Prisma returns `{ name }[]`; UI expects `string[]`.
   return {
     ...game,
-    developers: mapGameRelations(game.developers),
-    publishers: mapGameRelations(game.publishers),
-    platforms: mapGameRelations(game.platforms),
-    tags: mapGameRelations(game.tags),
-    languages: mapGameRelations(game.languages),
-    categories: mapGameRelations(game.categories),
-    genres: mapGameRelations(game.genres),
+    developers: safeMap(game.developers),
+    publishers: safeMap(game.publishers),
+    platforms: safeMap(game.platforms),
+    tags: safeMap(game.tags),
+    languages: safeMap(game.languages),
+    categories: safeMap(game.categories),
+    genres: safeMap(game.genres),
   };
 }
 
@@ -185,7 +187,7 @@ export function planForSort(
   }
 }
 
-export const gameSelect: Prisma.GameSelect = {
+export const gameListSelect: Prisma.GameSelect = {
   id: true,
   sid: true,
   name: true,
@@ -197,8 +199,12 @@ export const gameSelect: Prisma.GameSelect = {
   favoritesCount: true,
   popularityScore: true,
   hasRatings: true,
-  developers: { select: { name: true } },
   publishers: { select: { name: true } },
+};
+
+export const gameDetailSelect: Prisma.GameSelect = {
+  ...gameListSelect,
+  developers: { select: { name: true } },
   platforms: { select: { name: true } },
   tags: { select: { name: true } },
   languages: { select: { name: true } },

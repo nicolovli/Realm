@@ -73,8 +73,10 @@ npx tsx src/scripts/importJson.ts
 npx prisma generate
 ```
 
-3. (Valgfri) Seede databasen med brukere og reviews. Den starter på id 20, så dersom du har brukere med id 20 blir disse slettet.
-   du kan kjøre scriptet flere ganger uten å få dupliserte reviews/favorites.
+3. (Valgfri) Seede databasen med brukere og reviews.
+   Den starter på id 20, så dersom du har brukere med id 20+ blir disse slettet.
+   Du kan kjøre scriptet flere ganger uten å få dupliserte reviews/favorites.
+   Legg reviews.json og users.json filene i db-mappen.
 
 ```bash
 npm run seed

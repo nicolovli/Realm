@@ -175,85 +175,84 @@ export const ReviewItem = ({
           {pretty}
         </time>
 
-        {isMine ||
-          (isPrivileged && (
-            <>
-              {!editing ? (
-                <span className={`flex items-center gap-2`}>
-                  {!showDeleteConfirm ? (
-                    <button
-                      onClick={() => setShowDeleteConfirm(true)}
-                      disabled={deleting}
-                      className={`${FOCUS_VISIBLE} ${HOVER} mt-3 text-lg px-4 py-1 rounded-full cursor-pointer text-white dark:text-white bg-black/20 dark:bg-white/20`}
-                      aria-label="Delete review"
-                      title="Delete review"
+        {(isMine || isPrivileged) && (
+          <>
+            {!editing ? (
+              <span className={`flex items-center gap-2`}>
+                {!showDeleteConfirm ? (
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    disabled={deleting}
+                    className={`${FOCUS_VISIBLE} ${HOVER} mt-3 text-lg px-4 py-1 rounded-full cursor-pointer text-white dark:text-white bg-black/20 dark:bg-white/20`}
+                    aria-label="Delete review"
+                    title="Delete review"
+                  >
+                    Delete
+                  </button>
+                ) : (
+                  <>
+                    <section
+                      role="alertdialog"
+                      aria-labelledby={`review-${review.id}-heading`}
+                      className="mt-3 flex items-center gap-2 rounded md:mr-5"
                     >
-                      Delete
-                    </button>
-                  ) : (
-                    <>
-                      <section
-                        role="alertdialog"
-                        aria-labelledby={`review-${review.id}-heading`}
-                        className="mt-3 flex items-center gap-2 rounded md:mr-5"
-                      >
-                        <span className="text-lg text-black dark:text-white text-center">
-                          Delete your review?
-                        </span>
+                      <span className="text-lg text-black dark:text-white text-center">
+                        Delete your review?
+                      </span>
 
-                        <section className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => setShowDeleteConfirm(false)}
-                            className={`${FOCUS_VISIBLE} ${HOVER} text-lg px-3 py-1 rounded-full cursor-pointer`}
-                            aria-label="Cancel delete"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={onConfirmDelete}
-                            disabled={deleting}
-                            className={`${FOCUS_VISIBLE} ${HOVER} text-lg px-3 py-1 rounded-full bg-red-600 text-white cursor-pointer`}
-                            aria-label="Confirm delete review"
-                          >
-                            {deleting ? "Deleting…" : "Confirm"}
-                          </button>
-                        </section>
+                      <section className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => setShowDeleteConfirm(false)}
+                          className={`${FOCUS_VISIBLE} ${HOVER} text-lg px-3 py-1 rounded-full cursor-pointer`}
+                          aria-label="Cancel delete"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={onConfirmDelete}
+                          disabled={deleting}
+                          className={`${FOCUS_VISIBLE} ${HOVER} text-lg px-3 py-1 rounded-full bg-red-600 text-white cursor-pointer`}
+                          aria-label="Confirm delete review"
+                        >
+                          {deleting ? "Deleting…" : "Confirm"}
+                        </button>
                       </section>
-                    </>
-                  )}
+                    </section>
+                  </>
+                )}
 
-                  <button
-                    onClick={() => setEditing(true)}
-                    data-cy="edit-review-button"
-                    disabled={updating}
-                    className={`${FOCUS_VISIBLE} ${HOVER} mt-3 text-lg px-4 py-1 rounded-full cursor-pointer text-white bg-lightbuttonpurple dark:bg-darkbuttonpurple whitespace-nowrap ${showDeleteConfirm && "hidden md:inline-flex"}`}
-                  >
-                    Edit your review
-                  </button>
-                </span>
-              ) : (
-                <section className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={onCancel}
-                    disabled={updating}
-                    className={`${FOCUS_VISIBLE} ${HOVER} mt-1 text-lg px-4 py-1 rounded-full cursor-pointer`}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    data-cy="save-review-button"
-                    type="button"
-                    onClick={onSave}
-                    disabled={updating}
-                    className={`${FOCUS_VISIBLE} ${HOVER} mt-1 text-lg px-4 py-1 rounded-full text-white bg-lightbuttonpurple dark:bg-darkbuttonpurple cursor-pointer whitespace-nowrap`}
-                  >
-                    {updating ? "Saving..." : "Save your review"}
-                  </button>
-                </section>
-              )}
-            </>
-          ))}
+                <button
+                  onClick={() => setEditing(true)}
+                  data-cy="edit-review-button"
+                  disabled={updating}
+                  className={`${FOCUS_VISIBLE} ${HOVER} mt-3 text-lg px-4 py-1 rounded-full cursor-pointer text-white bg-lightbuttonpurple dark:bg-darkbuttonpurple whitespace-nowrap ${showDeleteConfirm && "hidden md:inline-flex"}`}
+                >
+                  Edit your review
+                </button>
+              </span>
+            ) : (
+              <section className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  disabled={updating}
+                  className={`${FOCUS_VISIBLE} ${HOVER} mt-1 text-lg px-4 py-1 rounded-full cursor-pointer`}
+                >
+                  Cancel
+                </button>
+                <button
+                  data-cy="save-review-button"
+                  type="button"
+                  onClick={onSave}
+                  disabled={updating}
+                  className={`${FOCUS_VISIBLE} ${HOVER} mt-1 text-lg px-4 py-1 rounded-full text-white bg-lightbuttonpurple dark:bg-darkbuttonpurple cursor-pointer whitespace-nowrap`}
+                >
+                  {updating ? "Saving..." : "Save your review"}
+                </button>
+              </section>
+            )}
+          </>
+        )}
       </footer>
     </article>
   );

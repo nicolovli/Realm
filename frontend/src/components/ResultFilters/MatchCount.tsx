@@ -4,10 +4,29 @@
 export interface MatchCountProps {
   matchesCount: number;
   countError?: string | null;
+  countLoading?: boolean;
+  isSearch?: boolean; // Ny prop for å indikere søk
 }
 
 // Displays the number of matches, or a message if there are none
-export const MatchCount = ({ matchesCount, countError }: MatchCountProps) => {
+export const MatchCount = ({
+  matchesCount,
+  countError,
+  countLoading,
+}: MatchCountProps) => {
+  if (countLoading) {
+    return (
+      <p
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="text-sm font-semibold pt-2 text-gray-400"
+      >
+        Loading…
+      </p>
+    );
+  }
+
   return (
     <p
       role="status"

@@ -33,21 +33,6 @@ export const GET_TOTAL_GAMES_COUNT = gql`
   }
 `;
 
-export const GET_AVAILABLE_FILTER_OPTIONS = gql`
-  query GetAvailableFilterOptions(
-    $currentFilter: GameFilter!
-    $search: String
-  ) {
-    availableFilterOptions(filter: $currentFilter, search: $search) {
-      genres
-      categories
-      platforms
-      publishers
-      tags
-    }
-  }
-`;
-
 export const GAME_LIST_CARD_FRAGMENT = gql`
   fragment GameListCard on Game {
     id
@@ -63,7 +48,7 @@ export const GET_FILTERED_GAMES = gql`
     $filter: GameFilter
     $search: String
     $sortBy: String
-    $sortOrder: SortOrder # <-- enum, not String
+    $sortOrder: SortOrder
     $first: Int!
     $after: String
   ) {
@@ -75,7 +60,6 @@ export const GET_FILTERED_GAMES = gql`
       first: $first
       after: $after
     ) {
-      totalCount
       pageInfo {
         hasNextPage
         endCursor

@@ -3,6 +3,7 @@ import { useUserProfileForm } from "@/hooks/useUserProfileForm";
 
 interface UserProfileProps {
   user: {
+    id: string;
     username: string;
     email: string;
   };
@@ -21,13 +22,16 @@ export const Profile = ({ user, handleLogOut }: UserProfileProps) => {
     saveProfile,
   } = useUserProfileForm(user);
 
+  const isPrivileged =
+    user.id !== undefined && [1, 2, 3].includes(Number(user.id));
+
   return (
     <section
       className="flex bg-lightpurple dark:bg-darkpurple rounded-3xl flex-col justify-center items-center gap-4 p-10 md:p-20"
       aria-labelledby="profile-heading"
     >
       <h1 id="profile-heading" className="text-3xl">
-        Hi, {user.username}!
+        Hi, {user.username}! {isPrivileged && "(Admin User)"}
       </h1>
       <section className="w-full">
         {isEditing ? (

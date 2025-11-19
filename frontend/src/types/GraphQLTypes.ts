@@ -78,21 +78,6 @@ export type GetPromoGamesData = {
   }>;
 };
 
-export type AvailableFilterOptionsData = {
-  availableFilterOptions: {
-    genres: string[];
-    categories: string[];
-    platforms: string[];
-    publishers: string[];
-    tags: string[];
-  };
-};
-
-export type AvailableFilterOptionsVariables = {
-  currentFilter: GameFilter;
-  search?: string;
-};
-
 export type GamesConnectionNode = {
   id: string;
   name: string;
@@ -103,7 +88,6 @@ export type GamesConnectionNode = {
 
 export type GamesConnectionData = {
   gamesConnection?: {
-    totalCount: number;
     pageInfo: {
       hasNextPage: boolean;
       endCursor: string | null;

@@ -33,6 +33,7 @@ export const ResultFilters = ({
   filtersReady,
   filterError,
   countError,
+  countLoading,
 }: ResultFiltersProps & ReturnType<typeof useResultFilters>) => {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const sortFields = [
@@ -157,7 +158,11 @@ export const ResultFilters = ({
         className="flex items-center justify-between w-full"
         aria-label="Sort and match count"
       >
-        <MatchCount matchesCount={matchesCount} countError={countError} />
+        <MatchCount
+          matchesCount={matchesCount}
+          countError={countError}
+          countLoading={countLoading}
+        />
       </section>
 
       {/* Mobile filter drawer overlay */}

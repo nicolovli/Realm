@@ -60,22 +60,16 @@ export const useResultFiltersPagination = ({
     prevSignatureRef.current = datasetSignature;
   }, [datasetSignature, clear, setCurrentPage, startTransition]);
 
-  const {
-    connection,
-    pageInfo,
-    games,
-    gamesLoading,
-    gamesError,
-    shouldJumpToPage,
-  } = useGamesPageQuery({
-    currentFilter,
-    sortOption,
-    order,
-    currentPage,
-    searchQuery,
-    cursorByPage,
-    persistCache: persist,
-  });
+  const { pageInfo, games, gamesLoading, gamesError, shouldJumpToPage } =
+    useGamesPageQuery({
+      currentFilter,
+      sortOption,
+      order,
+      currentPage,
+      searchQuery,
+      cursorByPage,
+      persistCache: persist,
+    });
 
   const {
     isJumping,
@@ -96,7 +90,6 @@ export const useResultFiltersPagination = ({
     cursorByPage,
     persistCache: persist,
     matchesCountFromCountQuery,
-    connectionTotalCount: connection?.totalCount,
   });
 
   useEffect(() => {
@@ -110,11 +103,10 @@ export const useResultFiltersPagination = ({
     handleGoToPage,
   ]);
 
-  const matchesCount = useMemo(() => {
-    if (typeof connection?.totalCount === "number")
-      return connection.totalCount;
-    return matchesCountFromCountQuery ?? 0;
-  }, [connection?.totalCount, matchesCountFromCountQuery]);
+  const matchesCount = useMemo(
+    () => matchesCountFromCountQuery ?? 0,
+    [matchesCountFromCountQuery],
+  );
 
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil(matchesCount / PAGE_SIZE)),

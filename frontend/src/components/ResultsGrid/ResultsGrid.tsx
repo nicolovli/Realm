@@ -13,7 +13,7 @@ export type ResultsGridProps = {
 };
 
 export const ResultsGrid = ({
-  games,
+  games = [],
   loading, // "no data yet AND fetching"
   emptyState,
   error,

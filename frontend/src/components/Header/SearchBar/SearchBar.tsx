@@ -5,6 +5,7 @@ import { SearchBarInput, SearchSuggestionList } from "@/components/Header";
 import type { Game } from "@/types";
 import { useSearchSuggestions } from "@/hooks/search";
 import { buildPreviewState } from "@/lib/utils/images";
+import { toast } from "sonner";
 
 type SearchBarProps = {
   placeholder?: string;
@@ -13,7 +14,7 @@ type SearchBarProps = {
 };
 
 export const SearchBar = ({
-  placeholder = "Search for games, tags, genres...",
+  placeholder = "Search for games, tags or publishers...",
   className = "",
   onSearchSubmit,
 }: SearchBarProps) => {
@@ -79,6 +80,10 @@ export const SearchBar = ({
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     const trimmed = term.trim();
+    if (trimmed.length < 3) {
+      toast.error("Please enter at least 3 characters to search.");
+      return;
+    }
     if (trimmed) performSearch(trimmed);
   };
 
@@ -145,6 +150,10 @@ export const SearchBar = ({
     if (event.key === "Enter") {
       event.preventDefault();
       const trimmed = term.trim();
+      if (trimmed.length < 3) {
+        toast.error("Please enter at least 3 characters to search.");
+        return;
+      }
       if (trimmed) performSearch(trimmed);
     }
   };
@@ -168,7 +177,6 @@ export const SearchBar = ({
           onClear={handleClear}
         />
       </form>
-
       <SearchSuggestionList
         isOpen={open}
         suggestions={suggestions}

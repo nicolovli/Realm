@@ -44,7 +44,7 @@ export const Header = () => {
         {/* Dekstop navigation + search, hidden in mobile version */}
         <section className="hidden md:flex flex-1 items-center gap-6">
           <SearchBar
-            placeholder="Search for games, tags, genres..."
+            placeholder="Search for games, tags or publishers..."
             className="flex-1 max-w-md ml-6"
           />
 

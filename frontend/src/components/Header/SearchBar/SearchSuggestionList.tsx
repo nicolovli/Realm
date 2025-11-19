@@ -42,61 +42,32 @@ export const SearchSuggestionList = ({
   };
 
   const hasTerm = debouncedTerm.length > 0;
+  const shortTerm = debouncedTerm.length < 3;
 
-  const containerClass =
-    "absolute top-full left-0 right-0 mt-1 rounded-lg shadow-lg overflow-hidden z-50 max-h-80 overflow-y-auto";
+  const getMessage = () => {
+    if (error) {
+      console.error(error);
+      return "Could not load search results. Try again.";
+    }
+    if (!hasTerm) return "Start typing to search for games...";
+    if (loading) return "Searching...";
+    if (shortTerm) return "Please enter at least 3 characters.";
+    if (suggestions.length === 0)
+      return `No games found for "${debouncedTerm}"`;
+    return null;
+  };
 
-  if (error) {
+  const message = getMessage();
+
+  if (message) {
     return (
       <section
         role="listbox"
         aria-label="Search suggestions"
-        className={containerClass}
-      >
-        <p className="p-4 text-base text-red-600 dark:text-red-400 bg-lightsearchbargray dark:bg-darksearchbargray">
-          Could not load search results. Try again.
-        </p>
-      </section>
-    );
-  }
-
-  if (!hasTerm) {
-    return (
-      <section
-        role="listbox"
-        aria-label="Search suggestions"
-        className={containerClass}
-      >
-        <p className="p-4 text-base text-gray-500 dark:text-gray-400 bg-lightsearchbargray dark:bg-darksearchbargray">
-          Start typing to search for games...
-        </p>
-      </section>
-    );
-  }
-
-  if (loading) {
-    return (
-      <section
-        role="listbox"
-        aria-label="Search suggestions"
-        className={containerClass}
+        className="absolute top-full left-0 right-0 mt-1 rounded-lg shadow-lg overflow-hidden z-50 max-h-80 overflow-y-auto"
       >
         <p className="p-4 text-base text-gray-500 dark:text-gray-400 bg-lightsearchbargray dark:bg-darksearchbargray">
-          Searching...
-        </p>
-      </section>
-    );
-  }
-
-  if (suggestions.length === 0) {
-    return (
-      <section
-        role="listbox"
-        aria-label="Search suggestions"
-        className={containerClass}
-      >
-        <p className="p-4 text-base text-gray-500 dark:text-gray-400 bg-lightsearchbargray dark:bg-darksearchbargray">
-          No games found for "{debouncedTerm}"
+          {message}
         </p>
       </section>
     );
@@ -106,7 +77,7 @@ export const SearchSuggestionList = ({
     <section
       role="listbox"
       aria-label="Search suggestions"
-      className={containerClass}
+      className="absolute top-full left-0 right-0 mt-1 rounded-lg shadow-lg overflow-hidden z-50 max-h-80 overflow-y-auto"
     >
       {suggestions.map((game, index) => {
         const isActive = index === activeIndex;
