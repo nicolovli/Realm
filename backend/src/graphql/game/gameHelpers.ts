@@ -315,12 +315,6 @@ export const tupleAfterToWhere = (
     }
     const val = parseForCompare(f, raw);
 
-    if (f === "avgRating" && raw) {
-      console.log(
-        `[cursor] avgRating: raw="${raw}" -> val=${val}, op=${op}, dir=${dir}`,
-      );
-    }
-
     if (val === null) {
       if (op === "equals") {
         return { [f]: { equals: null } } as unknown as Prisma.GameWhereInput;

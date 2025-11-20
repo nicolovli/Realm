@@ -27,6 +27,18 @@ export const GET_FILTER_OPTIONS = gql`
   }
 `;
 
+export const GET_AVAILABLE_FILTER_OPTIONS = gql`
+  query GetAvailableFilterOptions($filter: GameFilter!, $search: String) {
+    availableFilterOptions(filter: $filter, search: $search) {
+      genres
+      categories
+      platforms
+      publishers
+      tags
+    }
+  }
+`;
+
 export const GET_TOTAL_GAMES_COUNT = gql`
   query GetTotalGamesCount($filter: GameFilter, $search: String) {
     gamesCount(filter: $filter, search: $search)

@@ -34,7 +34,19 @@ export const filterTypeDefs = gql`
     tags: [Tag!]!
   }
 
+  type AvailableFilterOptions {
+    genres: [String!]!
+    categories: [String!]!
+    platforms: [String!]!
+    publishers: [String!]!
+    tags: [String!]!
+  }
+
   extend type Query {
     filterOptions: FilterOptions!
+    availableFilterOptions(
+      filter: GameFilter!
+      search: String
+    ): AvailableFilterOptions!
   }
 `;

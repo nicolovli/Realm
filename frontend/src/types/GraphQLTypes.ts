@@ -64,6 +64,21 @@ export type FilterOptionsData = {
   };
 };
 
+export type AvailableFilterOptionsData = {
+  availableFilterOptions: {
+    genres: string[];
+    categories: string[];
+    platforms: string[];
+    publishers: string[];
+    tags: string[];
+  };
+};
+
+export type AvailableFilterOptionsVariables = {
+  filter: GameFilter | Record<string, never>;
+  search?: string;
+};
+
 export type GamesCountData = {
   gamesCount: number;
 };

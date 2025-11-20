@@ -1,13 +1,22 @@
 import { useMemo } from "react";
 import { useQuery } from "@apollo/client/react";
-import { GET_FILTER_OPTIONS, GET_TOTAL_GAMES_COUNT } from "@/lib/graphql";
+const useAvailableResultFiltersOnSearch = true;
+
+import {
+  GET_FILTER_OPTIONS,
+  GET_TOTAL_GAMES_COUNT,
+  GET_AVAILABLE_FILTER_OPTIONS,
+} from "@/lib/graphql";
 import type {
+  GameFilter,
   FilterOptionsData,
   GamesCountData,
   FiltersMap,
   FilterKey,
   UseResultFiltersDataArgs,
   UseResultFiltersDataReturn,
+  AvailableFilterOptionsData,
+  AvailableFilterOptionsVariables,
 } from "@/types";
 import { FILTER_GROUPS } from "@/constants/resultFiltersConstants";
 import { buildGameFilter, toSorted } from "@/lib/utils/resultFiltersHelpers";
@@ -37,6 +46,21 @@ export const useResultFiltersData = ({
       fetchPolicy: "cache-first",
     },
   );
+
+  const shouldFetchAvailability =
+    !searchQuery?.trim() || useAvailableResultFiltersOnSearch;
+
+  const { data: availableData, loading: loadingAvailability } = useQuery<
+    AvailableFilterOptionsData,
+    AvailableFilterOptionsVariables
+  >(GET_AVAILABLE_FILTER_OPTIONS, {
+    variables: {
+      filter: (currentFilter ?? ({} as GameFilter)) as GameFilter,
+      search: searchQuery,
+    },
+    skip: !shouldFetchAvailability,
+    fetchPolicy: "cache-first",
+  });
 
   const filters: FiltersMap = useMemo(() => {
     if (!filterData?.filterOptions)
@@ -68,19 +92,39 @@ export const useResultFiltersData = ({
     } satisfies FiltersMap;
   }, [filterData]);
 
-  const filtersWithAvailability: FiltersWithAvailability = useMemo(
-    () =>
-      (
-        Object.entries(filters) as Array<[FilterKey, FiltersMap[FilterKey]]>
-      ).reduce((acc, [key, options]) => {
-        acc[key] = options.map((name) => ({
-          name,
-          disabled: false,
-        }));
-        return acc;
-      }, {} as FiltersWithAvailability),
-    [filters],
-  );
+  const availabilitySets = useMemo(() => {
+    const available = availableData?.availableFilterOptions;
+    const makeSet = (arr?: string[]) => new Set(arr ?? []);
+    return {
+      genres: makeSet(available?.genres),
+      tags: makeSet(available?.tags),
+      categories: makeSet(available?.categories),
+      platforms: makeSet(available?.platforms),
+      publisher: makeSet(available?.publishers),
+    };
+  }, [availableData]);
+
+  const availabilityReady =
+    shouldFetchAvailability &&
+    !!availableData?.availableFilterOptions &&
+    !loadingAvailability;
+
+  const filtersWithAvailability: FiltersWithAvailability = useMemo(() => {
+    return (
+      Object.entries(filters) as Array<[FilterKey, FiltersMap[FilterKey]]>
+    ).reduce((acc, [key, options]) => {
+      const availableSet = availabilitySets[key];
+      const selectedSet = new Set(selectedFilters[key] ?? []);
+      acc[key] = options.map((name) => {
+        const disabled =
+          availabilityReady &&
+          !selectedSet.has(name) &&
+          !availableSet.has(name);
+        return { name, disabled };
+      });
+      return acc;
+    }, {} as FiltersWithAvailability);
+  }, [availabilityReady, availabilitySets, filters, selectedFilters]);
 
   const activeFilterEntries = useMemo(
     () =>
