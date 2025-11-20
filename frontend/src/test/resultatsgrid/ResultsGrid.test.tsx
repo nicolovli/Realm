@@ -1,5 +1,7 @@
+// src/test/resultatsgrid/ResultsGrid.test.tsx
 import { render, screen, cleanup } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { MockedProvider } from "@apollo/client/testing/react";
 import { ResultsGrid } from "@/components/ResultsGrid";
 import type { Game } from "@/types";
 
@@ -20,13 +22,22 @@ const makeGame = (overrides: Partial<Game> = {}): Game => ({
   ...overrides,
 });
 
+const renderWithProviders = (ui: React.ReactElement) =>
+  render(
+    <MockedProvider mocks={[]}>
+      <MemoryRouter>{ui}</MemoryRouter>
+    </MockedProvider>,
+  );
+
 describe("ResultsGrid", () => {
   afterEach(() => {
     cleanup();
   });
 
   it("renders 12 skeletons while loading", () => {
-    const { container } = render(<ResultsGrid games={[]} loading={true} />);
+    const { container } = renderWithProviders(
+      <ResultsGrid games={[]} loading={true} />,
+    );
     expect(container.querySelectorAll(".animate-pulse").length).toBe(12);
   });
 
@@ -37,11 +48,7 @@ describe("ResultsGrid", () => {
       makeGame({ id: "3", name: "C" }),
     ];
 
-    render(
-      <MemoryRouter>
-        <ResultsGrid games={games} loading={false} />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<ResultsGrid games={games} loading={false} />);
 
     const links = await screen.findAllByRole("link");
     expect(links.length).toBe(3);
@@ -51,7 +58,9 @@ describe("ResultsGrid", () => {
   });
 
   it("renders an error message when error prop is provided", () => {
-    render(<ResultsGrid games={[]} loading={false} error="Boom!" />);
+    renderWithProviders(
+      <ResultsGrid games={[]} loading={false} error="Boom!" />,
+    );
     expect(screen.getByText("Boom!")).toBeInTheDocument();
   });
 });

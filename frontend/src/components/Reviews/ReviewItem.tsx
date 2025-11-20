@@ -133,7 +133,12 @@ export const ReviewItem = ({
         </h3>
         {!editing ? (
           <p className="flex items-center gap-2">
-            <span className="opacity-80">Rating:</span>
+            <span
+              className="opacity-80"
+              style={{ transform: "translateY(1.2px)" }}
+            >
+              Rating:
+            </span>
             <StarRating value={review.star} />
           </p>
         ) : (

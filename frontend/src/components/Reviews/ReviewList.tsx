@@ -56,7 +56,10 @@ export const ReviewList = ({
   return (
     <section aria-live="polite" className="space-y-4">
       <header className="flex items-center gap-3">
-        <h2 className="text-lg text-black dark:text-white md:text-xl font-semibold">
+        <h2
+          className="text-lg text-black dark:text-white md:text-xl font-semibold"
+          style={{ transform: "translateY(2px)" }}
+        >
           {isUserReviews
             ? `My Reviews (${totalCount ?? 0})`
             : `${totalCount ?? 0} Reviews`}
@@ -64,7 +67,10 @@ export const ReviewList = ({
 
         {!isUserReviews && (
           <>
-            <span className="opacity-80 text-lg text-black dark:text-white">
+            <span
+              className="opacity-80 text-lg text-black dark:text-white"
+              style={{ transform: "translateY(2px)" }}
+            >
               — average {avg.toFixed(1)}
             </span>
             <StarRating value={avg || 0} readOnly />

@@ -108,9 +108,16 @@ export const SearchBar = ({
     setOpen(false);
     inputRef.current?.focus();
 
-    const params = new URLSearchParams(window.location.search);
-    params.delete("search");
-    navigate(`/games?${params.toString()}`);
+    if (location.pathname === "/games") {
+      const params = new URLSearchParams(
+        location.search || window.location.search,
+      );
+      params.delete("search");
+      params.delete("page");
+
+      const qs = params.toString();
+      navigate(qs ? `/games?${qs}` : "/games");
+    }
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {

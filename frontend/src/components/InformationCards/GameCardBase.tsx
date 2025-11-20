@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
-import { HOVER, FOCUS_VISIBLE } from "@/lib/classNames";
+import { HOVER, FOCUS_VISIBLE, SHADOW_MD } from "@/lib/classNames";
 import { toDate } from "@/lib/utils/date";
 import { HeartIcon } from "@/components/HeartIcon";
 import { AuthDialog } from "@/components/User";
@@ -13,6 +13,7 @@ export interface GameCardBaseProps {
   gameId: number;
   title: string;
   descriptionShort: string;
+  descriptionFull?: string;
   image: string;
   initialImage?: string;
   finalImage?: string;
@@ -28,6 +29,12 @@ export interface GameCardBaseProps {
   publishedStore?: string | null;
   "data-cy"?: string;
 }
+
+const stripTrailingLink = (value?: string) => {
+  if (typeof value !== "string") return "";
+  const trimmed = value.trim();
+  return trimmed.replace(/\shttps?:\/\/\S+$/gi, "").trim();
+};
 
 export const GameCardBase = ({
   gameId,
@@ -46,11 +53,13 @@ export const GameCardBase = ({
   rating,
   isPromoCard,
   publishedStore,
+  descriptionFull,
   "data-cy": dataCy,
 }: GameCardBaseProps) => {
   const [showAllTags, setShowAllTags] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
   const { setIsLoggedIn } = useAuthStatus();
 
   const isReversed = imagePosition === "left";
@@ -102,10 +111,18 @@ export const GameCardBase = ({
     };
   }, [resolvedInitial, resolvedFinal]);
 
+  const trimmedShort = stripTrailingLink(descriptionShort);
+  const trimmedFull = descriptionFull ? stripTrailingLink(descriptionFull) : "";
+  const baseDescription = trimmedShort || trimmedFull || "";
+  const canToggleDescription =
+    Boolean(trimmedFull) && trimmedFull.length > baseDescription.length;
+  const descriptionToShow =
+    showFullDescription && trimmedFull ? trimmedFull : baseDescription;
+
   return (
     <section
       data-cy={dataCy}
-      className={`flex flex-col md:flex-row items-center bg-lightpurple dark:bg-darkpurple rounded-4xl p-6 w-full ${
+      className={`flex flex-col md:flex-row items-center bg-lightpurple dark:bg-darkpurple rounded-4xl p-6 w-full ${SHADOW_MD} ${
         isReversed ? "md:flex-row-reverse" : ""
       }`}
     >
@@ -163,13 +180,17 @@ export const GameCardBase = ({
             </section>
           )}
 
+          {/* Rating and favorite */}
           <section className="flex justify-center items-center gap-2 mt-3">
             {rating !== 0 && (
-              <span className="text-xl">{rating?.toFixed(1)} </span>
+              <span
+                className="text-xl leading-none flex items-center"
+                style={{ transform: "translateY(2px)" }}
+              >
+                {rating?.toFixed(1)}
+              </span>
             )}
-            <span>
-              <StarRating value={rating ?? 0} readOnly />
-            </span>
+            <StarRating value={rating ?? 0} readOnly />
 
             {!isPromoCard && (
               <HeartIcon
@@ -191,8 +212,21 @@ export const GameCardBase = ({
           </section>
 
           {/* Description */}
-          <p className="text-sm md:text-base leading-snug">
-            {descriptionShort}
+          <p className="text-sm md:text-base leading-snug text-black dark:text-white whitespace-pre-line">
+            {descriptionToShow}
+            {canToggleDescription && (
+              <>
+                {" "}
+                <button
+                  type="button"
+                  aria-expanded={showFullDescription}
+                  onClick={() => setShowFullDescription((prev) => !prev)}
+                  className={`${FOCUS_VISIBLE} inline-flex items-center text-sm text-lightbuttonpurple font-semibold dark:text-darkbuttonpurple cursor-pointer underline dark:hover:brightness-200 hover:brightness-70`}
+                >
+                  {showFullDescription ? "View less" : "View more"}
+                </button>
+              </>
+            )}
           </p>
         </header>
 

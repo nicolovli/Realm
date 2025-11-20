@@ -9,16 +9,17 @@ export const HomePage = () => {
   }, []);
 
   return (
-    <main className="home">
-      <section className="w-[min(1600px,92%)] mx-auto" aria-label="Promo">
-        <PromoCard />
-      </section>
-
+    <main className={`home`}>
       <section
-        className="w-[min(1600px,92%)] mx-auto grid gap-[clamp(20px,3vw,32px)]"
-        aria-label="Featured games"
+        className={`w-[min(1600px,92%)] mx-auto flex flex-col gap-10 py-10`}
       >
-        <FeaturedSection />
+        <section aria-label="Promo">
+          <PromoCard />
+        </section>
+
+        <section aria-label="Featured games">
+          <FeaturedSection />
+        </section>
       </section>
     </main>
   );

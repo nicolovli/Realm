@@ -69,6 +69,7 @@ describe("Breadcrumbs", () => {
               name: "Test Game 7472",
               image: "test.jpg",
               descriptionShort: "A test game",
+              descriptionText: "A test game long description",
               publishedStore: "2024-01-01",
               platforms: ["PC"],
               developers: ["Test Studio"],

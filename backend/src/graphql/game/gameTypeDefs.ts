@@ -6,6 +6,7 @@ export const gameTypeDefs = gql`
     sid: Int!
     name: String!
     descriptionShort: String
+    descriptionText: String
     image: String
     publishedStore: String
     platforms: [String!]!

@@ -7,6 +7,7 @@ export const GET_GAME = gql`
       sid
       name
       descriptionShort
+      descriptionText
       image
       publishedStore
       platforms

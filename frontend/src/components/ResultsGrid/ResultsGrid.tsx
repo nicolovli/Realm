@@ -73,7 +73,7 @@ export const ResultsGrid = ({
 
     return (
       <li key={`placeholder-${idx}`} className="list-none invisible">
-        <div
+        <section
           className={
             "rounded-2xl ring-1 bg-lightpurple ring-gray dark:bg-darkpurple dark:ring-darkgray overflow-hidden block w-full"
           }
@@ -86,7 +86,7 @@ export const ResultsGrid = ({
   return (
     <>
       <ul
-        className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4"
+        className="grid grid-cols-2 sm:grid-cols-2 mdlg:grid-cols-3 gap-4"
         aria-live="polite"
         role="list"
         data-cy="results-grid"

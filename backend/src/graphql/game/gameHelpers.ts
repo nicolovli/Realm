@@ -193,6 +193,7 @@ export const gameListSelect: Prisma.GameSelect = {
   name: true,
   image: true,
   descriptionShort: true,
+  descriptionText: true,
   publishedStore: true,
   avgRating: true,
   reviewsCount: true,

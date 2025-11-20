@@ -82,7 +82,7 @@ export const StarRating = (props: StarRatingProps) => {
     const rounded = Math.round(value);
     return (
       <span
-        className={`inline-flex items-center`}
+        className={`inline-flex items-center leading-none`}
         role="img"
         aria-label={`${ariaLabel}: ${rounded} av 5 stjerner`}
       >
@@ -109,7 +109,7 @@ export const StarRating = (props: StarRatingProps) => {
     <fieldset
       role="radiogroup"
       aria-label={ariaLabel}
-      className={`inline-flex items-center`}
+      className={`inline-flex items-center leading-none`}
       onMouseLeave={() => setHover(null)}
       onKeyDown={(e) => {
         if (e.key === "ArrowLeft") {

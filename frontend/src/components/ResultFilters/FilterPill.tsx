@@ -10,6 +10,7 @@ import {
   HOVER,
   PILL_TRIGGER_BASE,
   DISABLED,
+  SHADOW_SM,
 } from "@/lib/classNames";
 import { useState } from "react";
 
@@ -45,8 +46,12 @@ export const FilterPill = ({
     onToggle(option);
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+  };
+
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
+    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger
         disabled={isDisabled}
         aria-label={`Filter by ${label}`}
@@ -56,6 +61,7 @@ export const FilterPill = ({
           ${HOVER}
           ${PILL_TRIGGER_BASE}
           ${DISABLED}
+          ${SHADOW_SM}
           md:bg-lightpurple md:dark:bg-darkpurple
         `}
         data-cy={`filter-pill-${label}`}
@@ -68,7 +74,11 @@ export const FilterPill = ({
         <DropdownMenuContent
           className="min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-80 overflow-y-auto bg-lightpurple dark:bg-darkpurple border-none z-100"
           align="start"
-          onCloseAutoFocus={(e) => e.preventDefault()}
+          onKeyDown={(e) => {
+            if (e.key === "Tab") {
+              setOpen(false);
+            }
+          }}
           data-cy={`filter-pill-menu-${label}`}
         >
           {optionsWithAll.map((option) => {

@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { BrowserRouter } from "react-router-dom";
+import { MockedProvider } from "@apollo/client/testing/react";
 import type { Game } from "@/types";
 import { Card } from "@/components/ResultsGrid";
 
@@ -19,7 +21,9 @@ const mockGame: Game = {
 };
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
-  <BrowserRouter>{children}</BrowserRouter>
+  <MockedProvider mocks={[]}>
+    <BrowserRouter>{children}</BrowserRouter>
+  </MockedProvider>
 );
 
 describe("Card component", () => {
@@ -38,7 +42,7 @@ describe("Card component", () => {
     expect(figcaption).toBeVisible();
   });
 
-  it("renders a button if onClick prop is provided", () => {
+  it("renders a button if onClick prop is provided", async () => {
     const handleClick = vi.fn();
     render(<Card game={mockGame} onClick={handleClick} />, {
       wrapper: Wrapper,
@@ -47,7 +51,8 @@ describe("Card component", () => {
     const button = screen.getByRole("button", { name: /open test game/i });
     expect(button).toBeInTheDocument();
 
-    // Instead of fireEvent, call onClick directly via prop check
-    button.getAttribute("onClick"); // can't call it directly, but we can assert it's present
+    const user = userEvent.setup();
+    await user.click(button);
+    expect(handleClick).toHaveBeenCalledTimes(1);
   });
 });

@@ -8,7 +8,7 @@ import {
   SearchBar,
   ToggleTheme,
 } from "@/components/Header";
-import { FOCUS_VISIBLE } from "@/lib/classNames";
+import { FOCUS_VISIBLE, SHADOW_SM } from "@/lib/classNames";
 
 // Navigation Item type for Header component
 export type NavigationItem = {
@@ -33,7 +33,9 @@ const navigation: NavigationItem[] = [
 export const Header = () => {
   return (
     <header className="sticky top-4 z-50 flex flex-col m-3 gap-2 w-[min(1600px,92%)] mx-auto">
-      <section className="bg-lightpurple dark:bg-darkpurple shadow-sm rounded-full flex flex-row justify-between items-center p-3 gap-1">
+      <section
+        className={`bg-lightpurple dark:bg-darkpurple rounded-full flex flex-row justify-between items-center p-3 gap-1 ${SHADOW_SM}`}
+      >
         <Link to="" aria-label="Homepage" className={FOCUS_VISIBLE}>
           <Logo
             size={50}

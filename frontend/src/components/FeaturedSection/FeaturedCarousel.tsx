@@ -147,11 +147,11 @@ export const FeaturedCarousel = ({
             setApi={setApi}
             className={`w-full`}
           >
-            <CarouselContent className="select-none gap-0 sm:gap-4 md:gap-6 lg:gap-8 ">
+            <CarouselContent className="select-none -mr-0 sm:-mr-4 md:-mr-6 lg:-mr-8">
               {logical.map((g) => (
                 <CarouselItem
                   key={g.id}
-                  className={`shrink-0 ${itemBasisClassName}`}
+                  className={`shrink-0 ${itemBasisClassName} mt-4 mb-8 pr-0  sm:pr-4 md:pr-6 lg:pr-8`}
                 >
                   <FeaturedCard data-cy="featured-game-card" game={g} />
                 </CarouselItem>
@@ -210,14 +210,13 @@ export const FeaturedCarousel = ({
 
         {/* Explore */}
         {onExploreAll && (
-          <Link
-            className="mt-6 flex justify-center focus-visible:outline-none"
-            to="/games"
-          >
-            <button onClick={onExploreAll} className={exploreBtnClass}>
-              Explore all games
-            </button>
-          </Link>
+          <section className="mt-6 flex justify-center mb-4">
+            <Link className="focus-visible:outline-none" to="/games">
+              <button onClick={onExploreAll} className={exploreBtnClass}>
+                Explore all games
+              </button>
+            </Link>
+          </section>
         )}
       </article>
     </section>

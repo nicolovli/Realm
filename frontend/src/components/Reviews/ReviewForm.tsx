@@ -113,7 +113,7 @@ export const ReviewForm = ({
             type="button"
             onClick={openLogin}
             disabled={false}
-            className={`${FOCUS_VISIBLE} hover:underline text-lightbuttonpurple dark:text-darkbuttonpurple font-semibold cursor-pointer`}
+            className={`${FOCUS_VISIBLE} underline dark:hover:brightness-200 hover:brightness-70 text-lightbuttonpurple dark:text-darkbuttonpurple font-semibold cursor-pointer`}
           >
             log in
           </button>{" "}
@@ -138,7 +138,12 @@ export const ReviewForm = ({
             </h3>
 
             <label className="flex items-center gap-2">
-              <span className="opacity-80">Rating</span>
+              <span
+                className="opacity-80"
+                style={{ transform: "translateY(1.2px)" }}
+              >
+                Rating:
+              </span>
               <StarRating value={star} onChange={setStar} />
             </label>
           </header>

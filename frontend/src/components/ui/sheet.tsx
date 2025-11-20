@@ -71,10 +71,10 @@ const SheetContent = forwardRef<
       <SheetPrimitive.Close
         className={
           FOCUS_VISIBLE +
-          "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background hover:opacity-100 disabled:pointer-events-none data-[state=open]:bg-secondary"
+          "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background hover:opacity-100 disabled:pointer-events-none data-[state=open]:bg-secondary  cursor-pointer"
         }
       >
-        <X className="h-4 w-4" />
+        <X className="h-4 w-4 hover:text-white" />
         <span className="sr-only">Close</span>
       </SheetPrimitive.Close>
       {children}

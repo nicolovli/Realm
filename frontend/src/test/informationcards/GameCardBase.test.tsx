@@ -36,6 +36,7 @@ describe("GameCardBase", () => {
     gameId: 1,
     title: "Test Game",
     descriptionShort: "This is a short description.",
+    descriptionFull: "This is a short description.",
     image: "test-image.jpg",
     tags: ["Action", "Adventure", "Puzzle", "RPG", "Horror", "Strategy"],
     developers: "Test Studio",
@@ -180,5 +181,53 @@ describe("GameCardBase", () => {
 
     await user.click(heartButton);
     expect(screen.getByTestId("auth-dialog")).toBeInTheDocument();
+  });
+
+  it("strips trailing links from description", () => {
+    render(
+      <MockedProvider mocks={[]}>
+        <MemoryRouter>
+          <GameCardBase
+            {...defaultProps}
+            descriptionShort="A teaser description https://example.com"
+          />
+        </MemoryRouter>
+      </MockedProvider>,
+    );
+
+    expect(
+      screen.getByText("A teaser description", { exact: false }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/https?:\/\/example\.com/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("expands description when clicking Read more", async () => {
+    const user = userEvent.setup();
+    render(
+      <MockedProvider mocks={[]}>
+        <MemoryRouter>
+          <GameCardBase
+            {...defaultProps}
+            descriptionFull="This is a short description. Extra context that should appear when expanded."
+          />
+        </MemoryRouter>
+      </MockedProvider>,
+    );
+
+    const toggleButton = screen.getByRole("button", { name: /View more/i });
+    expect(toggleButton).toBeInTheDocument();
+
+    await user.click(toggleButton);
+    expect(
+      screen.getByText(/Extra context that should appear when expanded./i),
+    ).toBeInTheDocument();
+
+    const collapseButton = screen.getByRole("button", { name: /View less/i });
+    await user.click(collapseButton);
+    expect(
+      screen.queryByText(/Extra context that should appear when expanded./i),
+    ).not.toBeInTheDocument();
   });
 });

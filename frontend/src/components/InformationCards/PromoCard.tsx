@@ -119,7 +119,7 @@ export const PromoCard = () => {
 
       {/* Dot navigation */}
       <nav
-        className="flex items-center justify-center gap-4 mt-2"
+        className="flex items-center justify-center gap-4 mt-4"
         aria-label="Carousel navigation"
       >
         {/* Previous button */}

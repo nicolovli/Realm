@@ -4,6 +4,7 @@ import {
   FOCUS_VISIBLE,
   HOVER,
   PILL_TRIGGER_BASE,
+  SHADOW_SM,
 } from "@/lib/classNames";
 
 export type ResultsPaginationProps = {
@@ -66,19 +67,20 @@ export const ResultsPagination = ({
         onClick={prevEnabled && !isJumping ? onPrev : undefined}
         disabled={!prevEnabled || isJumping}
         aria-label="Previous page"
-        className={`${PILL_TRIGGER_BASE} ${FOCUS_VISIBLE} ${HOVER} ${DISABLED} select-none`}
+        className={`${PILL_TRIGGER_BASE} ${FOCUS_VISIBLE} ${HOVER} ${DISABLED} ${SHADOW_SM} select-none`}
       >
         <span aria-hidden>←</span> Prev
       </button>
 
       {/* Center: always an input */}
       <form
-        className="
+        className={`
           flex items-center gap-2
           rounded-xl px-3 py-1.5
           bg-lightpurple dark:bg-darkpurple
-          border border-gray-200 dark:border-ashygray
-        "
+          border border-gray-200 dark:border-ashygray 
+          ${SHADOW_SM}
+        `}
         onSubmit={(e) => {
           e.preventDefault();
           submitDraft();

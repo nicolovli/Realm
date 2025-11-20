@@ -35,6 +35,7 @@ export const SearchBarInput = ({
         onKeyDown={onKeyDown}
         className="flex-1 w-full px-4 py-3 outline-none bg-transparent text-black dark:text-white placeholder-lightgray text-sm"
         name="search"
+        autoComplete="off"
       />
 
       {showClear && (

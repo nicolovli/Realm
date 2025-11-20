@@ -11,6 +11,7 @@ interface Game {
   id: number;
   name: string;
   descriptionShort: string;
+  descriptionText?: string | null;
   image: string;
   tags?: string[];
   developers?: string[];
@@ -80,6 +81,7 @@ export const InformationPage = () => {
           gameId={game.id!}
           title={game.name ?? ""}
           descriptionShort={game.descriptionShort ?? ""}
+          descriptionText={game.descriptionText ?? ""}
           image={game.image ?? ""}
           initialImage={previewImage}
           tags={game.tags ?? []}

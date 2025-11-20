@@ -103,16 +103,34 @@ export const HeartIcon = ({
   const label = liked ? "Remove from favorites" : "Add to favorites";
 
   const hoverClasses = liked
-    ? "hover:fill-pink-100 hover:stroke-pink-300 dark:hover:stroke-pink-300"
-    : "hover:fill-pink-200 hover:stroke-pink-500 dark:hover:stroke-pink-300"; // outline -> fill on hover
+    ? [
+        // Liked → clearly stronger / louder on hover
+        "hover:fill-pink-500 hover:stroke-pink-500",
+        "dark:hover:fill-pink-400 dark:hover:stroke-pink-400",
+        // subtle glow so it's obvious
+        "hover:drop-shadow-[0_0_10px_rgba(244,114,182,0.75)]",
+      ].join(" ")
+    : [
+        // Not liked → clear "like" affordance on hover
+        "hover:fill-pink-200 hover:stroke-pink-500",
+        "dark:hover:fill-pink-300 dark:hover:stroke-pink-300",
+      ].join(" ");
 
   const iconClass = `
-    cursor-pointer
-    transition-colors duration-150 ease-out outline-none
-    ${liked ? "fill-pink-300 stroke-black dark:stroke-white" : "fill-none stroke-black dark:stroke-white"}
-    ${hoverClasses}
-    ${FOCUS_VISIBLE}
-  `;
+  cursor-pointer
+  transition-colors transition-transform duration-150 ease-out
+  transform-gpu hover:scale-110 active:scale-95
+  outline-none
+  ${
+    liked
+      ? // base liked state: visible pink but not as strong as hover
+        "fill-pink-300 stroke-pink-400 dark:fill-pink-300 dark:stroke-pink-300"
+      : // base not liked: neutral outline only
+        "fill-none stroke-lightgray dark:stroke-darkgray"
+  }
+  ${hoverClasses}
+  ${FOCUS_VISIBLE}
+`;
 
   return liked ? (
     <HeartSolid

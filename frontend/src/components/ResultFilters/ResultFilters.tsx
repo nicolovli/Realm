@@ -99,9 +99,12 @@ export const ResultFilters = ({
       )}
 
       {/* Mobile filter drawer trigger */}
-      <section className="flex md:hidden w-full mb-2" aria-label="Open filters">
+      <section
+        className="flex mdlg:hidden w-full mb-2"
+        aria-label="Open filters"
+      >
         <button
-          className={`${PILL_TRIGGER_BASE} ${FOCUS_VISIBLE} bg-lightpurple dark:bg-darkpurple font-semibold w-30 justify-center`}
+          className={`${PILL_TRIGGER_BASE} ${FOCUS_VISIBLE} bg-lightpurple dark:bg-darkpurple w-30 justify-center`}
           onClick={() => setMobileDrawerOpen(true)}
           aria-label="Open filters"
         >
@@ -119,7 +122,7 @@ export const ResultFilters = ({
 
       {/* Filter pills (desktop) */}
       <nav
-        className="flex hidden md:flex w-full gap-2 pb-4"
+        className="flex hidden mdlg:flex w-full gap-2 pb-4"
         aria-label="Filter dropdowns"
       >
         {availableGroups.map(({ key, label }) => (

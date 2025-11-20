@@ -40,6 +40,44 @@ export const ICON_CLASSNAME =
 export const CARD_CONTAINER =
   "flex flex-col items-center w-full max-w-[1600px] mx-auto ";
 
+// Card border styling
+export const CARD_BORDER =
+  "bg-surface-elevated dark:bg-dark-surface-elevated " +
+  "border border-transparent " +
+  "shadow-md shadow-black/15 dark:shadow-black/40 " +
+  "hover:shadow-lg hover:shadow-black/25 dark:hover:shadow-black/60 " +
+  "transition-shadow " +
+  "relative overflow-hidden";
+
+/*
+  "bg-lightpurple dark:bg-darkpurple " +
+  "ring-1 ring-gray/60 dark:ring-darkgray/40 " +
+  "relative overflow-hidden";
+*/
+// Card hover gradient effect (for image)
+export const IMAGE_HOVER_GRADIENT =
+  "after:absolute after:bottom-0 after:left-0 after:right-0 " +
+  "after:h-24 after:bg-gradient-to-t after:from-black/40 after:to-transparent " +
+  "after:opacity-0 group-hover:after:opacity-100 after:transition-opacity after:duration-300 after:pointer-events-none";
+
 // Loading... or error classnames
 export const LOADINGandERROR =
   "text-black dark:text-white flex justify-center text-2xl ";
+
+// Elevated element shadow scaling (SM for buttons, small cards, chips, etc. MD for larger cards and containers, LG for modals, etc)
+export const SHADOW_SM = "shadow-sm dark:shadow-[0_2px_10px_rgb(0,0,0,0.2)]";
+export const SHADOW_MD = "shadow-md dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]";
+export const SHADOW_LG = "shadow-lg dark:shadow-[0_15px_50px_rgb(0,0,0,0.9)]";
+
+// Elevated container styling (lifts content from background with subtle styling)
+export const ELEVATED_CONTAINER =
+  "bg-surface dark:bg-dark-surface-elevated " +
+  "ring-1 ring-border-subtle/80 dark:ring-white/10 " +
+  "rounded-3xl p-6 md:p-8 " +
+  SHADOW_SM;
+
+// Sunken / embedded container
+export const SUNKEN_CONTAINER =
+  "bg-surface dark:bg-ashygray " + // slightly darker than page
+  "ring-1 ring-border-subtle/80 dark:ring-black/40 " +
+  "rounded-2xl shadow-inner";
