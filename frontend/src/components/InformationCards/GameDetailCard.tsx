@@ -1,7 +1,6 @@
 import { GameCardBase } from "@/components/InformationCards";
 import { CARD_CONTAINER } from "@/lib/classNames";
 
-// GameDetailCard component props
 export interface GameDetailCardProps {
   gameId: number;
   title: string;

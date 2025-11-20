@@ -1,14 +1,10 @@
-// Renders the match count and status message
-
-// MatchCount component props
 export interface MatchCountProps {
   matchesCount: number;
   countError?: string | null;
   countLoading?: boolean;
-  isSearch?: boolean; // Ny prop for å indikere søk
+  isSearch?: boolean;
 }
 
-// Displays the number of matches, or a message if there are none
 export const MatchCount = ({
   matchesCount,
   countError,

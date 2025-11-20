@@ -47,6 +47,7 @@ export const Card = ({
     <li className="list-none">
       <article className={`rounded-2xl ${CARD_BORDER} overflow-hidden`}>
         {onClick ? (
+          /* Interactive card */
           <button
             type="button"
             onClick={() => onClick(game)}
@@ -102,13 +103,13 @@ export const Card = ({
                 />
               )}
 
+              {/* Fallback state */}
               {(!imageSources || errored) && (
                 <section className="absolute inset-0 grid place-items-center text-xs text-zinc-600 dark:text-zinc-300">
                   <span>Image unavailable</span>
                 </section>
               )}
 
-              {/* Fade-in name on hover/focus */}
               <figcaption
                 className="
                   pointer-events-none z-10 absolute inset-x-0 bottom-0
@@ -123,6 +124,7 @@ export const Card = ({
             </figure>
           </button>
         ) : (
+          /* Link card */
           <Link
             to={`/games/${game.id}`}
             state={buildPreviewState(game.image)}
@@ -133,6 +135,7 @@ export const Card = ({
             <figure
               className={`relative w-full aspect-[16/9] ${IMAGE_HOVER_GRADIENT}`}
             >
+              {/* Loading shimmer */}
               {!isTouchDevice && (
                 <section
                   onMouseDown={(e) => {
@@ -177,6 +180,7 @@ export const Card = ({
                 />
               )}
 
+              {/* Fallback state */}
               {(!imageSources || errored) && (
                 <section className="absolute inset-0 grid place-items-center text-xs text-zinc-600 dark:text-zinc-300">
                   <span>Image unavailable</span>

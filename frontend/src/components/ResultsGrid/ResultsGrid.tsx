@@ -8,20 +8,19 @@ import { SkeletonCard } from "@/components/Skeletons";
 export type ResultsGridProps = {
   games: Game[];
   loading: boolean;
-  emptyState?: ReactNode; // optional custom empty UI
+  emptyState?: ReactNode;
   error?: string | null;
 };
 
 export const ResultsGrid = ({
   games = [],
-  loading, // "no data yet AND fetching"
+  loading,
   emptyState,
   error,
 }: ResultsGridProps) => {
   const PAGE_SIZE = 12;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  // Reset visible slice when the dataset length changes
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
   }, [games.length]);
@@ -58,6 +57,7 @@ export const ResultsGrid = ({
     );
   }
 
+  // Render either skeletons or real cards up to visibleCount
   const items = Array.from({
     length: shouldShowSkeleton
       ? PAGE_SIZE
@@ -71,6 +71,7 @@ export const ResultsGrid = ({
       return <Card key={game.id} game={game} />;
     }
 
+    // Preserve grid shape when data is missing
     return (
       <li key={`placeholder-${idx}`} className="list-none invisible">
         <section
@@ -85,6 +86,7 @@ export const ResultsGrid = ({
 
   return (
     <>
+      {/* Results list */}
       <ul
         className="grid grid-cols-2 sm:grid-cols-2 mdlg:grid-cols-3 gap-4"
         aria-live="polite"
@@ -98,6 +100,7 @@ export const ResultsGrid = ({
         games.length > 0 &&
         visibleCount < games.length && (
           <section className="flex justify-center mt-6">
+            {/* Load more button */}
             <button
               onClick={loadMore}
               className={`text-black dark:text-white px-6 py-2 rounded-full bg-lightpurple dark:bg-darkpurple text-sm md:text-base ${HOVER} ${FOCUS_VISIBLE}`}

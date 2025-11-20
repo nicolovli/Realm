@@ -30,7 +30,6 @@ export async function checkReviewOwnership(
   return review;
 }
 
-// Helper to recompute game aggregates after review changes
 export async function updateGameAggregates(
   gameId: number,
   tx: Prisma.TransactionClient,

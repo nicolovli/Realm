@@ -1,3 +1,4 @@
+// Script to seed users and reviews from JSON files into the database
 import { PrismaClient } from "@prisma/client";
 import * as fs from "fs";
 import * as path from "path";

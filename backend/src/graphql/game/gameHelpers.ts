@@ -33,7 +33,7 @@ export function normalizeSearchTerm(search: string): string {
     .trim();
 }
 
-// Build precise Prisma where-chunks for search
+// Build search clauses for each token
 export function buildSearchConditions(
   searchTerm: string,
 ): Prisma.GameWhereInput[] {
@@ -66,11 +66,10 @@ export function buildWhereFromFilter(
   filter?: GameFilter,
   search?: string,
 ): Prisma.GameWhereInput {
-  // Search combines normalized (symbol-stripped) and raw tokens to catch names
-  // with symbols while still hitting indexed text when possible.
+  // Mix normalized and raw tokens so symbol-heavy titles hit indexes
   const where: Prisma.GameWhereInput = {};
 
-  // Search (normalized + raw if changed)
+  // Build OR of normalized+raw tokens
   const raw = search?.trim();
   if (raw) {
     const norm = normalizeSearchTerm(raw);
@@ -88,8 +87,7 @@ export function buildWhereFromFilter(
       field: keyof Prisma.GameWhereInput,
       values: string[],
     ) =>
-      // For each selected value, require at least one matching relation row.
-      // AND-ing these ensures “must include ALL selected tags/platforms/etc.”.
+      // Each selected value must have a matching relation row
       values.map<Prisma.GameWhereInput>(
         (v) =>
           ({
@@ -117,8 +115,6 @@ export function buildWhereFromFilter(
 }
 
 export function planForSort(
-  // Tie-breakers matter for stable pagination: every branch ends with { id: 'desc' }.
-  // Rating sort: put unrated games after rated ones (hasRatings DESC) before sorting by avgRating.
   sortBy?: string | null,
   sortOrder?: "asc" | "desc" | null,
 ): {
@@ -134,6 +130,7 @@ export function planForSort(
     dir: "asc" | "desc";
   }>;
 } {
+  // Always end with id desc to keep pagination stable
   let dir: "asc" | "desc" =
     sortOrder === "asc" || sortOrder === "desc" ? sortOrder : "desc";
 
@@ -158,6 +155,7 @@ export function planForSort(
       };
     }
     case "rating": {
+      // Place unrated games after rated ones before sorting by avgRating
       return {
         orderBy: [
           { hasRatings: "desc" },
@@ -261,16 +259,13 @@ const parseForCompare = (
 };
 
 const hasEmptyAnd = (w: Prisma.GameWhereInput): boolean => {
-  // Helper used by cursor-building to discard no-op boolean branches.
+  // Used by cursor-building to discard empty boolean branches
   const maybeAnd = (w as { AND?: unknown }).AND;
   return Array.isArray(maybeAnd) && maybeAnd.length === 0;
 };
 
-// Boolean-aware comparator for hasRatings in the lexicographic chain
+// Comparator for hasRatings in the tuple chain
 const booleanBranch = (
-  // Special-case boolean in lexicographic comparisons:
-  // hasRatings DESC means true > false; to advance strictly "after", we generate
-  // the appropriate equals/advance limb.
   field: "hasRatings",
   dir: "asc" | "desc",
   raw: string,
@@ -281,14 +276,12 @@ const booleanBranch = (
     return { [field]: { equals: val } } as unknown as Prisma.GameWhereInput;
   }
 
-  // "advance" limb (strictly after this boolean value)
+  // Strictly-after limb for boolean comparisons
   if (dir === "desc") {
-    // DESC: true > false; strictly less than current
     return val
       ? ({ hasRatings: { equals: false } } as unknown as Prisma.GameWhereInput)
       : ({ AND: [] } as unknown as Prisma.GameWhereInput);
   } else {
-    // ASC: false < true; strictly greater than current
     return !val
       ? ({ hasRatings: { equals: true } } as unknown as Prisma.GameWhereInput)
       : ({ AND: [] } as unknown as Prisma.GameWhereInput);
@@ -296,9 +289,7 @@ const booleanBranch = (
 };
 
 export const tupleAfterToWhere = (
-  // Build an OR-of-ANDs that encodes “strictly after (k1,v1),(k2,v2),…”
-  // for mixed-type keys and dir. This mirrors SQL tuple comparison:
-  // (a,b,c) > (va,vb,vc)  =>  a>va OR (a=va AND b>vb) OR (a=va AND b=vb AND c>vc)
+  // Encode SQL-style tuple comparison
   schema: Array<{ field: SortableField; dir: "asc" | "desc" }>,
   values: string[],
 ): Prisma.GameWhereInput => {
@@ -338,9 +329,8 @@ export const tupleAfterToWhere = (
     const op: "gt" | "lt" = schema[i].dir === "desc" ? "lt" : "gt";
     const branch = oneCmp(schema[i].field, schema[i].dir, op, values[i]);
 
-    // skip empty boolean-advance limbs
+    // Skip empty boolean branches
     if (hasEmptyAnd(branch)) {
-      // no-op
     } else {
       andParts.push(branch);
       or.push({ AND: andParts });

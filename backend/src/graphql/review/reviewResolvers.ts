@@ -26,7 +26,6 @@ export const reviewResolvers = {
       const pageSize = first ?? 6;
       const take = pageSize + 1;
 
-      // Decode cursor
       let cursor: { id: number } | undefined = undefined;
       if (after) {
         const decoded = Buffer.from(after, "base64").toString("utf-8");
@@ -36,7 +35,6 @@ export const reviewResolvers = {
         }
       }
 
-      // Fetch reviews directly with cursor pagination
       const reviews = await ctx.prisma.review.findMany({
         where,
         take,

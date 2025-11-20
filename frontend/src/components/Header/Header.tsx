@@ -10,7 +10,6 @@ import {
 } from "@/components/Header";
 import { FOCUS_VISIBLE, SHADOW_SM } from "@/lib/classNames";
 
-// Navigation Item type for Header component
 export type NavigationItem = {
   title: string;
   href: string;

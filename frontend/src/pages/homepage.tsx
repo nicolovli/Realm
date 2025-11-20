@@ -3,7 +3,6 @@ import { PromoCard } from "@/components/InformationCards";
 import { useEffect } from "react";
 
 export const HomePage = () => {
-  // Scroll to top on mount
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, []);

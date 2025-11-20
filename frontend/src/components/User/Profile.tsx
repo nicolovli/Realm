@@ -35,6 +35,7 @@ export const Profile = ({ user, handleLogOut }: UserProfileProps) => {
       </h1>
       <section className="w-full">
         {isEditing ? (
+          /* Editing form */
           <section className="flex flex-col gap-4">
             <section className="flex flex-row gap-2 items-center">
               <label htmlFor="username" className="font-bold text-xl w-55">
@@ -108,6 +109,7 @@ export const Profile = ({ user, handleLogOut }: UserProfileProps) => {
             )}
           </section>
         ) : (
+          /* Read-only snapshot */
           <section className="flex flex-col gap-4">
             <section className="flex flex-row gap-2 items-center">
               <label
@@ -134,6 +136,7 @@ export const Profile = ({ user, handleLogOut }: UserProfileProps) => {
         )}
       </section>
 
+      {/* Action buttons */}
       <section className="flex flex-row gap-4">
         <button
           onClick={() => (isEditing ? void saveProfile() : startEditing())}

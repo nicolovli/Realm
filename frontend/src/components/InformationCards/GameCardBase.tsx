@@ -8,8 +8,7 @@ import { useAuthStatus } from "@/hooks/useAuthStatus";
 import { StarRating } from "@/components/Reviews";
 import { Link } from "react-router-dom";
 
-// GameCardBase component props
-export interface GameCardBaseProps {
+interface GameCardBaseProps {
   gameId: number;
   title: string;
   descriptionShort: string;
@@ -64,7 +63,6 @@ export const GameCardBase = ({
 
   const isReversed = imagePosition === "left";
 
-  // Handle window resize to update mobile state
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();

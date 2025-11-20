@@ -4,7 +4,7 @@ import { HttpLink } from "@apollo/client/link/http";
 
 const GRAPHQL_URL = import.meta.env.VITE_GRAPHQL_URL;
 
-// Auth link
+// Attaches Authorization header if a token exists
 const authLink = new SetContextLink((prevContext) => {
   const token =
     typeof localStorage !== "undefined" ? localStorage.getItem("token") : null;
@@ -23,7 +23,7 @@ const httpLink = new HttpLink({
   // credentials: "include", // uncomment if cookies needed
 });
 
-// Cache with type policies
+// Cache with custom merge policies for paginated fields
 const cache = new InMemoryCache({
   typePolicies: {
     Query: {

@@ -35,12 +35,7 @@ export const FeaturedSection = () => {
           ))}
         </section>
       ) : (
-        <FeaturedCarousel
-          items={top10}
-          onExploreAll={() => {
-            /* Navigate to all games */
-          }}
-        />
+        <FeaturedCarousel items={top10} onExploreAll={() => {}} />
       )}
     </section>
   );

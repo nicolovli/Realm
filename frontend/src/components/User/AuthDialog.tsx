@@ -10,41 +10,16 @@ import { useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { toast } from "sonner";
 import { Login, Register } from "@/components/User";
+import type {
+  CreateUserResponse,
+  CreateUserVariables,
+  LoginUserResponse,
+  LoginUserVariables,
+} from "@/types";
 
-// AuthDialog component props
-export interface AuthDialogProps {
+interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-interface CreateUserResponse {
-  createUser: {
-    id: string;
-    username: string;
-    email: string;
-  };
-}
-
-interface CreateUserVariables {
-  username: string;
-  email: string;
-  password: string;
-}
-
-interface LoginUserResponse {
-  loginUser: {
-    token: string;
-    user: {
-      id: string;
-      username: string;
-      email: string;
-    };
-  };
-}
-
-interface LoginUserVariables {
-  username: string;
-  password: string;
 }
 
 const darkmode = "text-black dark:text-white";
@@ -132,6 +107,7 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             ? "Jump back into Realm! Enter your portal credentials to continue your adventure."
             : "Create your portal and join the Realm universe!"}
         </DialogDescription>
+        {/* Form switch */}
         {mode === "login" ? (
           <Login onSubmit={handleLoginSubmit} />
         ) : (

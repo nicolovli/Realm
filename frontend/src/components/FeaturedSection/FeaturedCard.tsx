@@ -4,12 +4,10 @@ import type { FeaturedGame } from "@/types";
 import { memo, useState } from "react";
 import { Link } from "react-router-dom";
 
-// Card + title style constants
 const cardClass = `relative w-full overflow-hidden rounded-2xl ${CARD_BORDER} ${SHADOW_SM}`;
 
-const containerClass = `group relative block w-full mx-auto select-none cursor-pointer
-              sm:max-w-none max-[380px]:max-w-[300px] rounded-2xl ml-1
-            `;
+const containerClass =
+  "group relative block w-full mx-auto select-none cursor-pointer sm:max-w-none max-[380px]:max-w-[300px] rounded-2xl ml-1";
 
 const titleClass =
   "mt-2 px-3 text-sm font-medium text-zinc-900 dark:text-zinc-100 text-center truncate";

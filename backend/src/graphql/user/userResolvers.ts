@@ -13,12 +13,10 @@ import { clearGamesCache } from "../game/index.js";
 
 export const userResolvers = {
   Query: {
-    users: async () => {
-      // minimal projection
-      return prisma.user.findMany({
+    users: async () =>
+      prisma.user.findMany({
         select: { id: true, username: true, email: true },
-      });
-    },
+      }),
     me: async (
       _parent: unknown,
       _args: unknown,
@@ -167,7 +165,6 @@ export const userResolvers = {
         return user;
       });
 
-      // invalidate game cache so rating/popularity updates are reflected immediately
       clearGamesCache();
 
       return result;

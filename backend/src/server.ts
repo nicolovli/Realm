@@ -1,4 +1,3 @@
-// src/server.ts
 import { ApolloServer } from "@apollo/server";
 import { typeDefs, resolvers } from "./graphql/index.js";
 import { prisma } from "./db.js";
@@ -10,9 +9,10 @@ import cors from "cors";
 import compression from "compression";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
+// Apollo context shared with resolvers
 type Context = {
   prisma: PrismaClient;
-  userId?: number; // <-- make optional so number | undefined is valid
+  userId?: number;
 };
 
 const app = express();
@@ -25,6 +25,7 @@ const server = new ApolloServer<Context>({
 const start = async () => {
   await server.start();
 
+  // GraphQL endpoint with CORS, JSON parsing, and auth-aware context
   app.use(
     "/graphql",
     cors({
@@ -38,7 +39,7 @@ const start = async () => {
     express.json(),
     expressMiddleware<Context>(server, {
       context: async ({ req }: { req: Request }): Promise<Context> => {
-        const auth = req.headers.authorization; // e.g. "Bearer <token>"
+        const auth = req.headers.authorization;
         const token = auth?.startsWith("Bearer ") ? auth.slice(7) : undefined;
 
         let userId: number | undefined = undefined;
@@ -64,6 +65,7 @@ const start = async () => {
     compression(),
   );
 
+  // Simple health endpoint
   app.get("/", (_req, res) => {
     res.send("Server is running");
   });

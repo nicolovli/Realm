@@ -1,4 +1,4 @@
-// scripts/importJson.ts (TypeScript)
+// Script to import game data from steamdb.json into the database
 import fs from "fs";
 import path from "path";
 import sanitizeHtml from "sanitize-html";
@@ -29,12 +29,6 @@ function mapToConnectOrCreate(arr: unknown[]) {
     create: { name: String(name) },
   }));
 }
-
-// // Helper function to convert to string or null
-// function toStringOrNull(val: unknown): string | null {
-//   if (val === undefined || val === null || val === "") return null;
-//   return String(val);
-// }
 
 function toArray(val: unknown): string[] {
   if (!val) return [];

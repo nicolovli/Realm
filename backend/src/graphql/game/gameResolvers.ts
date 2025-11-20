@@ -27,7 +27,7 @@ import {
 
 type GameRow = Prisma.GameGetPayload<{ select: typeof gameListSelect }>;
 
-const MAX_TAKE = 50;
+const MAX_TAKE = 50; // Hard cap for list fetches
 
 export const gameResolvers = {
   Query: {
@@ -157,6 +157,7 @@ export const gameResolvers = {
         offset?: number | null;
       },
     ) => {
+      // Cursor-paginated game list for the discovery grid
       const first = Math.min(args.first ?? 12, MAX_TAKE);
 
       const baseWhere = buildWhereFromFilter(

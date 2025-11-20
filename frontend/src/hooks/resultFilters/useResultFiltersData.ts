@@ -1,3 +1,4 @@
+// Fetches filters counts, then merges them with the current selections.
 import { useMemo } from "react";
 import { useQuery } from "@apollo/client/react";
 const useAvailableResultFiltersOnSearch = true;

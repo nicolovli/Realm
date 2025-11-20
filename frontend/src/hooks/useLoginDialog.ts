@@ -1,3 +1,4 @@
+// Controls the login modal state and syncs auth status when it closes with a new token.
 import { useState } from "react";
 import { useAuthStatus } from "@/hooks/useAuthStatus";
 

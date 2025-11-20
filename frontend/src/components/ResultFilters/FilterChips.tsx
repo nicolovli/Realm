@@ -13,7 +13,6 @@ export const FilterChips = ({
   onRemove,
   onClearAll,
 }: FilterChipsProps) => {
-  // Don't render if no active filters
   if (!hasActiveFilters) return null;
 
   return (

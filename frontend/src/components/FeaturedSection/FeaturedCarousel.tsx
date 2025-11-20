@@ -3,7 +3,6 @@ import { FeaturedCard } from "@/components/FeaturedSection";
 import { Link } from "react-router-dom";
 import type { FeaturedGame } from "@/types";
 
-// ⬇️ shadcn/ui (Embla) carousel
 import {
   Carousel,
   CarouselContent,
@@ -14,9 +13,8 @@ import {
 } from "@/components/ui/carousel";
 import { FOCUS_VISIBLE, HOVER } from "@/lib/classNames";
 
-// FeaturedCarousel component props
 export type FeaturedCarouselProps = {
-  items: FeaturedGame[]; // pass up to 10 items (or more, loop handles it)
+  items: FeaturedGame[];
   title?: string;
   onExploreAll?: () => void;
   itemBasisClassName?: string;
@@ -44,7 +42,6 @@ export const exploreBtnClass =
   HOVER +
   FOCUS_VISIBLE;
 
-// ====== helpers ======
 function useAnyHover() {
   const get = () =>
     typeof window !== "undefined" &&
@@ -85,7 +82,7 @@ export const FeaturedCarousel = ({
   onExploreAll,
   itemBasisClassName = "basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4",
 }: FeaturedCarouselProps) => {
-  const logical = useMemo(() => items.slice(0, 10), [items]); // keep your 10 cap
+  const logical = useMemo(() => items.slice(0, 10), [items]);
   const [api, setApi] = useState<CarouselApi | null>(null);
   const [selected, setSelected] = useState(0);
   const [snapCount, setSnapCount] = useState(0);
@@ -96,7 +93,6 @@ export const FeaturedCarousel = ({
   const regionRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    // show only on true-touch environments
     setHint(!anyHover && isCoarse);
   }, [anyHover, isCoarse]);
 
@@ -105,7 +101,7 @@ export const FeaturedCarousel = ({
 
     const onSelect = () => setSelected(api.selectedScrollSnap());
     const onInit = () => {
-      setSnapCount(api.scrollSnapList().length); // number of snaps varies by item basis
+      setSnapCount(api.scrollSnapList().length);
       setSelected(api.selectedScrollSnap());
     };
 
@@ -180,7 +176,6 @@ export const FeaturedCarousel = ({
             <p
               className="pointer-events-none absolute right-3 top-3 rounded-full px-2 py-1 text-xs text-white"
               style={{
-                // matches your oklab color-mix intent
                 backgroundColor: "color-mix(in oklab, black 70%, transparent)",
               }}
             >
@@ -208,7 +203,6 @@ export const FeaturedCarousel = ({
           })}
         </nav>
 
-        {/* Explore */}
         {onExploreAll && (
           <section className="mt-6 flex justify-center mb-4">
             <Link className="focus-visible:outline-none" to="/games">

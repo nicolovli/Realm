@@ -8,13 +8,13 @@ import {
 } from "@/lib/classNames";
 
 export type ResultsPaginationProps = {
-  page: number; // currentPage from hook
-  totalPages: number; // from hook
-  canPrev?: boolean; // default: page > 1
-  canNext?: boolean; // default: page < totalPages (or use hasMore)
-  onPrev: () => void; // handlePrevPage
-  onNext: () => void; // handleNextPage
-  onPage?: (page: number) => void; // optional direct jump
+  page: number;
+  totalPages: number;
+  canPrev?: boolean;
+  canNext?: boolean;
+  onPrev: () => void;
+  onNext: () => void;
+  onPage?: (page: number) => void;
   isJumping?: boolean;
 };
 
@@ -32,17 +32,15 @@ export const ResultsPagination = ({
   const nextEnabled = canNext ?? page < Math.max(totalPages, 1);
   const total = Math.max(totalPages, 1);
 
-  // Always-visible input state
   const [draft, setDraft] = useState<number>(page);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Keep input synced with external page changes
   useEffect(() => {
     setDraft(page);
   }, [page]);
 
   const clamp = (n: number) => {
-    const v = Number.isFinite(n) ? n : page; // fallback to current page
+    const v = Number.isFinite(n) ? n : page;
     return Math.max(1, Math.min(total, Math.floor(v)));
   };
 
@@ -97,14 +95,14 @@ export const ResultsPagination = ({
           <input
             id="page-input"
             ref={inputRef}
-            type="text" // no spinners anywhere
+            type="text"
             inputMode="numeric"
             aria-label="Page number"
             disabled={isJumping || !onPage}
             min={1}
             max={total}
             value={Number.isNaN(draft) ? "" : draft}
-            readOnly={!onPage} // if no handler, show but don't allow edits
+            readOnly={!onPage}
             aria-disabled={!onPage}
             onChange={(e) =>
               setDraft(
@@ -121,7 +119,7 @@ export const ResultsPagination = ({
                 inputRef.current?.select();
               }
             }}
-            onBlur={cancelDraft} // cancel on blur to avoid accidental jumps
+            onBlur={cancelDraft}
             className={`${DISABLED} ${FOCUS_VISIBLE} w-[4.5ch] px-2 py-1 rounded-md outline-none bg-lightsearchbargray dark:bg-darksearchbargray text-black dark:text-white text-sm text-center disabled:opacity-80 disabled:cursor-not-allowed`}
           />
         </section>

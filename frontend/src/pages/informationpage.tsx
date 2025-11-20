@@ -5,7 +5,7 @@ import { GameDetailCard } from "@/components/InformationCards";
 import { GameCardSkeleton } from "@/components/Skeletons";
 import { ReviewList, ReviewForm } from "@/components/Reviews";
 import { useEffect } from "react";
-import { useReviewsMeta } from "@/hooks/useReviews";
+import { useReviewsMeta } from "@/hooks/reviews";
 
 interface Game {
   id: number;
@@ -21,7 +21,6 @@ interface Game {
 }
 
 export const InformationPage = () => {
-  // Scroll to top on mount
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, []);

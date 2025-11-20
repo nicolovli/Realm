@@ -17,7 +17,6 @@ import {
 } from "@/lib/graphql";
 import type { UserData } from "@/types";
 
-// HeartIcon component props
 export type HeartIconProps = {
   size?: number;
   gameId: number;
@@ -45,7 +44,6 @@ export const HeartIcon = ({
 
   const user = data?.me;
 
-  // Track if query failed
   useEffect(() => {
     if (error) {
       setHasError(true);
@@ -53,14 +51,12 @@ export const HeartIcon = ({
     }
   }, [error]);
 
-  // Update liked state when user data changes
   useEffect(() => {
     if (user?.favorites) {
       setLiked(user.favorites.some((fav) => Number(fav.id) === gameId));
     }
   }, [user, gameId]);
 
-  // Refetch user when login state changes
   useEffect(() => {
     if (isLoggedIn) {
       refetch();
@@ -104,14 +100,13 @@ export const HeartIcon = ({
 
   const hoverClasses = liked
     ? [
-        // Liked → clearly stronger / louder on hover
+        // Liked
         "hover:fill-pink-500 hover:stroke-pink-500",
         "dark:hover:fill-pink-400 dark:hover:stroke-pink-400",
-        // subtle glow so it's obvious
         "hover:drop-shadow-[0_0_10px_rgba(244,114,182,0.75)]",
       ].join(" ")
     : [
-        // Not liked → clear "like" affordance on hover
+        // Not liked
         "hover:fill-pink-200 hover:stroke-pink-500",
         "dark:hover:fill-pink-300 dark:hover:stroke-pink-300",
       ].join(" ");
@@ -123,9 +118,9 @@ export const HeartIcon = ({
   outline-none
   ${
     liked
-      ? // base liked state: visible pink but not as strong as hover
+      ? // base liked state:
         "fill-pink-300 stroke-pink-400 dark:fill-pink-300 dark:stroke-pink-300"
-      : // base not liked: neutral outline only
+      : // base not liked:
         "fill-none stroke-lightgray dark:stroke-darkgray"
   }
   ${hoverClasses}

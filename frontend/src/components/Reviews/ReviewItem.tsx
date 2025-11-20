@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import { StarRating, ReviewTextArea, type Review } from "@/components/Reviews";
+import { StarRating, ReviewTextArea } from "@/components/Reviews";
+import type { Review } from "@/types";
 import { toast } from "sonner";
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import {
@@ -119,6 +120,7 @@ export const ReviewItem = ({
       className={`bg-lightpurple dark:bg-darkpurple rounded-4xl p-6 w-full text-black dark:text-white ${isMine && "mb-10"}`}
       aria-labelledby={`review-${review.id}-heading`}
     >
+      {/* Header with user + rating */}
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h3
           id={`review-${review.id}-heading`}
@@ -149,6 +151,7 @@ export const ReviewItem = ({
         )}
       </header>
       {!editing ? (
+        /* Static description */
         <section className="mt-4">
           <h4 className="sr-only">Review</h4>
           <p className="bg-gray-100 dark:bg-white/10 rounded-3xl p-4 leading-relaxed outline-none break-words overflow-wrap-break-word">
@@ -156,9 +159,10 @@ export const ReviewItem = ({
           </p>
         </section>
       ) : (
+        /* Editing state */
         <section className="mt-4">
           <label htmlFor={`edit-review-${review.id}`} className="sr-only">
-            Edit your review
+            Edit {isMine ? "your" : ""} review
           </label>
           <ReviewTextArea
             id={`edit-review-${review.id}`}
@@ -169,6 +173,7 @@ export const ReviewItem = ({
         </section>
       )}
 
+      {/* Footer with meta + actions */}
       <footer
         className={`mt-3 text-xs flex md:flex-row items-center justify-between ${showDeleteConfirm && "flex-col"}`}
       >
@@ -232,7 +237,7 @@ export const ReviewItem = ({
                   disabled={updating}
                   className={`${FOCUS_VISIBLE} ${HOVER} mt-3 text-lg px-4 py-1 rounded-full cursor-pointer text-white bg-lightbuttonpurple dark:bg-darkbuttonpurple whitespace-nowrap ${showDeleteConfirm && "hidden md:inline-flex"}`}
                 >
-                  Edit your review
+                  Edit {isMine ? "your" : ""} review
                 </button>
               </span>
             ) : (

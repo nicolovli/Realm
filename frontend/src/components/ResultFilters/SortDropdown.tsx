@@ -1,4 +1,3 @@
-// Sort dropdown for result header (desktop and mobile)
 import { ChevronDown } from "lucide-react";
 import type { SortOptionValue } from "@/constants/resultFiltersConstants";
 import {
@@ -15,7 +14,6 @@ import {
 } from "@/lib/classNames";
 import { useState } from "react";
 
-// SortDropdown component props
 export interface SortDropdownProps {
   sortOption: SortOptionValue;
   order: "asc" | "desc";
@@ -29,7 +27,6 @@ export interface SortDropdownProps {
   }>;
 }
 
-// Renders the sort dropdown trigger and menu
 export const SortDropdown = ({
   sortOption,
   order,
@@ -49,6 +46,7 @@ export const SortDropdown = ({
 
   return (
     <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+      {/* Dropdown trigger */}
       <DropdownMenuTrigger
         className={`
           ${FOCUS_VISIBLE}
@@ -66,6 +64,7 @@ export const SortDropdown = ({
         <ChevronDown className="h-4 w-4" />
       </DropdownMenuTrigger>
 
+      {/* Sort option list */}
       <DropdownMenuContent
         className="min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-80 overflow-y-auto bg-lightpurple dark:bg-darkpurple border-gray-200 dark:border-gray-700 z-100"
         align="end"

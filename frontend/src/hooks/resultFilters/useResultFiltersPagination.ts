@@ -1,5 +1,4 @@
 // Orchestrates paginated game retrieval by wiring cache, queries, and jump handlers together.
-
 import { useEffect, useMemo, useRef } from "react";
 import { useApolloClient } from "@apollo/client/react";
 import type {

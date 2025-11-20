@@ -1,11 +1,8 @@
-// components/Reviews/StarRating.tsx
 import { useId, useState } from "react";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
 import { FOCUS_VISIBLE } from "@/lib/classNames";
 
-// StarRating component props
-// Supports both read-only and interactive modes
 type StarRatingBaseProps = {
   value: number;
   size?: number;
@@ -34,6 +31,7 @@ export const StarRating = (props: StarRatingProps) => {
   const generatedId = useId();
   const [hover, setHover] = useState<number | null>(null);
 
+  // Base star element
   const commonStar = (fillPercent: number, key: number) => {
     const pct = Math.max(0, Math.min(100, Math.round(fillPercent)));
     return (

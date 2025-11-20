@@ -37,7 +37,6 @@ export const FilterPill = ({
   const isReady = filtersReady && options.length > 0;
   const isDisabled = disabled || isLoading || !isReady;
 
-  // Add "All" as first option if ready
   const optionsWithAll = isReady
     ? [{ name: "All", disabled: false }, ...options]
     : [];
@@ -52,6 +51,7 @@ export const FilterPill = ({
 
   return (
     <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+      {/* Pill trigger */}
       <DropdownMenuTrigger
         disabled={isDisabled}
         aria-label={`Filter by ${label}`}
@@ -70,6 +70,7 @@ export const FilterPill = ({
         <ChevronDown className="h-4 w-4" />
       </DropdownMenuTrigger>
 
+      {/* Dropdown with options */}
       {isReady && (
         <DropdownMenuContent
           className="min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-80 overflow-y-auto bg-lightpurple dark:bg-darkpurple border-none z-100"

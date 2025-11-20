@@ -6,7 +6,6 @@ import {
 } from "../utils/cacheKey.js";
 
 // Cache of game list pages keyed by normalized query args.
-// TTL + bounded size. Every get re-inserts the entry to approximate LRU.
 
 export type GamesCacheData = GameWithRelations[];
 
