@@ -147,6 +147,10 @@ export const reviewResolvers = {
       const userId = ctx.userId;
       checkAuthenticated(userId);
 
+      // Edge case & validation handling
+      validateStar(star);
+      validateDescription(description);
+
       try {
         const result = await ctx.prisma.$transaction(
           async (tx: Prisma.TransactionClient) => {
