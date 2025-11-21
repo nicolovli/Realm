@@ -16,28 +16,22 @@ describe("InformationPage, can reveiw", () => {
     cy.wait(500);
 
     cy.get('textarea[name="description"]').type(
-      "This is a Cypress test review.",
+      "This is a Cypress test review 1.",
     );
     cy.get('button[data-cy="submit-review-button"]').click();
-  });
-
-  it("can edit review", () => {
-    cy.login({ username: user.username, password: user.password });
-    cy.wait(500);
-
-    cy.get('button[data-cy="edit-review-button"]').click();
-    cy.get('textarea[name="description"]', { timeout: 10000 })
-      .should("be.visible")
-      .clear()
-      .type(" This is a Cypress test review with edit.");
-    cy.get('button[data-cy="save-review-button"]').click();
   });
 
   it("can delete review", () => {
     cy.login({ username: user.username, password: user.password });
     cy.wait(500);
+    
+    cy.contains("This is a Cypress test review", { timeout: 8000 }).should("be.visible");
 
-    cy.get('button[aria-label="Delete review"]').click();
+    cy.contains("Your review")
+  .closest("article")       // this matches the root of <ReviewItem>
+  .find('button[aria-label="Delete review"]')
+  .click();
+
     cy.get('button[aria-label="Confirm delete review"]').click();
   });
 

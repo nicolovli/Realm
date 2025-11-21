@@ -169,13 +169,14 @@ export const SearchBar = ({
     <section ref={wrapperRef} className={`relative w-full ${className}`}>
       <form
         role="search"
+        data-cy="search-form"
         aria-label="Search games"
-        data-cy="search-input"
         onSubmit={handleSubmit}
         className="relative w-full"
       >
         <SearchBarInput
           term={term}
+          data-cy="search-input"
           placeholder={placeholder}
           inputRef={inputRef}
           onChange={handleInputChange}
