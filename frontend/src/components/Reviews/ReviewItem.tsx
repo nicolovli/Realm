@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import { StarRating, ReviewTextArea, type Review } from "@/components/Reviews";
+import { StarRating, ReviewTextArea } from "@/components/Reviews";
+import type { Review } from "@/types";
 import { toast } from "sonner";
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import {
@@ -26,6 +27,8 @@ export const ReviewItem = ({
   userId?: string;
 }) => {
   const isMine = Number(review.user?.id) === Number(currentUserId);
+  const isPrivileged =
+    currentUserId !== undefined && [1, 2, 3].includes(currentUserId);
 
   // Date parsing
   const created = toDate(review.createdAt);
@@ -85,7 +88,7 @@ export const ReviewItem = ({
         },
       });
       invalidateGameLists();
-      toast.success("Review updated!");
+      toast.info("Review updated!");
       setEditing(false);
     } catch (error) {
       console.error(`[Frontend] Error updating review:`, error);
@@ -105,7 +108,7 @@ export const ReviewItem = ({
     try {
       await deleteReview({ variables: { id: Number(review.id) } });
       invalidateGameLists();
-      toast.success("Review deleted");
+      toast.info("Review deleted");
     } catch (error) {
       console.error(`[Frontend] Error deleting review:`, error);
       toast.error("Could not delete the review.");
@@ -117,21 +120,35 @@ export const ReviewItem = ({
       className={`bg-lightpurple dark:bg-darkpurple rounded-4xl p-6 w-full text-black dark:text-white ${isMine && "mb-10"}`}
       aria-labelledby={`review-${review.id}-heading`}
     >
-      <header className="flex flex-wrap items-center justify-between gap-3">
+      {/* Header with user + rating + time */}
+      <header className="flex flex-wrap items-center justify-between gap-4">
         <h3
           id={`review-${review.id}-heading`}
           className="text-base md:text-lg font-semibold"
         >
           <span>{review.user?.username ?? "Anon"}</span>
           {isMine && (
-            <span className="ml-2 text-lg px-3 py-1 rounded-full bg-white text-black dark:bg-white/80">
+            <span className="ml-2 text-lg px-3 py-1 rounded-full bg-white text-black dark:bg-white/80 whitespace-nowrap">
               Your review
             </span>
           )}
+          <time
+            className={`ml-3 mt-3 text-black dark:text-white`}
+            dateTime={isoForAttr}
+            title={created?.toLocaleString("nb-NO")}
+          >
+            {pretty}
+          </time>
         </h3>
+
         {!editing ? (
           <p className="flex items-center gap-2">
-            <span className="opacity-80">Rating:</span>
+            <span
+              className="opacity-80"
+              style={{ transform: "translateY(1.2px)" }}
+            >
+              Rating:
+            </span>
             <StarRating value={review.star} />
           </p>
         ) : (
@@ -142,6 +159,7 @@ export const ReviewItem = ({
         )}
       </header>
       {!editing ? (
+        /* Static description */
         <section className="mt-4">
           <h4 className="sr-only">Review</h4>
           <p className="bg-gray-100 dark:bg-white/10 rounded-3xl p-4 leading-relaxed outline-none break-words overflow-wrap-break-word">
@@ -149,9 +167,10 @@ export const ReviewItem = ({
           </p>
         </section>
       ) : (
+        /* Editing state */
         <section className="mt-4">
           <label htmlFor={`edit-review-${review.id}`} className="sr-only">
-            Edit your review
+            Edit {isMine ? "your" : ""} review
           </label>
           <ReviewTextArea
             id={`edit-review-${review.id}`}
@@ -162,31 +181,34 @@ export const ReviewItem = ({
         </section>
       )}
 
+      {/* Footer with meta + actions */}
       <footer
-        className={`mt-3 text-xs flex md:flex-row items-center justify-between ${showDeleteConfirm && "flex-col"}`}
+        className={`mt-3 text-xs flex md:flex-row items-center justify-end`}
       >
-        <time
-          className={`mt-3 text-black dark:text-white opacity-70 ${showDeleteConfirm && "w-full md:w-auto text-left"}`}
-          dateTime={isoForAttr}
-          title={created?.toLocaleString("nb-NO")}
-        >
-          {pretty}
-        </time>
-
-        {isMine && (
+        {(isMine || isPrivileged) && (
           <>
             {!editing ? (
               <span className={`flex items-center gap-2`}>
                 {!showDeleteConfirm ? (
-                  <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    disabled={deleting}
-                    className={`${FOCUS_VISIBLE} ${HOVER} mt-3 text-lg px-4 py-1 rounded-full cursor-pointer text-white dark:text-white bg-black/20 dark:bg-white/20`}
-                    aria-label="Delete review"
-                    title="Delete review"
-                  >
-                    Delete
-                  </button>
+                  <section className="flex items-center gap-2 flex-wrap">
+                    <button
+                      onClick={() => setShowDeleteConfirm(true)}
+                      disabled={deleting}
+                      className={`${FOCUS_VISIBLE} ${HOVER} mt-3 text-lg px-4 py-1 rounded-full cursor-pointer text-white dark:text-white bg-black/20 dark:bg-white/20`}
+                      aria-label="Delete review"
+                      title="Delete review"
+                    >
+                      Delete
+                    </button>
+                    <button
+                      onClick={() => setEditing(true)}
+                      data-cy="edit-review-button"
+                      disabled={updating}
+                      className={`${FOCUS_VISIBLE} ${HOVER} mt-3 text-lg px-4 py-1 rounded-full cursor-pointer text-white bg-lightbuttonpurple dark:bg-darkbuttonpurple whitespace-nowrap ${showDeleteConfirm && "hidden md:inline-flex"}`}
+                    >
+                      Edit {isMine ? "your" : ""} review
+                    </button>
+                  </section>
                 ) : (
                   <>
                     <section
@@ -218,15 +240,6 @@ export const ReviewItem = ({
                     </section>
                   </>
                 )}
-
-                <button
-                  onClick={() => setEditing(true)}
-                  data-cy="edit-review-button"
-                  disabled={updating}
-                  className={`${FOCUS_VISIBLE} ${HOVER} mt-3 text-lg px-4 py-1 rounded-full cursor-pointer text-white bg-lightbuttonpurple dark:bg-darkbuttonpurple whitespace-nowrap ${showDeleteConfirm && "hidden md:inline-flex"}`}
-                >
-                  Edit your review
-                </button>
               </span>
             ) : (
               <section className="flex items-center gap-2">

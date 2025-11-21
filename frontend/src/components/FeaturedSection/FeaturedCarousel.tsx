@@ -3,7 +3,6 @@ import { FeaturedCard } from "@/components/FeaturedSection";
 import { Link } from "react-router-dom";
 import type { FeaturedGame } from "@/types";
 
-// ⬇️ shadcn/ui (Embla) carousel
 import {
   Carousel,
   CarouselContent,
@@ -12,11 +11,10 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { FOCUS_VISIBLE, HOVER } from "@/lib/classNames";
+import { FOCUS_VISIBLE, HOVER, HOVER_DOTS } from "@/lib/classNames";
 
-// FeaturedCarousel component props
 export type FeaturedCarouselProps = {
-  items: FeaturedGame[]; // pass up to 10 items (or more, loop handles it)
+  items: FeaturedGame[];
   title?: string;
   onExploreAll?: () => void;
   itemBasisClassName?: string;
@@ -32,19 +30,15 @@ export const arrowClass =
   FOCUS_VISIBLE;
 
 export const dotBaseClass =
-  "h-2 w-2 rounded-full transition-all " +
-  "bg-lightdots dark:bg-darkpurple cursor-pointer " +
+  "rounded-full transition-all bg-transparent cursor-pointer flex items-center justify-center" +
   FOCUS_VISIBLE;
-
-export const activeDotClass = "w-4 bg-activelightdots dark:bg-darkbuttonpurple";
 
 export const exploreBtnClass =
   "rounded-full px-4 py-2 text-sm font-medium text-white shadow " +
   "bg-lightbuttonpurple dark:bg-darkbuttonpurple cursor-pointer " +
-  HOVER +
+  HOVER_DOTS +
   FOCUS_VISIBLE;
 
-// ====== helpers ======
 function useAnyHover() {
   const get = () =>
     typeof window !== "undefined" &&
@@ -85,7 +79,7 @@ export const FeaturedCarousel = ({
   onExploreAll,
   itemBasisClassName = "basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4",
 }: FeaturedCarouselProps) => {
-  const logical = useMemo(() => items.slice(0, 10), [items]); // keep your 10 cap
+  const logical = useMemo(() => items.slice(0, 10), [items]);
   const [api, setApi] = useState<CarouselApi | null>(null);
   const [selected, setSelected] = useState(0);
   const [snapCount, setSnapCount] = useState(0);
@@ -96,7 +90,6 @@ export const FeaturedCarousel = ({
   const regionRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    // show only on true-touch environments
     setHint(!anyHover && isCoarse);
   }, [anyHover, isCoarse]);
 
@@ -105,7 +98,7 @@ export const FeaturedCarousel = ({
 
     const onSelect = () => setSelected(api.selectedScrollSnap());
     const onInit = () => {
-      setSnapCount(api.scrollSnapList().length); // number of snaps varies by item basis
+      setSnapCount(api.scrollSnapList().length);
       setSelected(api.selectedScrollSnap());
     };
 
@@ -147,13 +140,17 @@ export const FeaturedCarousel = ({
             setApi={setApi}
             className={`w-full`}
           >
-            <CarouselContent className="select-none gap-0 sm:gap-4 md:gap-6 lg:gap-8 ">
-              {logical.map((g) => (
+            <CarouselContent className="select-none -mr-0 sm:-mr-4 md:-mr-6 lg:-mr-8">
+              {logical.map((g, idx) => (
                 <CarouselItem
                   key={g.id}
-                  className={`shrink-0 ${itemBasisClassName}`}
+                  className={`shrink-0 ${itemBasisClassName} mt-4 mb-8 pr-0  sm:pr-4 md:pr-6 lg:pr-8`}
                 >
-                  <FeaturedCard data-cy="featured-game-card" game={g} />
+                  <FeaturedCard
+                    data-cy="featured-game-card"
+                    game={g}
+                    priority={idx === 0}
+                  />
                 </CarouselItem>
               ))}
             </CarouselContent>
@@ -180,7 +177,6 @@ export const FeaturedCarousel = ({
             <p
               className="pointer-events-none absolute right-3 top-3 rounded-full px-2 py-1 text-xs text-white"
               style={{
-                // matches your oklab color-mix intent
                 backgroundColor: "color-mix(in oklab, black 70%, transparent)",
               }}
             >
@@ -189,7 +185,7 @@ export const FeaturedCarousel = ({
           )}
         </figure>
 
-        <nav aria-label="Pagination" className="mt-4 flex justify-center gap-2">
+        <nav aria-label="Pagination" className="mt-4 flex justify-center gap-5">
           {Array.from({ length: snapCount }).map((_, i) => {
             const isActive = selected === i;
             return (
@@ -199,25 +195,31 @@ export const FeaturedCarousel = ({
                 aria-label={`Go to slide ${i + 1} of ${snapCount}`}
                 aria-current={isActive}
                 onClick={() => api?.scrollTo(i)}
-                className={`${dotBaseClass} ${isActive ? activeDotClass : ""}`}
-                style={{
-                  width: isActive ? "1rem" : "0.5rem",
-                }}
-              />
+                className={`${dotBaseClass}`}
+              >
+                <span
+                  className={`block rounded-full transition-all ${HOVER_DOTS} ${
+                    isActive
+                      ? "h-5 w-5 bg-activelightdots dark:bg-darkbuttonpurple"
+                      : "h-4 w-4 bg-lightdots dark:bg-darkpurple"
+                  }`}
+                />
+              </button>
             );
           })}
         </nav>
 
-        {/* Explore */}
         {onExploreAll && (
-          <Link
-            className="mt-6 flex justify-center focus-visible:outline-none"
-            to="/games"
-          >
-            <button onClick={onExploreAll} className={exploreBtnClass}>
-              Explore all games
-            </button>
-          </Link>
+          <section className="mt-6 flex justify-center mb-4">
+            <Link className="focus-visible:outline-none" to="/games">
+              <button
+                onClick={onExploreAll}
+                className={`${exploreBtnClass} ${HOVER}`}
+              >
+                Explore all games
+              </button>
+            </Link>
+          </section>
         )}
       </article>
     </section>

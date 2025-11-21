@@ -5,6 +5,7 @@ import { SearchBarInput, SearchSuggestionList } from "@/components/Header";
 import type { Game } from "@/types";
 import { useSearchSuggestions } from "@/hooks/search";
 import { buildPreviewState } from "@/lib/utils/images";
+import { toast } from "sonner";
 
 type SearchBarProps = {
   placeholder?: string;
@@ -13,7 +14,7 @@ type SearchBarProps = {
 };
 
 export const SearchBar = ({
-  placeholder = "Search for games, tags, genres...",
+  placeholder = "Search for games, tags or publishers...",
   className = "",
   onSearchSubmit,
 }: SearchBarProps) => {
@@ -79,6 +80,10 @@ export const SearchBar = ({
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     const trimmed = term.trim();
+    if (trimmed.length < 3) {
+      toast.error("Please enter at least 3 characters to search.");
+      return;
+    }
     if (trimmed) performSearch(trimmed);
   };
 
@@ -103,9 +108,16 @@ export const SearchBar = ({
     setOpen(false);
     inputRef.current?.focus();
 
-    const params = new URLSearchParams(window.location.search);
-    params.delete("search");
-    navigate(`/games?${params.toString()}`);
+    if (location.pathname === "/games") {
+      const params = new URLSearchParams(
+        location.search || window.location.search,
+      );
+      params.delete("search");
+      params.delete("page");
+
+      const qs = params.toString();
+      navigate(qs ? `/games?${qs}` : "/games");
+    }
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -145,6 +157,10 @@ export const SearchBar = ({
     if (event.key === "Enter") {
       event.preventDefault();
       const trimmed = term.trim();
+      if (trimmed.length < 3) {
+        toast.error("Please enter at least 3 characters to search.");
+        return;
+      }
       if (trimmed) performSearch(trimmed);
     }
   };
@@ -153,13 +169,14 @@ export const SearchBar = ({
     <section ref={wrapperRef} className={`relative w-full ${className}`}>
       <form
         role="search"
+        data-cy="search-form"
         aria-label="Search games"
-        data-cy="search-input"
         onSubmit={handleSubmit}
         className="relative w-full"
       >
         <SearchBarInput
           term={term}
+          data-cy="search-input"
           placeholder={placeholder}
           inputRef={inputRef}
           onChange={handleInputChange}
@@ -168,7 +185,6 @@ export const SearchBar = ({
           onClear={handleClear}
         />
       </form>
-
       <SearchSuggestionList
         isOpen={open}
         suggestions={suggestions}

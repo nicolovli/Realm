@@ -1,3 +1,4 @@
+// Best-effort utility to turn unknown values into Date instances for display.
 export function toDate(v: unknown): Date | null {
   if (v instanceof Date) return v;
   if (typeof v === "number" && Number.isFinite(v)) return new Date(v);

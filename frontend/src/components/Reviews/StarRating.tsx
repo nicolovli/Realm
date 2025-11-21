@@ -1,11 +1,8 @@
-// components/Reviews/StarRating.tsx
 import { useId, useState } from "react";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { StarIcon as StarOutline } from "@heroicons/react/24/outline";
 import { FOCUS_VISIBLE } from "@/lib/classNames";
 
-// StarRating component props
-// Supports both read-only and interactive modes
 type StarRatingBaseProps = {
   value: number;
   size?: number;
@@ -34,6 +31,7 @@ export const StarRating = (props: StarRatingProps) => {
   const generatedId = useId();
   const [hover, setHover] = useState<number | null>(null);
 
+  // Base star element
   const commonStar = (fillPercent: number, key: number) => {
     const pct = Math.max(0, Math.min(100, Math.round(fillPercent)));
     return (
@@ -41,7 +39,6 @@ export const StarRating = (props: StarRatingProps) => {
         key={key}
         className="relative inline-block"
         style={{ width: size, height: size, lineHeight: 0 }}
-        aria-hidden
       >
         <StarOutline
           width={size}
@@ -73,7 +70,7 @@ export const StarRating = (props: StarRatingProps) => {
   if (!("onChange" in props) || props.readOnly) {
     if (value == null || value === 0) {
       return (
-        <span className={`text-xs md:text-sm text-black/40 dark:text-white/60`}>
+        <span className={`text-xs md:text-sm text-black dark:text-white`}>
           No ratings yet
         </span>
       );
@@ -82,7 +79,7 @@ export const StarRating = (props: StarRatingProps) => {
     const rounded = Math.round(value);
     return (
       <span
-        className={`inline-flex items-center`}
+        className={`inline-flex items-center leading-none`}
         role="img"
         aria-label={`${ariaLabel}: ${rounded} av 5 stjerner`}
       >
@@ -109,7 +106,7 @@ export const StarRating = (props: StarRatingProps) => {
     <fieldset
       role="radiogroup"
       aria-label={ariaLabel}
-      className={`inline-flex items-center`}
+      className={`inline-flex items-center leading-none`}
       onMouseLeave={() => setHover(null)}
       onKeyDown={(e) => {
         if (e.key === "ArrowLeft") {

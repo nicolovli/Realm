@@ -76,7 +76,6 @@ export const useGamesPageQuery = ({
   const connection = useMemo(() => {
     const maybe = pageConn?.gamesConnection;
     if (!maybe) return undefined;
-    if (typeof maybe.totalCount !== "number") return undefined;
     return maybe as GamesConnection;
   }, [pageConn]);
 

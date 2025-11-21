@@ -1,3 +1,4 @@
+// Handles edit state, validation, and submission logic for the profile screen.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";

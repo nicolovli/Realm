@@ -28,7 +28,6 @@ type UsePageJumpArgs = {
   cursorByPage: React.MutableRefObject<Map<number, CursorEntry>>;
   persistCache: (options?: { currentPage?: number }) => void;
   matchesCountFromCountQuery?: number;
-  connectionTotalCount?: number;
 };
 
 type UsePageJumpReturn = {
@@ -58,7 +57,6 @@ export const usePageJump = ({
   cursorByPage,
   persistCache,
   matchesCountFromCountQuery,
-  connectionTotalCount,
 }: UsePageJumpArgs): UsePageJumpReturn => {
   const [isJumping, setIsJumping] = useState(false);
   const [loadingPage, setLoadingPage] = useState<number | null>(null);
@@ -83,10 +81,7 @@ export const usePageJump = ({
 
   const handleGoToPage = useCallback(
     async (targetPage: number) => {
-      const totalMatches =
-        typeof connectionTotalCount === "number"
-          ? connectionTotalCount
-          : (matchesCountFromCountQuery ?? 0);
+      const totalMatches = matchesCountFromCountQuery ?? 0;
       const totalPages = Math.max(1, Math.ceil(totalMatches / PAGE_SIZE));
       const target = Math.max(
         1,
@@ -262,7 +257,6 @@ export const usePageJump = ({
     },
     [
       apollo,
-      connectionTotalCount,
       currentFilter,
       currentPage,
       cursorByPage,

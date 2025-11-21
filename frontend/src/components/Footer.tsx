@@ -10,9 +10,9 @@ export const Footer = () => {
           <span className="flex items-center space-x-2">
             <Logo
               size={40}
-              className="text-lightbuttonpurple dark:text-darkpurple"
+              className="text-lightbuttonpurple dark:text-lightpurple"
             />
-            <h1 className="text-2xl md:text-4xl font-bold tracking-wide text-lightbuttonpurple dark:text-darkpurple">
+            <h1 className="text-2xl md:text-4xl font-bold tracking-wide text-lightbuttonpurple dark:text-lightpurple">
               Realm
             </h1>
           </span>

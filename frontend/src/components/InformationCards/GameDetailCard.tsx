@@ -1,11 +1,11 @@
 import { GameCardBase } from "@/components/InformationCards";
 import { CARD_CONTAINER } from "@/lib/classNames";
 
-// GameDetailCard component props
 export interface GameDetailCardProps {
   gameId: number;
   title: string;
   descriptionShort: string;
+  descriptionText?: string;
   image: string;
   initialImage?: string;
   finalImage?: string;
@@ -22,6 +22,7 @@ export const GameDetailCard = ({
   gameId,
   title,
   descriptionShort,
+  descriptionText,
   image,
   initialImage,
   finalImage,
@@ -34,11 +35,12 @@ export const GameDetailCard = ({
   publishedStore,
 }: GameDetailCardProps) => {
   return (
-    <section className={CARD_CONTAINER} aria-labelledby={`${title}-heading`}>
+    <section className={CARD_CONTAINER} aria-label={title}>
       <GameCardBase
         gameId={Number(gameId)}
         title={title}
         descriptionShort={descriptionShort}
+        descriptionFull={descriptionText}
         image={image}
         initialImage={initialImage}
         finalImage={finalImage}

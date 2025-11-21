@@ -12,12 +12,17 @@ import { Bars3Icon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import type { NavigationItem } from "@/components/Header";
 import { AuthButton, ToggleTheme } from ".";
+import type { LoginDialogControls } from "@/hooks/useLoginDialog";
 
 type MobileMenuProps = {
   navigation: NavigationItem[];
+  dialogControls?: LoginDialogControls;
 };
 
-export const MobileSheetMenu = ({ navigation }: MobileMenuProps) => {
+export const MobileSheetMenu = ({
+  navigation,
+  dialogControls,
+}: MobileMenuProps) => {
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -45,7 +50,10 @@ export const MobileSheetMenu = ({ navigation }: MobileMenuProps) => {
         <section className="flex gap-4 items-center">
           <SheetClose asChild>
             <span>
-              <AuthButton />
+              <AuthButton
+                dialogControls={dialogControls}
+                renderDialog={false}
+              />
             </span>
           </SheetClose>
           <ToggleTheme />

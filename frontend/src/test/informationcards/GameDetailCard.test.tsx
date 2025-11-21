@@ -3,6 +3,8 @@ import { render, screen } from "@testing-library/react";
 import { GameDetailCard } from "@/components/InformationCards";
 import { MockedProvider } from "@apollo/client/testing/react";
 import { MemoryRouter } from "react-router-dom";
+import { axe, toHaveNoViolations } from "jest-axe";
+expect.extend(toHaveNoViolations);
 
 // Mock auth status hook and components
 vi.mock("@/hooks/useAuthStatus", () => ({
@@ -61,7 +63,7 @@ describe("GameDetailCard", () => {
     ).toBeInTheDocument();
     expect(screen.getByAltText("Test Game")).toHaveAttribute(
       "src",
-      "https://images.weserv.nl/?url=%2Ftest-image.jpg&w=800&output=webp",
+      "https://images.weserv.nl/?url=%2Ftest-image.jpg&w=800&output=webp&q=70",
     );
   });
 
@@ -160,6 +162,20 @@ describe("GameDetailCard", () => {
     );
   });
 
+  it("exposes a named region for screen readers", () => {
+    render(
+      <MockedProvider mocks={[]}>
+        <MemoryRouter>
+          <GameDetailCard {...mockProps} />
+        </MemoryRouter>
+      </MockedProvider>,
+    );
+
+    // A <section> with an accessible name becomes a landmark region
+    const region = screen.getByRole("region", { name: /Test Game/i });
+    expect(region).toBeInTheDocument();
+  });
+
   it("renders the image in the correct position", () => {
     const { container } = render(
       <MockedProvider mocks={[]}>
@@ -216,5 +232,17 @@ describe("GameDetailCard", () => {
     expect(screen.getByText("Multiplayer")).toBeInTheDocument();
     expect(screen.getByText(/Super Studio/)).toBeInTheDocument();
     expect(screen.getByText(/PC, PS5, Xbox/)).toBeInTheDocument();
+  });
+
+  it("should have no accessibility violations", async () => {
+    const { container } = render(
+      <MockedProvider mocks={[]}>
+        <MemoryRouter>
+          <GameDetailCard {...mockProps} />
+        </MemoryRouter>
+      </MockedProvider>,
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

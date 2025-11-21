@@ -8,6 +8,7 @@ describe("Profile component", () => {
   const mockHandleLogOut = vi.fn();
 
   const mockUser = {
+    id: "4",
     username: "KariN",
     email: "KariN@example.com",
   };

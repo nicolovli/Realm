@@ -6,6 +6,7 @@ export const gameTypeDefs = gql`
     sid: Int!
     name: String!
     descriptionShort: String
+    descriptionText: String
     image: String
     publishedStore: String
     platforms: [String!]!
@@ -53,7 +54,6 @@ export const gameTypeDefs = gql`
   type GamesConnection {
     edges: [GameEdge!]!
     pageInfo: PageInfo!
-    totalCount: Int!
   }
 
   extend type Query {
@@ -61,7 +61,7 @@ export const gameTypeDefs = gql`
       filter: GameFilter
       search: String
       after: Int
-      take: Int = 9
+      take: Int = 12
       ids: [Int!]
       sortBy: String
       sortOrder: SortOrder
@@ -74,7 +74,7 @@ export const gameTypeDefs = gql`
     gamesConnection(
       filter: GameFilter
       search: String
-      first: Int = 9
+      first: Int = 12
       after: String
       last: Int
       before: String

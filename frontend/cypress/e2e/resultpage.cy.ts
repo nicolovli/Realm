@@ -2,6 +2,7 @@
 
 describe("ResultPage: pagination, filters, and sorting", () => {
   beforeEach(() => {
+    cy.viewport(1400, 900);
     cy.visit("/games?sort=popularity&order=desc");
   });
 
@@ -12,7 +13,7 @@ describe("ResultPage: pagination, filters, and sorting", () => {
     );
 
     cy.get("[data-cy=results-grid] li").then(($items) => {
-      expect($items.length).to.be.lte(9);
+      expect($items.length).to.be.lte(12);
     });
   });
 
@@ -43,13 +44,13 @@ describe("ResultPage: pagination, filters, and sorting", () => {
     cy.get("[data-cy=results-count]").should("contain.text", "11 matches");
   });
 
-  it("paginates correctly from 9 to 2 items (close filter menu before clicking Next)", () => {
+  it("shows all 11 filtered results on a single page when Cute + Agriculture are selected", () => {
     cy.get("[data-cy=filter-pill-Tags]").click();
     cy.get("[data-cy=filter-pill-menu-Tags]").should("be.visible");
     cy.get("[data-cy=filter-option-Tags-Cute]").click();
     cy.get("[data-cy=filter-option-Tags-Agriculture]").click();
 
-    // esc to close the scrolldowndown menu
+    // close dropdown
     cy.get("body").type("{esc}", { force: true });
     cy.get("body").click(0, 0, { force: true });
     cy.get("body", { timeout: 5000 }).should(
@@ -59,13 +60,10 @@ describe("ResultPage: pagination, filters, and sorting", () => {
     );
 
     cy.get("[data-cy=results-count]").should("contain.text", "11 matches");
-    cy.get("[data-cy=results-grid] li").should("have.length", 9);
 
-    cy.get("[aria-label='Next page']").should("be.visible").click();
-    cy.get("[data-cy=results-grid] li", { timeout: 10000 }).should(
-      "have.length",
-      2,
-    );
+    cy.get("[data-cy=results-grid] li").should("have.length", 11);
+
+    cy.get("[aria-label='Next page']").should("be.disabled");
   });
 
   it("sorts A → Z with 'Farm Frenzy: Hurricane Season' first", () => {

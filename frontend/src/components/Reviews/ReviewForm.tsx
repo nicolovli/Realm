@@ -2,9 +2,10 @@ import { useCallback, useState } from "react";
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import { CREATE_REVIEW, getReviewRefetchQueries } from "@/lib/graphql";
 import { BUTTON_BASE, FOCUS_VISIBLE, HOVER } from "@/lib/classNames";
-import { StarRating, ReviewTextArea, type Review } from "@/components/Reviews";
+import { StarRating, ReviewTextArea } from "@/components/Reviews";
+import type { Review } from "@/types";
 import { toast } from "sonner";
-import { useReviewsForGame } from "@/hooks/useReviews";
+import { useReviewsForGame } from "@/hooks/reviews";
 import { useLoginDialog } from "@/hooks/useLoginDialog";
 import { AuthDialog } from "@/components/User";
 
@@ -76,14 +77,13 @@ export const ReviewForm = ({
     try {
       await createReview({ variables: { gameId, star, description } });
       invalidateGameLists();
-      toast.success("Review posted!");
+      toast.info("Review posted!");
       setDescription("");
       setStar(5);
     } catch (error: unknown) {
       const err = error as { message?: string };
       console.error("Error creating review:", error);
 
-      // Check if it's a unique constraint error
       if (
         err?.message?.includes("Unique constraint failed") ||
         err?.message?.includes("A user can only submit a review once")
@@ -104,6 +104,7 @@ export const ReviewForm = ({
   if (!currentUserId)
     return (
       <>
+        {/* Prompt login */}
         <span
           data-cy="reviewform_login"
           className="text-xl text-black dark:text-white bg-lightpurple dark:bg-darkpurple rounded-3xl p-8 justify-center"
@@ -113,7 +114,7 @@ export const ReviewForm = ({
             type="button"
             onClick={openLogin}
             disabled={false}
-            className={`${FOCUS_VISIBLE} hover:underline text-lightbuttonpurple dark:text-darkbuttonpurple font-semibold cursor-pointer`}
+            className={`${FOCUS_VISIBLE} underline dark:hover:brightness-200 hover:brightness-70 text-blue-600 dark:text-blue-400 font-semibold cursor-pointer`}
           >
             log in
           </button>{" "}
@@ -138,11 +139,17 @@ export const ReviewForm = ({
             </h3>
 
             <label className="flex items-center gap-2">
-              <span className="opacity-80">Rating</span>
+              <span
+                className="opacity-80"
+                style={{ transform: "translateY(1.2px)" }}
+              >
+                Rating:
+              </span>
               <StarRating value={star} onChange={setStar} />
             </label>
           </header>
 
+          {/* Description editor */}
           <section className="mt-4">
             <>
               <label htmlFor="description" className="sr-only">
@@ -157,6 +164,7 @@ export const ReviewForm = ({
             </>
           </section>
 
+          {/* Action buttons */}
           <footer className="mt-4 flex items-center justify-end gap-3">
             <button
               type="button"

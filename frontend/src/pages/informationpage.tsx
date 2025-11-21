@@ -5,12 +5,13 @@ import { GameDetailCard } from "@/components/InformationCards";
 import { GameCardSkeleton } from "@/components/Skeletons";
 import { ReviewList, ReviewForm } from "@/components/Reviews";
 import { useEffect } from "react";
-import { useReviewsMeta } from "@/hooks/useReviews";
+import { useReviewsMeta } from "@/hooks/reviews";
 
 interface Game {
   id: number;
   name: string;
   descriptionShort: string;
+  descriptionText?: string | null;
   image: string;
   tags?: string[];
   developers?: string[];
@@ -20,7 +21,6 @@ interface Game {
 }
 
 export const InformationPage = () => {
-  // Scroll to top on mount
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
@@ -80,6 +80,7 @@ export const InformationPage = () => {
           gameId={game.id!}
           title={game.name ?? ""}
           descriptionShort={game.descriptionShort ?? ""}
+          descriptionText={game.descriptionText ?? ""}
           image={game.image ?? ""}
           initialImage={previewImage}
           tags={game.tags ?? []}

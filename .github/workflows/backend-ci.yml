@@ -2,13 +2,13 @@ name: GitHub CI pipeline - Backend
 
 on:
   push:
-    branches: [main, dev4]
+    branches: [main, dev5]
     paths:
-      - 'backend/**'
+      - "backend/**"
   pull_request:
-    branches: [main, dev4]
+    branches: [main, dev5]
     paths:
-      - 'backend/**'
+      - "backend/**"
 
 jobs:
   install:
@@ -48,7 +48,7 @@ jobs:
       - name: Prisma format & validate
         working-directory: ./backend
         env:
-            DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           npx prisma format
           npx prisma validate

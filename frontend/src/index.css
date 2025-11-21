@@ -1,9 +1,8 @@
 @import "tailwindcss";
-@plugin "tailwindcss-animate";
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  font-family: monospace;
+  font-family: monospace, sans-serif;
 }
 
 main {
@@ -16,7 +15,7 @@ main {
 
 @layer base {
   body {
-    @apply bg-white dark:bg-darkmodebackground;
+    @apply bg-light-bg dark:bg-darkmodebackground;
   }
 }
 
@@ -36,10 +35,21 @@ main {
   --color-darkgray: #9d9d9d; /* for carousel in darkmode */
   --color-lightsearchbargray: #f3f3f3; /* for searchbar in lightmode */
   --color-darksearchbargray: #494949; /* for searchbar in darkmode */
+  --color-light-bg: #ffffff; /* app background */
   --color-darkmodebackground: #2d2d2d; /* for background in darkmode */
   --color-lightgray: #9a9a9a; /*Used in Result component as text color*/
   --color-ashygray: #2a2a2a; /*Used in Result as dark border color */
   --color-darkblack: #141414; /*Used in Result as background color*/
+  --color-dark-surface: #333333; /* normal containers */
+  --color-dark-surface-elevated: #383838; /* elevated cards / wrappers */
+  --color-dark-surface-high: #404040; /* modals, popovers */
+  --color-surface: #f7f7f7; /* default containers / sections */
+  --color-surface-elevated: #f0f0f0; /* cards, filters, panels */
+  --color-surface-high: #e7e7e7; /* modals, popovers */
+  --color-border-subtle: #e2e2e2; /* soft borders/dividers */
+
+  /* Custom breakpoint */
+  --breakpoint-mdlg: 75rem; /* 1200px */
 }
 
 /* Mobile is default */

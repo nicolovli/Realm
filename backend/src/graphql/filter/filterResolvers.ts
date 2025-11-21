@@ -1,14 +1,39 @@
 import { prisma } from "../../db.js";
-import { TOP_PUBLISHERS } from "../../constants/topPublishers.js";
-import {
-  getCacheKey,
-  getCachedResult,
-  setCachedResult,
-  GameFilter,
-  AvailableFilterOptions,
-} from "./index.js";
 import { Prisma } from "@prisma/client";
+import { TOP_PUBLISHERS } from "../../constants/topPublishers.js";
+import type { GameFilter } from "./filterTypes.js";
 import { buildWhereFromFilter, buildSearchWhere } from "../game/index.js";
+
+const useAvailableResultFiltersOnSearch = true;
+
+const fetchOptionNames = async () => {
+  const [genres, categories, platforms, tags] = await Promise.all([
+    prisma.genre.findMany({ orderBy: { name: "asc" }, select: { name: true } }),
+    prisma.category.findMany({
+      orderBy: { name: "asc" },
+      select: { name: true },
+    }),
+    prisma.platform.findMany({
+      orderBy: { name: "asc" },
+      select: { name: true },
+    }),
+    prisma.tag.findMany({ orderBy: { name: "asc" }, select: { name: true } }),
+  ]);
+
+  const publishers = await prisma.publisher.findMany({
+    where: { name: { in: TOP_PUBLISHERS } },
+    orderBy: { name: "asc" },
+    select: { name: true },
+  });
+
+  return {
+    genres: genres.map((g) => g.name),
+    categories: categories.map((c) => c.name),
+    platforms: platforms.map((p) => p.name),
+    publishers: publishers.map((p) => p.name),
+    tags: tags.map((t) => t.name),
+  };
+};
 
 export const filterResolvers = {
   Query: {
@@ -30,52 +55,39 @@ export const filterResolvers = {
       return { genres, categories, platforms, publishers, tags };
     },
 
-    // Get available filter options based on current search and filters
     availableFilterOptions: async (
       _parent: unknown,
-      args: { filter: GameFilter; search?: string },
+      args: { filter: GameFilter; search?: string | null },
     ) => {
       const { filter, search } = args;
-      const cacheKey = getCacheKey(filter, search);
-
-      const cached = getCachedResult(cacheKey);
-      if (cached) return cached;
-
-      // Build search WHERE once (contains + startsWith + relation-aware from unified search.ts)
       const trimmed = search?.trim();
+      if (trimmed && !useAvailableResultFiltersOnSearch) {
+        return fetchOptionNames();
+      }
       const searchWhere: Prisma.GameWhereInput = trimmed
         ? await buildSearchWhere(trimmed, "containsIds")
         : {};
 
-      // Helper: base filters, optionally excluding one relation type
-      function whereExcluding(
+      const whereExcluding = (
         f: GameFilter | undefined,
         exclude?: keyof GameFilter,
-      ): Prisma.GameWhereInput {
-        // When computing “available options” for type T, exclude T from the base
-        // filter so we can "discover" remaining values, unless the user already
-        // selected some T (then we keep it to narrow within their choices)
+      ): Prisma.GameWhereInput => {
         if (!f || !exclude) {
           return buildWhereFromFilter(f, undefined) as Prisma.GameWhereInput;
         }
-        const rest: Partial<GameFilter> = { ...f };
-        delete (rest as Record<string, unknown>)[exclude];
-        return buildWhereFromFilter(
-          rest as GameFilter,
-          undefined,
-        ) as Prisma.GameWhereInput;
-      }
+        const rest: GameFilter = { ...f };
+        delete rest[exclude];
+        return buildWhereFromFilter(rest, undefined) as Prisma.GameWhereInput;
+      };
 
-      // For each relation type: fetch distinct names among relations whose games match
-      async function getOptionsForType(
+      const getOptionsForType = async (
         type: keyof GameFilter,
-      ): Promise<string[]> {
+      ): Promise<string[]> => {
         const noFilters =
           !filter || Object.values(filter).every((v) => !v?.length);
-        const selected = filter?.[type] || [];
+        const selected = filter?.[type] ?? [];
 
-        // Fast path when nothing is selected or searched
-        if (noFilters && !trimmed && !selected.length) {
+        if (noFilters && !trimmed && selected.length === 0) {
           if (type === "genres")
             return (
               await prisma.genre.findMany({ orderBy: { name: "asc" } })
@@ -99,18 +111,16 @@ export const filterResolvers = {
           return [];
         }
 
-        // Build the game WHERE used to constrain each relation query
-        const baseFilterWhere = selected.length
-          ? whereExcluding(filter, undefined) // include this type if user already picked some
-          : whereExcluding(filter, type); // otherwise exclude this type to discover options
+        const baseFilterWhere =
+          selected.length > 0
+            ? whereExcluding(filter, undefined)
+            : whereExcluding(filter, type);
 
-        const whereForGames: Prisma.GameWhereInput = Object.keys(searchWhere)
-          .length
-          ? { AND: [baseFilterWhere, searchWhere] }
-          : baseFilterWhere;
+        const whereForGames =
+          Object.keys(searchWhere).length > 0
+            ? { AND: [baseFilterWhere, searchWhere] }
+            : baseFilterWhere;
 
-        // Query relations directly with `where: { games: { some: <gameWhere> } }`.
-        // This avoids the slow pattern of “fetch game IDs → filter relations in app”.
         let rows: Array<{ name: string }> = [];
         if (type === "genres") {
           rows = await prisma.genre.findMany({
@@ -144,13 +154,13 @@ export const filterResolvers = {
           });
         }
 
-        const names = Array.from(new Set(rows.map((r) => r.name))).sort();
+        const names = Array.from(new Set(rows.map((row) => row.name))).sort();
         return selected.length
-          ? names.filter((n) => !selected.includes(n))
+          ? names.filter((name) => !selected.includes(name))
           : names;
-      }
+      };
 
-      const [genresOpt, categoriesOpt, platformsOpt, publishersOpt, tagsOpt] =
+      const [genres, categories, platforms, publishers, tags] =
         await Promise.all([
           getOptionsForType("genres"),
           getOptionsForType("categories"),
@@ -159,17 +169,7 @@ export const filterResolvers = {
           getOptionsForType("tags"),
         ]);
 
-      const result: AvailableFilterOptions = {
-        genres: genresOpt,
-        categories: categoriesOpt,
-        platforms: platformsOpt,
-        publishers: publishersOpt,
-        tags: tagsOpt,
-      };
-
-      // Cache the result
-      setCachedResult(cacheKey, result);
-      return result;
+      return { genres, categories, platforms, publishers, tags };
     },
   },
 };

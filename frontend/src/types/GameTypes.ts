@@ -4,6 +4,7 @@ export type Game = {
   sid: number;
   name: string;
   descriptionShort?: string;
+  descriptionText?: string;
   image?: string;
   publishedStore?: string;
   platforms: string[];

@@ -1,3 +1,4 @@
+// Tracks login status by watching localStorage token changes via a global auth-change event.
 import { useEffect, useState } from "react";
 
 export function useAuthStatus() {

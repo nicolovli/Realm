@@ -19,7 +19,7 @@ export const FeaturedSection = () => {
   const top10: FeaturedGame[] = data?.games ?? [];
 
   return (
-    <section className="overflow-x-hidden">
+    <section className="overflow-x-hidden pt-4">
       {loading ? (
         <section className="flex gap-4 mt-6">
           {Array.from({ length: 10 }).map((_, i) => (
@@ -35,12 +35,7 @@ export const FeaturedSection = () => {
           ))}
         </section>
       ) : (
-        <FeaturedCarousel
-          items={top10}
-          onExploreAll={() => {
-            /* Navigate to all games */
-          }}
-        />
+        <FeaturedCarousel items={top10} onExploreAll={() => {}} />
       )}
     </section>
   );

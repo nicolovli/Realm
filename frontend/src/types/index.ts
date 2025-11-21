@@ -3,3 +3,5 @@ export * from "@/types/GameTypes";
 export * from "@/types/GraphQLTypes";
 export * from "@/types/HookTypes";
 export * from "@/types/UtilityTypes";
+export * from "@/types/ReviewTypes";
+export * from "@/types/UserTypes";

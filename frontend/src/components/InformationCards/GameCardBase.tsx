@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
-import { HOVER, FOCUS_VISIBLE } from "@/lib/classNames";
+import { HOVER, FOCUS_VISIBLE, SHADOW_MD } from "@/lib/classNames";
 import { toDate } from "@/lib/utils/date";
 import { HeartIcon } from "@/components/HeartIcon";
 import { AuthDialog } from "@/components/User";
 import { useAuthStatus } from "@/hooks/useAuthStatus";
 import { StarRating } from "@/components/Reviews";
 import { Link } from "react-router-dom";
+import { buildSrcSet } from "@/lib/utils/images";
 
-// GameCardBase component props
-export interface GameCardBaseProps {
+interface GameCardBaseProps {
   gameId: number;
   title: string;
   descriptionShort: string;
+  descriptionFull?: string;
   image: string;
   initialImage?: string;
   finalImage?: string;
@@ -28,6 +29,12 @@ export interface GameCardBaseProps {
   publishedStore?: string | null;
   "data-cy"?: string;
 }
+
+const stripTrailingLink = (value?: string) => {
+  if (typeof value !== "string") return "";
+  const trimmed = value.trim();
+  return trimmed.replace(/\shttps?:\/\/\S+$/gi, "").trim();
+};
 
 export const GameCardBase = ({
   gameId,
@@ -46,16 +53,17 @@ export const GameCardBase = ({
   rating,
   isPromoCard,
   publishedStore,
+  descriptionFull,
   "data-cy": dataCy,
 }: GameCardBaseProps) => {
   const [showAllTags, setShowAllTags] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
   const { setIsLoggedIn } = useAuthStatus();
 
   const isReversed = imagePosition === "left";
 
-  // Handle window resize to update mobile state
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
@@ -76,11 +84,14 @@ export const GameCardBase = ({
     : null;
 
   const buildProxied = (url: string, width: number) =>
-    `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=${width}&output=webp`;
+    `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=${width}&output=webp&q=70`;
 
   const resolvedFinal = finalImage ?? buildProxied(image, 800);
   const resolvedInitial = initialImage ?? resolvedFinal;
   const [src, setSrc] = useState(resolvedInitial);
+
+  const finalSet = buildSrcSet(image, [480, 640, 800, 1200]);
+  const initialSet = buildSrcSet(image, [320, 480]);
 
   useEffect(() => {
     setSrc(resolvedInitial);
@@ -102,23 +113,38 @@ export const GameCardBase = ({
     };
   }, [resolvedInitial, resolvedFinal]);
 
+  const trimmedShort = stripTrailingLink(descriptionShort);
+  const trimmedFull = descriptionFull ? stripTrailingLink(descriptionFull) : "";
+  const baseDescription = trimmedShort || trimmedFull || "";
+  const canToggleDescription =
+    Boolean(trimmedFull) && trimmedFull.length > baseDescription.length;
+  const descriptionToShow =
+    showFullDescription && trimmedFull ? trimmedFull : baseDescription;
+
   return (
     <section
       data-cy={dataCy}
-      className={`flex flex-col md:flex-row items-center bg-lightpurple dark:bg-darkpurple rounded-4xl p-6 w-full ${
+      className={`flex flex-col md:flex-row items-center bg-lightpurple dark:bg-darkpurple rounded-4xl p-6 w-full ${SHADOW_MD} ${
         isReversed ? "md:flex-row-reverse" : ""
       }`}
     >
       {/* Image */}
       <figure className="md:w-1/2 flex justify-center mb-4 md:mb-0">
-        <img
-          src={src}
-          alt={title}
-          sizes="(max-width: 768px) 90vw, 50vw"
-          className="rounded-3xl w-full h-full max-h-[25rem] object-cover"
-          fetchPriority="high"
-          decoding="async"
-        />
+        {src ? (
+          <img
+            src={src}
+            srcSet={src === resolvedFinal ? finalSet.srcSet : initialSet.srcSet}
+            sizes={finalSet.sizes}
+            alt={title}
+            className="rounded-3xl w-full h-full max-h-[25rem] object-cover"
+            fetchPriority="high"
+            decoding="async"
+          />
+        ) : (
+          <section className="rounded-3xl w-full h-full max-h-[25rem] grid place-items-center text-xs text-zinc-600 dark:text-zinc-300 bg-lightsearchbargray dark:bg-darksearchbargray">
+            <span>Image unavailable</span>
+          </section>
+        )}
       </figure>
 
       {/* Text */}
@@ -127,49 +153,61 @@ export const GameCardBase = ({
           <h2 className="text-xl md:text-3xl">{title}</h2>
 
           {/* Release / published date */}
-          {publishedLabel && (
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              Released {publishedLabel}
-            </p>
-          )}
+          {!isPromoCard &&
+            (publishedLabel ? (
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                Released {publishedLabel}
+              </p>
+            ) : (
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                No release date available
+              </p>
+            ))}
+
           {/* Tags */}
-          {tags.length > 0 && (
-            <section className="flex flex-wrap justify-center gap-2 items-center">
-              {visibleTags.map((tag) => (
-                <Link
-                  key={tag}
-                  to={`/games?tags=${encodeURIComponent(tag)}`}
-                  className={`bg-lightdots dark:bg-lightdots text-white px-2 py-1 rounded-full text-xs inline-flex items-center ${HOVER} ${FOCUS_VISIBLE}`}
-                >
-                  {tag}
-                </Link>
-              ))}
+          {!isPromoCard &&
+            (tags.length > 0 ? (
+              <section className="flex flex-wrap justify-center gap-2 items-center">
+                {visibleTags.map((tag) => (
+                  <Link
+                    key={tag}
+                    to={`/games?tags=${encodeURIComponent(tag)}`}
+                    className={`bg-lightdots dark:bg-lightdots text-white px-2 py-1 rounded-full text-xs inline-flex items-center ${HOVER} ${FOCUS_VISIBLE}`}
+                  >
+                    {tag}
+                  </Link>
+                ))}
+                {hasExtraTags && (
+                  <button
+                    onClick={() => setShowAllTags((prev) => !prev)}
+                    className={`text-gray-800 dark:text-gray-200 cursor-pointer ${HOVER} ${FOCUS_VISIBLE}`}
+                    aria-label={
+                      showAllTags ? "Show fewer tags" : "Show more tags"
+                    }
+                  >
+                    {showAllTags ? (
+                      <ChevronUpIcon className="w-5 h-5" />
+                    ) : (
+                      <ChevronDownIcon className="w-5 h-5" />
+                    )}
+                  </button>
+                )}
+              </section>
+            ) : (
+              <span>No tags available</span>
+            ))}
 
-              {hasExtraTags && (
-                <button
-                  onClick={() => setShowAllTags((prev) => !prev)}
-                  className={`text-gray-800 dark:text-gray-200 cursor-pointer ${HOVER} ${FOCUS_VISIBLE}`}
-                  aria-label={
-                    showAllTags ? "Show fewer tags" : "Show more tags"
-                  }
-                >
-                  {showAllTags ? (
-                    <ChevronUpIcon className="w-5 h-5" />
-                  ) : (
-                    <ChevronDownIcon className="w-5 h-5" />
-                  )}
-                </button>
-              )}
-            </section>
-          )}
-
+          {/* Rating and favorite */}
           <section className="flex justify-center items-center gap-2 mt-3">
             {rating !== 0 && (
-              <span className="text-xl">{rating?.toFixed(1)} </span>
+              <span
+                className="text-xl leading-none flex items-center"
+                style={{ transform: "translateY(2px)" }}
+              >
+                {rating?.toFixed(1)}
+              </span>
             )}
-            <span>
-              <StarRating value={rating ?? 0} readOnly />
-            </span>
+            <StarRating value={rating ?? 0} readOnly />
 
             {!isPromoCard && (
               <HeartIcon
@@ -191,29 +229,37 @@ export const GameCardBase = ({
           </section>
 
           {/* Description */}
-          <p className="text-sm md:text-base leading-snug">
-            {descriptionShort}
+          <p className="text-sm md:text-base leading-snug text-black dark:text-white whitespace-pre-line">
+            {descriptionToShow}
+            {canToggleDescription && (
+              <>
+                {" "}
+                <button
+                  type="button"
+                  aria-expanded={showFullDescription}
+                  onClick={() => setShowFullDescription((prev) => !prev)}
+                  className={`${FOCUS_VISIBLE} inline-flex items-center text-sm text-blue-600 dark:text-blue-400 font-semibold cursor-pointer underline dark:hover:brightness-200 hover:brightness-70`}
+                >
+                  {showFullDescription ? "View less" : "View more"}
+                </button>
+              </>
+            )}
           </p>
         </header>
 
         {/* Developers, publishers and platforms */}
         {(developers || publishers || platforms) && (
           <section className="mt-4 flex flex-wrap justify-center gap-6 text-xs md:text-sm text-gray-800 dark:text-white text-center">
-            {developers && (
-              <p>
-                <strong>Developer:</strong> {developers}
+            {[
+              { label: "Developer", value: developers },
+              { label: "Publisher", value: publishers },
+              { label: "Platforms", value: platforms },
+            ].map(({ label, value }) => (
+              <p key={label}>
+                <strong>{label}:</strong>{" "}
+                {value || `No ${label.toLowerCase()} available`}
               </p>
-            )}
-            {publishers && (
-              <p>
-                <strong>Publisher:</strong> {publishers}
-              </p>
-            )}
-            {platforms && (
-              <p>
-                <strong>Platforms:</strong> {platforms}
-              </p>
-            )}
+            ))}
           </section>
         )}
 

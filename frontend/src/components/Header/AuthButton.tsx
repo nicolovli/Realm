@@ -6,15 +6,26 @@ import { FOCUS_VISIBLE } from "@/lib/classNames";
 import { useNavigate } from "react-router-dom";
 import { AuthDialog } from "@/components/User";
 import { useAuthStatus } from "@/hooks/useAuthStatus";
-import { useLoginDialog } from "@/hooks/useLoginDialog";
+import {
+  type LoginDialogControls,
+  useLoginDialog,
+} from "@/hooks/useLoginDialog";
 
 interface AuthButtonProps {
   className?: string;
+  dialogControls?: LoginDialogControls;
+  renderDialog?: boolean;
 }
 
-export const AuthButton = ({ className = "" }: AuthButtonProps) => {
+export const AuthButton = ({
+  className = "",
+  dialogControls,
+  renderDialog = true,
+}: AuthButtonProps) => {
   const { isLoggedIn } = useAuthStatus();
-  const { open, openLogin, handleOpenChange } = useLoginDialog();
+  const internalDialogControls = useLoginDialog();
+  const { open, openLogin, handleOpenChange } =
+    dialogControls ?? internalDialogControls;
   const navigate = useNavigate();
   const loginbutton =
     "flex items-center gap-1 rounded-full cursor-pointer " +
@@ -56,7 +67,9 @@ export const AuthButton = ({ className = "" }: AuthButtonProps) => {
           Login
         </button>
       )}
-      <AuthDialog open={open} onOpenChange={handleOpenChange} />
+      {renderDialog && (
+        <AuthDialog open={open} onOpenChange={handleOpenChange} />
+      )}
     </>
   );
 };

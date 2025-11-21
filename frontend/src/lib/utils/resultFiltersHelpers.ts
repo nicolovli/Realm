@@ -1,4 +1,4 @@
-// Reusable helpers that transform result-filter state (selection parsing, cache keys, payload builders).
+// Helpers for parsing query params, building filter payloads, and reading/writing cursor cache entries.
 
 import type { SortOptionValue } from "@/constants/resultFiltersConstants";
 import {

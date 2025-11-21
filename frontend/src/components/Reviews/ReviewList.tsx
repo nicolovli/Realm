@@ -1,9 +1,13 @@
 import { ReviewItem, StarRating } from "@/components/Reviews";
 import { BUTTON_BASE, FOCUS_VISIBLE, HOVER } from "@/lib/classNames";
-import { useReviewsForGame, useUserReviews } from "@/hooks/useReviews";
+import { useReviewsForGame, useUserReviews } from "@/hooks/reviews";
 import { Link } from "react-router-dom";
-import type { Review } from "@/components/Reviews/types";
+import type { Review } from "@/types";
 import { useMemo } from "react";
+
+type ReviewWithGame = Review & {
+  game?: { id: number | string; name: string };
+};
 
 export const ReviewList = ({
   gameId,
@@ -16,11 +20,8 @@ export const ReviewList = ({
   isUserReviews?: boolean;
   userId?: string;
 }) => {
-  // Always call hooks unconditionally
   const userReviewsData = useUserReviews(userId || "");
   const gameReviewsData = useReviewsForGame(gameId || null);
-
-  // Then select which data to use based on context
   const reviewsData = isUserReviews ? userReviewsData : gameReviewsData;
 
   const {
@@ -35,7 +36,7 @@ export const ReviewList = ({
 
   const reviews = useMemo(() => {
     const seen = new Set<string>();
-    return rawReviews.filter((review) => {
+    return rawReviews.filter((review: Review) => {
       const key = review.id;
       if (key == null) return true;
       const normalizedKey = String(key);
@@ -55,8 +56,12 @@ export const ReviewList = ({
 
   return (
     <section aria-live="polite" className="space-y-4">
+      {/* Summary header */}
       <header className="flex items-center gap-3">
-        <h2 className="text-lg text-black dark:text-white md:text-xl font-semibold">
+        <h2
+          className="text-lg text-black dark:text-white md:text-xl font-semibold"
+          style={{ transform: "translateY(2px)" }}
+        >
           {isUserReviews
             ? `My Reviews (${totalCount ?? 0})`
             : `${totalCount ?? 0} Reviews`}
@@ -64,7 +69,10 @@ export const ReviewList = ({
 
         {!isUserReviews && (
           <>
-            <span className="opacity-80 text-lg text-black dark:text-white">
+            <span
+              className="opacity-80 text-lg text-black dark:text-white"
+              style={{ transform: "translateY(2px)" }}
+            >
               — average {avg.toFixed(1)}
             </span>
             <StarRating value={avg || 0} readOnly />
@@ -79,28 +87,26 @@ export const ReviewList = ({
             : "No reviews found."}
         </p>
       ) : (
+        /* Review list */
         <ul className="space-y-4">
-          {reviews.map((r) => {
-            const review = r as Review & {
-              game?: { id: number; name: string };
-            };
+          {reviews.map((review: ReviewWithGame) => {
             const reviewGameId =
               gameId || (review.game?.id ? Number(review.game.id) : 0);
             return (
-              <li key={r.id}>
+              <li key={review.id}>
                 {isUserReviews && review.game?.name && (
                   <p className="text-l font-semibold text-gray-600 dark:text-gray-300 mb-2">
                     Game:{" "}
                     <Link
                       to={`/games/${review.game.id}`}
-                      className={`${FOCUS_VISIBLE} hover:underline text-lightbuttonpurple dark:text-lightpurple`}
+                      className={`${FOCUS_VISIBLE} underline text-blue-600 dark:text-blue-300 dark:hover:brightness-200 hover:brightness-70`}
                     >
                       {review.game.name}
                     </Link>
                   </p>
                 )}
                 <ReviewItem
-                  review={r}
+                  review={review}
                   gameId={reviewGameId}
                   currentUserId={currentUserId}
                   isUserContext={isUserReviews}
@@ -113,6 +119,7 @@ export const ReviewList = ({
       )}
 
       {hasMore && (
+        /* Load more button */
         <footer className="pt-2 justify-center flex">
           <button
             type="button"

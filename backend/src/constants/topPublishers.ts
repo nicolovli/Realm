@@ -1,3 +1,4 @@
+// This file contains a curated list of top video game publishers from various segments of the gaming industry.
 export const TOP_PUBLISHERS = [
   // AAA Gaming Giants
   "Electronic Arts",

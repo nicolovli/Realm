@@ -33,6 +33,7 @@ export const ResultFilters = ({
   filtersReady,
   filterError,
   countError,
+  countLoading,
 }: ResultFiltersProps & ReturnType<typeof useResultFilters>) => {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const sortFields = [
@@ -98,15 +99,18 @@ export const ResultFilters = ({
       )}
 
       {/* Mobile filter drawer trigger */}
-      <section className="flex md:hidden w-full mb-2" aria-label="Open filters">
+      <section
+        className="flex mdlg:hidden w-full mb-2"
+        aria-label="Open filters"
+      >
         <button
-          className={`${PILL_TRIGGER_BASE} ${FOCUS_VISIBLE} bg-lightpurple dark:bg-darkpurple font-semibold w-30 justify-center`}
+          className={`${PILL_TRIGGER_BASE} ${FOCUS_VISIBLE} bg-lightpurple dark:bg-darkpurple w-25 justify-center`}
           onClick={() => setMobileDrawerOpen(true)}
           aria-label="Open filters"
         >
           Filters
         </button>
-        <section className="flex items-center gap-2 ml-auto">
+        <section className="flex items-center gap-2 ml-auto ">
           <SortDropdown
             sortOption={sortOption}
             order={order}
@@ -118,7 +122,7 @@ export const ResultFilters = ({
 
       {/* Filter pills (desktop) */}
       <nav
-        className="flex hidden md:flex w-full gap-2 pb-4"
+        className=" hidden mdlg:flex w-full gap-2 pb-4"
         aria-label="Filter dropdowns"
       >
         {availableGroups.map(({ key, label }) => (
@@ -157,7 +161,11 @@ export const ResultFilters = ({
         className="flex items-center justify-between w-full"
         aria-label="Sort and match count"
       >
-        <MatchCount matchesCount={matchesCount} countError={countError} />
+        <MatchCount
+          matchesCount={matchesCount}
+          countError={countError}
+          countLoading={countLoading}
+        />
       </section>
 
       {/* Mobile filter drawer overlay */}

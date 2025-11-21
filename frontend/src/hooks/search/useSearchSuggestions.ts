@@ -1,3 +1,4 @@
+// Runs the search suggestions query with debouncing and exposes state for the SearchBar.
 import { useEffect, useMemo } from "react";
 import { useLazyQuery } from "@apollo/client/react";
 import { SEARCH_GAMES } from "@/lib/graphql";

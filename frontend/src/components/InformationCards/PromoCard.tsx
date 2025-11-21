@@ -5,6 +5,7 @@ import { GET_PROMO_GAMES, GET_REVIEWS_META_FOR_GAME } from "@/lib/graphql";
 import { GameCardBase } from "@/components/InformationCards";
 import { useNavigate } from "react-router-dom";
 import {
+  HOVER_DOTS,
   HOVER,
   FOCUS_VISIBLE,
   CARD_CONTAINER,
@@ -19,7 +20,7 @@ export const PromoCard = () => {
   const carouselRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
 
-  const promoGameIds = [14610, 8600, 7472];
+  const promoGameIds = [14610, 44235, 7988];
   const { data, loading, error } = useQuery<GetPromoGamesData>(
     GET_PROMO_GAMES,
     {
@@ -119,7 +120,7 @@ export const PromoCard = () => {
 
       {/* Dot navigation */}
       <nav
-        className="flex items-center justify-center gap-4 mt-2"
+        className="flex items-center justify-center gap-4 mt-4"
         aria-label="Carousel navigation"
       >
         {/* Previous button */}
@@ -145,7 +146,7 @@ export const PromoCard = () => {
                   index === currentIndex
                     ? "bg-activelightdots dark:bg-darkbuttonpurple"
                     : "bg-lightdots dark:bg-darkpurple"
-                } ${HOVER} ${FOCUS_VISIBLE}`}
+                } ${HOVER_DOTS} ${FOCUS_VISIBLE}`}
                 role="tab"
                 aria-selected={index === currentIndex}
                 aria-label={`Go to slide ${index + 1}`}

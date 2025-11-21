@@ -1,3 +1,4 @@
+// Produces relative human-readable labels like “5 minutes ago”.
 export const formatPretty = (d: Date) => {
   const now = new Date().getTime();
   const diffSec = Math.round((now - d.getTime()) / 1000);

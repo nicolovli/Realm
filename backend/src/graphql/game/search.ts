@@ -1,31 +1,20 @@
-// src/graphql/game/search.ts
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "../../db.js";
 import { normalizeSearchTerm } from "./gameHelpers.js";
 
-export type SearchBoostMode = "none" | "prefixIds" | "containsIds";
-
-// Unified search builder used by both games listing and filter options.
-// - Normalizes query (strip symbols / collapse whitespace)
-// - Single-word: (name contains|startsWith) OR (publisher/tag contains|startsWith)
-// - Multi-word: AND over name tokens (prefix-friendly)
-// - Optional “boosts”: add OR branches for publisher/tag IDs that prefix-match query.
-//   (This keeps the WHERE sargable for indexes on relation names/ids.)
-
-// Typed helpers so `mode` is correctly inferred as Prisma.QueryMode for each model
-type ModelName = "Game" | "Publisher" | "Tag";
-const ci = <M extends ModelName>(s: string): Prisma.StringFilter<M> => ({
-  contains: s,
-  mode: "insensitive",
-});
-const si = <M extends ModelName>(s: string): Prisma.StringFilter<M> => ({
-  startsWith: s,
+const ci = (value: string): Prisma.StringFilter => ({
+  contains: value,
   mode: "insensitive",
 });
 
-const nameFilters = (s: string): Prisma.GameWhereInput[] => [
-  { name: ci<"Game">(s) },
-  { name: si<"Game">(s) },
+const si = (value: string): Prisma.StringFilter => ({
+  startsWith: value,
+  mode: "insensitive",
+});
+
+const nameFilters = (value: string): Prisma.GameWhereInput[] => [
+  { name: ci(value) },
+  { name: si(value) },
 ];
 
 const buildNameOnlyWhere = (words: string[]): Prisma.GameWhereInput | null => {
@@ -33,69 +22,68 @@ const buildNameOnlyWhere = (words: string[]): Prisma.GameWhereInput | null => {
   if (words.length === 1) {
     return { OR: nameFilters(words[0]) };
   }
+
   return {
-    AND: words.map<Prisma.GameWhereInput>((w) => ({ name: ci<"Game">(w) })),
+    AND: words.map<Prisma.GameWhereInput>((word) => ({
+      name: ci(word),
+    })),
   };
 };
 
-// Build a rich Game where-clause for search:
-// name/publisher/tag: contains + startsWith
-// multi-word: AND on name words
-// optional relation ID boosts (publisherIds/tagIds)
+type Boosts = {
+  publisherIds?: number[];
+  tagIds?: number[];
+};
 
+// Build a flexible search clause that can match by name, publisher names or tags.
 function buildSearchWhereBase(
-  qRaw: string,
-  boosts?: { publisherIds?: number[]; tagIds?: number[] },
+  qRaw?: string | null,
+  boosts?: Boosts,
 ): Prisma.GameWhereInput {
   const q = qRaw?.trim();
   if (!q) return {};
 
   const norm = normalizeSearchTerm(q);
   const words = norm.split(/\s+/).filter(Boolean);
-
   const nameOnly = buildNameOnlyWhere(words);
-
-  const nameOrRel = (s: string): Prisma.GameWhereInput => ({
+  const nameOrRel = (value: string): Prisma.GameWhereInput => ({
     OR: [
-      ...nameFilters(s),
-      { publishers: { some: { name: ci<"Publisher">(s) } } },
-      { publishers: { some: { name: si<"Publisher">(s) } } },
-      { tags: { some: { name: ci<"Tag">(s) } } },
-      { tags: { some: { name: si<"Tag">(s) } } },
+      ...nameFilters(value),
+      { publishers: { some: { name: ci(value) } } },
+      { publishers: { some: { name: si(value) } } },
+      { tags: { some: { name: ci(value) } } },
+      { tags: { some: { name: si(value) } } },
     ],
   });
 
-  const base: Prisma.GameWhereInput = nameOnly
-    ? words.length === 1
-      ? nameOrRel(words[0])
-      : nameOnly
-    : {};
+  const base =
+    nameOnly && words.length === 1 ? nameOrRel(words[0]) : (nameOnly ?? {});
 
-  const extra: Prisma.GameWhereInput[] = [];
+  const extras: Prisma.GameWhereInput[] = [];
   if (boosts?.publisherIds?.length) {
-    extra.push({ publishers: { some: { id: { in: boosts.publisherIds } } } });
+    extras.push({
+      publishers: { some: { id: { in: boosts.publisherIds } } },
+    });
   }
   if (boosts?.tagIds?.length) {
-    extra.push({ tags: { some: { id: { in: boosts.tagIds } } } });
+    extras.push({
+      tags: { some: { id: { in: boosts.tagIds } } },
+    });
   }
 
-  return extra.length ? { OR: [base, ...extra] } : base;
+  return extras.length ? { OR: [base, ...extras] } : base;
 }
 
-// Build search where-clause and (optionally) fetch relation-ID boosts.
-// mode:
-// "none": no ID boosts
-// "prefixIds": boost games whose publisher/tag IDs match a prefix of the normalized query
+type SearchMode = "none" | "prefixIds" | "containsIds";
 
 export async function buildSearchWhere(
-  qRaw: string | undefined,
-  mode: SearchBoostMode = "prefixIds",
+  qRaw?: string | null,
+  mode: SearchMode = "prefixIds",
 ): Promise<Prisma.GameWhereInput> {
   if (!qRaw?.trim()) return {};
   if (mode === "none") return buildSearchWhereBase(qRaw);
 
   const norm = normalizeSearchTerm(qRaw);
-
   const terms = Array.from(new Set([norm, qRaw].filter(Boolean)));
 
   if (mode === "containsIds") {
@@ -103,33 +91,43 @@ export async function buildSearchWhere(
     for (const term of terms) {
       const tokens = term.split(/\s+/).filter(Boolean);
       const branch = buildNameOnlyWhere(tokens);
-      if (branch) orNameBranches.push(branch);
+      if (branch) {
+        orNameBranches.push(branch);
+      }
     }
 
     const base =
       orNameBranches.length === 0
         ? {}
         : orNameBranches.length === 1
-          ? orNameBranches[0]
+          ? orNameBranches[0]!
           : ({ OR: orNameBranches } as Prisma.GameWhereInput);
 
     const orFilters = terms.map((term) => ({
-      name: { contains: term, mode: "insensitive" as const },
+      name: { contains: term, mode: "insensitive" },
     }));
-    const whereClause = orFilters.length ? { OR: orFilters } : undefined;
-    const MAX_REL_MATCHES = 200;
 
+    const publisherWhere =
+      orFilters.length > 0
+        ? ({ OR: orFilters } as Prisma.PublisherWhereInput)
+        : undefined;
+    const tagWhere =
+      orFilters.length > 0
+        ? ({ OR: orFilters } as Prisma.TagWhereInput)
+        : undefined;
+
+    const MAX_REL_MATCHES = 200;
     const [pubs, tags] = await Promise.all([
-      whereClause
+      publisherWhere
         ? prisma.publisher.findMany({
-            where: whereClause,
+            where: publisherWhere,
             select: { id: true },
             take: MAX_REL_MATCHES,
           })
         : [],
-      whereClause
+      tagWhere
         ? prisma.tag.findMany({
-            where: whereClause,
+            where: tagWhere,
             select: { id: true },
             take: MAX_REL_MATCHES,
           })
@@ -139,25 +137,21 @@ export async function buildSearchWhere(
     const extras: Prisma.GameWhereInput[] = [];
     if (pubs.length) {
       extras.push({
-        publishers: {
-          some: { id: { in: pubs.map((p) => p.id) } },
-        },
+        publishers: { some: { id: { in: pubs.map((p) => p.id) } } },
       });
     }
     if (tags.length) {
       extras.push({
-        tags: {
-          some: { id: { in: tags.map((t) => t.id) } },
-        },
+        tags: { some: { id: { in: tags.map((t) => t.id) } } },
       });
     }
 
     if (!extras.length) return base;
-    return base && Object.keys(base).length
-      ? ({ OR: [base, ...extras] } as Prisma.GameWhereInput)
-      : extras.length === 1
-        ? extras[0]
-        : ({ OR: extras } as Prisma.GameWhereInput);
+    const hasBase = base && Object.keys(base).length > 0;
+    if (!hasBase) {
+      return extras.length === 1 ? extras[0]! : { OR: extras };
+    }
+    return { OR: [base, ...extras] };
   }
 
   const [pubs, tags] = await Promise.all([
@@ -173,6 +167,5 @@ export async function buildSearchWhere(
 
   const publisherIds = pubs.map((p) => p.id);
   const tagIds = tags.map((t) => t.id);
-
   return buildSearchWhereBase(qRaw, { publisherIds, tagIds });
 }

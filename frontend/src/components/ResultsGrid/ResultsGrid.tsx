@@ -8,20 +8,19 @@ import { SkeletonCard } from "@/components/Skeletons";
 export type ResultsGridProps = {
   games: Game[];
   loading: boolean;
-  emptyState?: ReactNode; // optional custom empty UI
+  emptyState?: ReactNode;
   error?: string | null;
 };
 
 export const ResultsGrid = ({
-  games,
-  loading, // "no data yet AND fetching"
+  games = [],
+  loading,
   emptyState,
   error,
 }: ResultsGridProps) => {
-  const PAGE_SIZE = 9;
+  const PAGE_SIZE = 12;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  // Reset visible slice when the dataset length changes
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
   }, [games.length]);
@@ -58,6 +57,7 @@ export const ResultsGrid = ({
     );
   }
 
+  // Render either skeletons or real cards up to visibleCount
   const items = Array.from({
     length: shouldShowSkeleton
       ? PAGE_SIZE
@@ -68,12 +68,13 @@ export const ResultsGrid = ({
     }
     const game = games[idx];
     if (game) {
-      return <Card key={game.id} game={game} />;
+      return <Card key={game.id} game={game} priority={idx === 0} />;
     }
 
+    // Preserve grid shape when data is missing
     return (
       <li key={`placeholder-${idx}`} className="list-none invisible">
-        <div
+        <section
           className={
             "rounded-2xl ring-1 bg-lightpurple ring-gray dark:bg-darkpurple dark:ring-darkgray overflow-hidden block w-full"
           }
@@ -85,8 +86,9 @@ export const ResultsGrid = ({
 
   return (
     <>
+      {/* Results list */}
       <ul
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+        className="grid grid-cols-2 sm:grid-cols-2 mdlg:grid-cols-3 gap-4"
         aria-live="polite"
         role="list"
         data-cy="results-grid"
@@ -98,6 +100,7 @@ export const ResultsGrid = ({
         games.length > 0 &&
         visibleCount < games.length && (
           <section className="flex justify-center mt-6">
+            {/* Load more button */}
             <button
               onClick={loadMore}
               className={`text-black dark:text-white px-6 py-2 rounded-full bg-lightpurple dark:bg-darkpurple text-sm md:text-base ${HOVER} ${FOCUS_VISIBLE}`}

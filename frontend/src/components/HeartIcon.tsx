@@ -17,7 +17,6 @@ import {
 } from "@/lib/graphql";
 import type { UserData } from "@/types";
 
-// HeartIcon component props
 export type HeartIconProps = {
   size?: number;
   gameId: number;
@@ -45,7 +44,6 @@ export const HeartIcon = ({
 
   const user = data?.me;
 
-  // Track if query failed
   useEffect(() => {
     if (error) {
       setHasError(true);
@@ -53,14 +51,12 @@ export const HeartIcon = ({
     }
   }, [error]);
 
-  // Update liked state when user data changes
   useEffect(() => {
     if (user?.favorites) {
       setLiked(user.favorites.some((fav) => Number(fav.id) === gameId));
     }
   }, [user, gameId]);
 
-  // Refetch user when login state changes
   useEffect(() => {
     if (isLoggedIn) {
       refetch();
@@ -80,7 +76,7 @@ export const HeartIcon = ({
     setLiked(newLiked);
     try {
       await toggleFavorite({ variables: { gameId, liked: newLiked } });
-      toast.success(
+      toast.info(
         newLiked ? "Added to favorites :)" : "Removed from favorites :(",
       );
     } catch {
@@ -103,16 +99,33 @@ export const HeartIcon = ({
   const label = liked ? "Remove from favorites" : "Add to favorites";
 
   const hoverClasses = liked
-    ? "hover:fill-pink-100 hover:stroke-pink-300 dark:hover:stroke-pink-300"
-    : "hover:fill-pink-200 hover:stroke-pink-500 dark:hover:stroke-pink-300"; // outline -> fill on hover
+    ? [
+        // Liked
+        "hover:fill-pink-500 hover:stroke-pink-500",
+        "dark:hover:fill-pink-400 dark:hover:stroke-pink-400",
+        "hover:drop-shadow-[0_0_10px_rgba(244,114,182,0.75)]",
+      ].join(" ")
+    : [
+        // Not liked
+        "hover:fill-pink-200 hover:stroke-pink-500",
+        "dark:hover:fill-pink-300 dark:hover:stroke-pink-300",
+      ].join(" ");
 
   const iconClass = `
-    cursor-pointer
-    transition-colors duration-150 ease-out outline-none
-    ${liked ? "fill-pink-300 stroke-black dark:stroke-white" : "fill-none stroke-black dark:stroke-white"}
-    ${hoverClasses}
-    ${FOCUS_VISIBLE}
-  `;
+  cursor-pointer
+  transition-colors transition-transform duration-150 ease-out
+  transform-gpu hover:scale-110 active:scale-95
+  outline-none
+  ${
+    liked
+      ? // base liked state:
+        "fill-pink-300 stroke-pink-400 dark:fill-pink-300 dark:stroke-pink-300"
+      : // base not liked:
+        "fill-none stroke-lightgray dark:stroke-darkgray"
+  }
+  ${hoverClasses}
+  ${FOCUS_VISIBLE}
+`;
 
   return liked ? (
     <HeartSolid
@@ -121,6 +134,7 @@ export const HeartIcon = ({
       onKeyDown={handleKeyDown}
       role="button"
       tabIndex={0}
+      aria-hidden={false}
       aria-label={label}
       aria-pressed={liked}
       className={iconClass}
@@ -134,6 +148,7 @@ export const HeartIcon = ({
       onKeyDown={handleKeyDown}
       role="button"
       tabIndex={0}
+      aria-hidden={false}
       aria-label={label}
       aria-pressed={liked}
       className={iconClass}

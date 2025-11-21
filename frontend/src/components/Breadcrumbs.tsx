@@ -1,4 +1,5 @@
 import { useLocation, Link, useParams } from "react-router-dom";
+import { Fragment } from "react";
 import { useQuery } from "@apollo/client/react";
 import { GET_GAME } from "@/lib/graphql";
 import type { GetGameData, GetGameVariables } from "@/types";
@@ -23,7 +24,6 @@ export const Breadcrumbs = () => {
     login: "Login",
   };
 
-  // Hide breadcrumb on homepage, but keep space
   const hideBreadcrumb = location.pathname === "/";
 
   const inferredId =
@@ -37,13 +37,13 @@ export const Breadcrumbs = () => {
 
   const { data: gameData } = useQuery<GetGameData, GetGameVariables>(GET_GAME, {
     variables: { id: inferredId ?? "" },
-    // skip the query when this is not a game detail page
     skip: !isGamePage || !inferredId,
   });
 
   return (
     <Breadcrumb className="flex flex-col p-2 w-[min(1600px,92%)] mx-auto text-black dark:text-white min-h-[2.5rem]">
       {!hideBreadcrumb && (
+        /* Breadcrumb trail */
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild className="hover:underline">
@@ -65,7 +65,7 @@ export const Breadcrumbs = () => {
                 : labels[name] || name.charAt(0).toUpperCase() + name.slice(1);
 
             return (
-              <section key={routeTo} className="flex items-center">
+              <Fragment key={routeTo}>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   {isLast ? (
@@ -76,7 +76,7 @@ export const Breadcrumbs = () => {
                     </BreadcrumbLink>
                   )}
                 </BreadcrumbItem>
-              </section>
+              </Fragment>
             );
           })}
         </BreadcrumbList>

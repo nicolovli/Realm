@@ -51,12 +51,12 @@ export const UserPage = () => {
 
   return (
     <main className="dark:text-white min-h-screen p-4 md:p-8">
-      <section className="flex flex-col md:flex-row justify-center md:gap-15 gap-8">
+      <section className="flex flex-col mdlg:flex-row justify-center md:gap-15 gap-8">
         <section className="flex justify-center md:justify-center md:items-start">
           <Profile user={data.me} handleLogOut={handleLogOut} />
         </section>
 
-        <section className="w-full max-w-4xl">
+        <section className="w-full max-w-4xl mdlg:mx-0 mx-auto">
           <ReviewList
             isUserReviews={true}
             userId={data.me.id}

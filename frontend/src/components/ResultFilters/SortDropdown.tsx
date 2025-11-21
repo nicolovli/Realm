@@ -1,4 +1,3 @@
-// Sort dropdown for result header (desktop and mobile)
 import { ChevronDown } from "lucide-react";
 import type { SortOptionValue } from "@/constants/resultFiltersConstants";
 import {
@@ -7,9 +6,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { FOCUS_VISIBLE, HOVER, PILL_TRIGGER_BASE } from "@/lib/classNames";
+import {
+  FOCUS_VISIBLE,
+  HOVER,
+  SHADOW_SM,
+  SORT_TRIGGER_BASE,
+} from "@/lib/classNames";
+import { useState } from "react";
 
-// SortDropdown component props
 export interface SortDropdownProps {
   sortOption: SortOptionValue;
   order: "asc" | "desc";
@@ -23,34 +27,52 @@ export interface SortDropdownProps {
   }>;
 }
 
-// Renders the sort dropdown trigger and menu
 export const SortDropdown = ({
   sortOption,
   order,
   setSortOption,
   sortOptions,
 }: SortDropdownProps) => {
+  const [open, setOpen] = useState(false);
   const currentLabel =
     sortOptions.find((o) => o.sortValue === sortOption && o.order === order)
       ?.label ??
     sortOptions.find((o) => o.sortValue === sortOption)?.label ??
     "Sort";
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+  };
+
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+      {/* Dropdown trigger */}
       <DropdownMenuTrigger
-        className={`${HOVER} ${PILL_TRIGGER_BASE} md:w-[200px] w-[177px] bg-lightpurple dark:bg-darkpurple whitespace-nowrap`}
+        className={`
+          ${FOCUS_VISIBLE}
+          ${HOVER}
+          ${SORT_TRIGGER_BASE}
+          ${SHADOW_SM}
+          md:w-[200px] w-40 bg-lightpurple dark:bg-darkpurple whitespace-nowrap
+        `}
         aria-haspopup="menu"
         aria-label={`Sort by ${currentLabel}`}
+        aria-expanded={open}
         data-cy="sort-dropdown-trigger"
       >
-        <span className="md:font-medium font-semibold">{currentLabel}</span>
+        <span className="font-medium">{currentLabel}</span>
         <ChevronDown className="h-4 w-4" />
       </DropdownMenuTrigger>
 
+      {/* Sort option list */}
       <DropdownMenuContent
-        className=" bg-lightpurple dark:bg-darkpurple border-gray-200 dark:border-gray-700 min-w-[var(--radix-dropdown-menu-trigger-width)]"
+        className="min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-80 overflow-y-auto bg-lightpurple dark:bg-darkpurple border-gray-200 dark:border-gray-700 z-100"
         align="end"
+        onKeyDown={(e) => {
+          if (e.key === "Tab") {
+            setOpen(false);
+          }
+        }}
         data-cy="sort-dropdown-menu"
       >
         {sortOptions.map((option) => (

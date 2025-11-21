@@ -8,9 +8,9 @@ import {
   SearchBar,
   ToggleTheme,
 } from "@/components/Header";
-import { FOCUS_VISIBLE } from "@/lib/classNames";
+import { FOCUS_VISIBLE, SHADOW_SM } from "@/lib/classNames";
+import { useLoginDialog } from "@/hooks/useLoginDialog";
 
-// Navigation Item type for Header component
 export type NavigationItem = {
   title: string;
   href: string;
@@ -31,9 +31,13 @@ const navigation: NavigationItem[] = [
 ];
 
 export const Header = () => {
+  const loginDialogControls = useLoginDialog();
+
   return (
     <header className="sticky top-4 z-50 flex flex-col m-3 gap-2 w-[min(1600px,92%)] mx-auto">
-      <section className="bg-lightpurple dark:bg-darkpurple shadow-sm rounded-full flex flex-row justify-between items-center p-3 gap-1">
+      <section
+        className={`bg-lightpurple dark:bg-darkpurple rounded-full flex flex-row justify-between items-center p-3 gap-1 ${SHADOW_SM}`}
+      >
         <Link to="" aria-label="Homepage" className={FOCUS_VISIBLE}>
           <Logo
             size={50}
@@ -44,7 +48,7 @@ export const Header = () => {
         {/* Dekstop navigation + search, hidden in mobile version */}
         <section className="hidden md:flex flex-1 items-center gap-6">
           <SearchBar
-            placeholder="Search for games, tags, genres..."
+            placeholder="Search for games, tags or publishers..."
             className="flex-1 max-w-md ml-6"
           />
 
@@ -71,13 +75,19 @@ export const Header = () => {
           </nav>
         </section>
 
-        <AuthButton className="hidden md:flex md:flex-row" />
+        <AuthButton
+          className="hidden md:flex md:flex-row"
+          dialogControls={loginDialogControls}
+        />
         <ToggleTheme className=" hidden md:block lg:ml-5 lg:mr-5" />
 
         {/* Mobile icons only visible in reponsivive small size */}
         <section className="flex flex-row gap-3 w-full md:hidden items-center">
-          <SearchBar />
-          <MobileSheetMenu navigation={navigation} />
+          <SearchBar placeholder="Search for games" />
+          <MobileSheetMenu
+            navigation={navigation}
+            dialogControls={loginDialogControls}
+          />
         </section>
       </section>
     </header>

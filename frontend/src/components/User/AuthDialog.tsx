@@ -10,41 +10,16 @@ import { useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { toast } from "sonner";
 import { Login, Register } from "@/components/User";
+import type {
+  CreateUserResponse,
+  CreateUserVariables,
+  LoginUserResponse,
+  LoginUserVariables,
+} from "@/types";
 
-// AuthDialog component props
-export interface AuthDialogProps {
+interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-interface CreateUserResponse {
-  createUser: {
-    id: string;
-    username: string;
-    email: string;
-  };
-}
-
-interface CreateUserVariables {
-  username: string;
-  email: string;
-  password: string;
-}
-
-interface LoginUserResponse {
-  loginUser: {
-    token: string;
-    user: {
-      id: string;
-      username: string;
-      email: string;
-    };
-  };
-}
-
-interface LoginUserVariables {
-  username: string;
-  password: string;
 }
 
 const darkmode = "text-black dark:text-white";
@@ -132,6 +107,7 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             ? "Jump back into Realm! Enter your portal credentials to continue your adventure."
             : "Create your portal and join the Realm universe!"}
         </DialogDescription>
+        {/* Form switch */}
         {mode === "login" ? (
           <Login onSubmit={handleLoginSubmit} />
         ) : (
@@ -141,7 +117,10 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           {mode === "login" ? (
             <>
               New to Realm?{" "}
-              <span className="underline" onClick={() => setMode("register")}>
+              <span
+                className="underline text-blue-600 dark:text-blue-300 dark:hover:brightness-200 hover:brightness-70"
+                onClick={() => setMode("register")}
+              >
                 Create your portal
               </span>{" "}
               and start exploring!
@@ -149,7 +128,10 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           ) : (
             <>
               Back to the adventure?{" "}
-              <span className="underline" onClick={() => setMode("login")}>
+              <span
+                className="underline text-blue-600 dark:text-blue-300"
+                onClick={() => setMode("login")}
+              >
                 Enter Realm
               </span>{" "}
               and continue your journey!
