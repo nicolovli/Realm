@@ -6,16 +6,17 @@ import { FOCUS_VISIBLE } from "@/lib/classNames";
 import { useNavigate } from "react-router-dom";
 import { AuthDialog } from "@/components/User";
 import { useAuthStatus } from "@/hooks/useAuthStatus";
-import { type LoginDialogControls, useLoginDialog } from "@/hooks/useLoginDialog";
+import {
+  type LoginDialogControls,
+  useLoginDialog,
+} from "@/hooks/useLoginDialog";
 
 interface AuthButtonProps {
-  className?: string;
   dialogControls?: LoginDialogControls;
   renderDialog?: boolean;
 }
 
 export const AuthButton = ({
-  className = "",
   dialogControls,
   renderDialog = true,
 }: AuthButtonProps) => {
@@ -25,10 +26,7 @@ export const AuthButton = ({
     dialogControls ?? internalDialogControls;
   const navigate = useNavigate();
   const loginbutton =
-    "flex items-center gap-1 rounded-full cursor-pointer " +
-    FOCUS_VISIBLE +
-    " " +
-    className;
+    "flex items-center gap-1 rounded-full cursor-pointer " + FOCUS_VISIBLE;
 
   const handleAccountClick = () => {
     navigate("/profile");
