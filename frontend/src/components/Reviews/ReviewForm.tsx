@@ -77,7 +77,7 @@ export const ReviewForm = ({
     try {
       await createReview({ variables: { gameId, star, description } });
       invalidateGameLists();
-      toast.success("Review posted!");
+      toast.info("Review posted!");
       setDescription("");
       setStar(5);
     } catch (error: unknown) {

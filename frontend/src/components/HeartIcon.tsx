@@ -76,7 +76,7 @@ export const HeartIcon = ({
     setLiked(newLiked);
     try {
       await toggleFavorite({ variables: { gameId, liked: newLiked } });
-      toast.success(
+      toast.info(
         newLiked ? "Added to favorites :)" : "Removed from favorites :(",
       );
     } catch {

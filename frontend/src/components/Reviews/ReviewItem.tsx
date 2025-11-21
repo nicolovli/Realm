@@ -88,7 +88,7 @@ export const ReviewItem = ({
         },
       });
       invalidateGameLists();
-      toast.success("Review updated!");
+      toast.info("Review updated!");
       setEditing(false);
     } catch (error) {
       console.error(`[Frontend] Error updating review:`, error);
@@ -108,7 +108,7 @@ export const ReviewItem = ({
     try {
       await deleteReview({ variables: { id: Number(review.id) } });
       invalidateGameLists();
-      toast.success("Review deleted");
+      toast.info("Review deleted");
     } catch (error) {
       console.error(`[Frontend] Error deleting review:`, error);
       toast.error("Could not delete the review.");
