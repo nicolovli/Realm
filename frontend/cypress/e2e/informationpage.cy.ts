@@ -24,13 +24,15 @@ describe("InformationPage, can reveiw", () => {
   it("can delete review", () => {
     cy.login({ username: user.username, password: user.password });
     cy.wait(500);
-    
-    cy.contains("This is a Cypress test review", { timeout: 8000 }).should("be.visible");
+
+    cy.contains("This is a Cypress test review", { timeout: 8000 }).should(
+      "be.visible",
+    );
 
     cy.contains("Your review")
-  .closest("article")       // this matches the root of <ReviewItem>
-  .find('button[aria-label="Delete review"]')
-  .click();
+      .closest("article")
+      .find('button[aria-label="Delete review"]')
+      .click();
 
     cy.get('button[aria-label="Confirm delete review"]').click();
   });
