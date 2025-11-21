@@ -46,7 +46,7 @@ export const FavoritePage = () => {
     return (
       <>
         <main className="flex flex-col items-center justify-center min-h-screen p-6">
-          <section className="text-center space-y-4 -mt-20">
+          <section className="w-full max-w-xl mx-auto px-6 sm:px-10 text-center space-y-4 -mt-20">
             <h1 className="text-2xl sm:text-3xl font-bold dark:text-white">
               You have no favorites yet :/
             </h1>
@@ -58,7 +58,7 @@ export const FavoritePage = () => {
               >
                 Log in
               </button>
-              <p className="text-gray-600 dark:text-gray-400 whitespace-nowrap">
+              <p className="text-gray-600 dark:text-gray-400 sm:whitespace-nowrap">
                 and start favoriting games to see them here!
               </p>
             </section>
