@@ -27,7 +27,7 @@ export const Profile = ({ user, handleLogOut }: UserProfileProps) => {
 
   return (
     <section
-      className="flex bg-lightpurple dark:bg-darkpurple rounded-3xl flex-col justify-center items-center gap-4 p-10 md:p-20"
+      className="flex bg-lightpurple dark:bg-darkpurple rounded-3xl flex-col justify-center items-center gap-4 p-10 md:p-20 w-full"
       aria-labelledby="profile-heading"
     >
       <h1 id="profile-heading" className="text-3xl">
