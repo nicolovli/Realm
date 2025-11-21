@@ -20,7 +20,7 @@ export function buildPromoGamesMock(
   return {
     request: {
       query: GET_PROMO_GAMES,
-      variables: { ids: [14610, 8600, 7472] },
+      variables: { ids: [14610, 44235, 7988] },
     },
     result: { data: { games } },
   };
