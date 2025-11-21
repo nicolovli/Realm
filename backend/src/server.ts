@@ -50,7 +50,7 @@ const start = async () => {
           try {
             const decoded = jwt.verify(
               token,
-              process.env.JWT_SECRET!
+              process.env.JWT_SECRET!,
             ) as JwtPayload & {
               userId?: number;
             };
@@ -65,7 +65,7 @@ const start = async () => {
         return { prisma, userId };
       },
     }),
-    compression()
+    compression(),
   );
 
   // Simple health endpoint
@@ -82,7 +82,7 @@ const start = async () => {
             if (filePath.endsWith("index.html")) {
               res.setHeader(
                 "Cache-Control",
-                "no-cache, no-store, must-revalidate"
+                "no-cache, no-store, must-revalidate",
               );
               return;
             }
@@ -92,13 +92,13 @@ const start = async () => {
             if (hasHash) {
               res.setHeader(
                 "Cache-Control",
-                "public, max-age=31536000, immutable"
+                "public, max-age=31536000, immutable",
               );
             } else {
               res.setHeader("Cache-Control", "public, max-age=3600");
             }
           },
-        })
+        }),
       );
 
       const assetsDir = path.join(distDir, "assets");
@@ -113,7 +113,7 @@ const start = async () => {
           const preloadLinks = cssFiles
             .map(
               (f) =>
-                `<link rel=\"preload\" as=\"style\" href=\"/assets/${f}\" onload=\"this.rel='stylesheet'\">`
+                `<link rel=\"preload\" as=\"style\" href=\"/assets/${f}\" onload=\"this.rel='stylesheet'\">`,
             )
             .join("\n");
 
@@ -126,7 +126,7 @@ const start = async () => {
       console.log(`Serving static files from ${distDir} with cache headers`);
     } else {
       console.warn(
-        `SERVE_STATIC=true but ${distDir} not found; skipping static middleware`
+        `SERVE_STATIC=true but ${distDir} not found; skipping static middleware`,
       );
     }
   }

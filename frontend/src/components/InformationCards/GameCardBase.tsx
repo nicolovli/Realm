@@ -7,6 +7,7 @@ import { AuthDialog } from "@/components/User";
 import { useAuthStatus } from "@/hooks/useAuthStatus";
 import { StarRating } from "@/components/Reviews";
 import { Link } from "react-router-dom";
+import { buildSrcSet } from "@/lib/utils/images";
 
 interface GameCardBaseProps {
   gameId: number;
@@ -89,6 +90,9 @@ export const GameCardBase = ({
   const resolvedInitial = initialImage ?? resolvedFinal;
   const [src, setSrc] = useState(resolvedInitial);
 
+  const finalSet = buildSrcSet(image, [480, 640, 800, 1200]);
+  const initialSet = buildSrcSet(image, [320, 480]);
+
   useEffect(() => {
     setSrc(resolvedInitial);
   }, [resolvedInitial]);
@@ -128,8 +132,9 @@ export const GameCardBase = ({
       <figure className="md:w-1/2 flex justify-center mb-4 md:mb-0">
         <img
           src={src}
+          srcSet={src === resolvedFinal ? finalSet.srcSet : initialSet.srcSet}
+          sizes={finalSet.sizes}
           alt={title}
-          sizes="(max-width: 768px) 90vw, 50vw"
           className="rounded-3xl w-full h-full max-h-[25rem] object-cover"
           fetchPriority="high"
           decoding="async"

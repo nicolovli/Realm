@@ -1,5 +1,5 @@
 import { FOCUS_VISIBLE, CARD_BORDER, SHADOW_SM } from "@/lib/classNames";
-import { buildPreviewState } from "@/lib/utils/images";
+import { buildPreviewState, buildSrcSet } from "@/lib/utils/images";
 import type { FeaturedGame } from "@/types";
 import { memo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -25,12 +25,9 @@ export const FeaturedCard = memo(
     const [loaded, setLoaded] = useState(false);
     const [errored, setErrored] = useState(false);
 
-    // Build an optimized, proxied image URL only if we actually have an image
-    const imageSrc = game.image
-      ? `https://images.weserv.nl/?url=${encodeURIComponent(
-          game.image,
-        )}&w=800&output=webp&q=70`
-      : undefined;
+    const imageSet = game.image
+      ? buildSrcSet(game.image, [320, 480, 640, 800])
+      : null;
 
     return (
       <Link
@@ -42,16 +39,18 @@ export const FeaturedCard = memo(
       >
         <figure className={cardClass}>
           <section className="relative w-full aspect-[16/9]">
-            {imageSrc && !loaded && !errored && (
-              <img
+            {imageSet && !loaded && !errored && (
+              <span
                 className="absolute inset-0 animate-pulse bg-zinc-200/60 dark:bg-zinc-700/40"
-                alt="Next game"
+                aria-hidden
               />
             )}
 
-            {imageSrc && (
+            {imageSet && (
               <img
-                src={imageSrc}
+                src={imageSet.src}
+                srcSet={imageSet.srcSet}
+                sizes={imageSet.sizes}
                 alt={`Picure of game: ${game.name}`}
                 loading={priority ? "eager" : "lazy"}
                 fetchPriority={priority ? "high" : undefined}
@@ -65,7 +64,7 @@ export const FeaturedCard = memo(
               />
             )}
 
-            {(!imageSrc || errored) && (
+            {(!imageSet || errored) && (
               <figcaption className="absolute inset-0 grid place-items-center text-xs text-zinc-600 dark:text-zinc-300">
                 <span>Image unavailable</span>
               </figcaption>
