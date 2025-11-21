@@ -12,6 +12,6 @@ export const buildPreviewState = (
   const encodedUrl = encodeURIComponent(image);
 
   return {
-    previewImage: `https://images.weserv.nl/?url=${encodedUrl}&w=${width}&output=webp`,
+    previewImage: `https://images.weserv.nl/?url=${encodedUrl}&w=${width}&output=webp&q=70`,
   };
 };

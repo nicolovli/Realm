@@ -68,7 +68,7 @@ export const ResultsGrid = ({
     }
     const game = games[idx];
     if (game) {
-      return <Card key={game.id} game={game} />;
+      return <Card key={game.id} game={game} priority={idx === 0} />;
     }
 
     // Preserve grid shape when data is missing

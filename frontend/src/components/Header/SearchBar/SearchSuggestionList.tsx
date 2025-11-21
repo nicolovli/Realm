@@ -84,10 +84,10 @@ export const SearchSuggestionList = ({
         const encoded = game.image ? encodeURIComponent(game.image) : null;
         const src =
           encoded &&
-          `https://images.weserv.nl/?url=${encoded}&w=96&output=webp`;
+          `https://images.weserv.nl/?url=${encoded}&w=96&output=webp&q=70`;
         const srcSet =
           encoded &&
-          `https://images.weserv.nl/?url=${encoded}&w=48&output=webp 1x, https://images.weserv.nl/?url=${encoded}&w=96&output=webp 2x`;
+          `https://images.weserv.nl/?url=${encoded}&w=48&output=webp&q=70 1x, https://images.weserv.nl/?url=${encoded}&w=96&output=webp&q=70 2x`;
         const hasLoaded = loadedImages.has(game.id);
 
         return (

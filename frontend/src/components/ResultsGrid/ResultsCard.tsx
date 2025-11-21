@@ -16,9 +16,11 @@ import { useAuthStatus } from "@/hooks/useAuthStatus";
 export const Card = ({
   game,
   onClick,
+  priority,
 }: {
   game: Game;
   onClick?: (g: Game) => void;
+  priority?: boolean;
 }) => {
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
@@ -35,7 +37,7 @@ export const Card = ({
     if (!game.image) return null;
     const base = encodeURIComponent(game.image);
     const make = (w: number) =>
-      `https://images.weserv.nl/?url=${base}&w=${w}&output=webp`;
+      `https://images.weserv.nl/?url=${base}&w=${w}&output=webp&q=70`;
     return {
       src: make(640),
       srcSet: `${make(320)} 320w, ${make(480)} 480w, ${make(640)} 640w`,
@@ -88,7 +90,8 @@ export const Card = ({
                   srcSet={imageSources.srcSet}
                   sizes={imageSources.sizes}
                   alt={game.name}
-                  loading="lazy"
+                  loading={priority ? "eager" : "lazy"}
+                  fetchPriority={priority ? "high" : undefined}
                   decoding="async"
                   onLoad={() => setLoaded(true)}
                   onError={() => {
@@ -165,7 +168,8 @@ export const Card = ({
                   srcSet={imageSources.srcSet}
                   sizes={imageSources.sizes}
                   alt={`Image of ${game.name}`}
-                  loading="lazy"
+                  loading={priority ? "eager" : "lazy"}
+                  fetchPriority={priority ? "high" : undefined}
                   decoding="async"
                   onLoad={() => setLoaded(true)}
                   onError={() => {

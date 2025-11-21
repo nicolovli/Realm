@@ -13,13 +13,23 @@ const titleClass =
   "mt-2 px-3 text-sm font-medium text-zinc-900 dark:text-zinc-100 text-center truncate";
 
 export const FeaturedCard = memo(
-  ({ game, "data-cy": dataCy }: { game: FeaturedGame; "data-cy"?: string }) => {
+  ({
+    game,
+    "data-cy": dataCy,
+    priority,
+  }: {
+    game: FeaturedGame;
+    "data-cy"?: string;
+    priority?: boolean;
+  }) => {
     const [loaded, setLoaded] = useState(false);
     const [errored, setErrored] = useState(false);
 
     // Build an optimized, proxied image URL only if we actually have an image
     const imageSrc = game.image
-      ? `https://images.weserv.nl/?url=${encodeURIComponent(game.image)}&w=800&output=webp`
+      ? `https://images.weserv.nl/?url=${encodeURIComponent(
+          game.image,
+        )}&w=800&output=webp&q=70`
       : undefined;
 
     return (
@@ -43,7 +53,8 @@ export const FeaturedCard = memo(
               <img
                 src={imageSrc}
                 alt={`Picure of game: ${game.name}`}
-                loading="lazy"
+                loading={priority ? "eager" : "lazy"}
+                fetchPriority={priority ? "high" : undefined}
                 decoding="async"
                 onLoad={() => setLoaded(true)}
                 onError={() => {

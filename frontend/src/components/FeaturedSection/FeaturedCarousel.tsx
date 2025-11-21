@@ -141,12 +141,16 @@ export const FeaturedCarousel = ({
             className={`w-full`}
           >
             <CarouselContent className="select-none -mr-0 sm:-mr-4 md:-mr-6 lg:-mr-8">
-              {logical.map((g) => (
+              {logical.map((g, idx) => (
                 <CarouselItem
                   key={g.id}
                   className={`shrink-0 ${itemBasisClassName} mt-4 mb-8 pr-0  sm:pr-4 md:pr-6 lg:pr-8`}
                 >
-                  <FeaturedCard data-cy="featured-game-card" game={g} />
+                  <FeaturedCard
+                    data-cy="featured-game-card"
+                    game={g}
+                    priority={idx === 0}
+                  />
                 </CarouselItem>
               ))}
             </CarouselContent>

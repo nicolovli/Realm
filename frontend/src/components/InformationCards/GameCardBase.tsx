@@ -83,7 +83,7 @@ export const GameCardBase = ({
     : null;
 
   const buildProxied = (url: string, width: number) =>
-    `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=${width}&output=webp`;
+    `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=${width}&output=webp&q=70`;
 
   const resolvedFinal = finalImage ?? buildProxied(image, 800);
   const resolvedInitial = initialImage ?? resolvedFinal;
