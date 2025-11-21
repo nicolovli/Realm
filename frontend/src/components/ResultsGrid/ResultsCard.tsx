@@ -7,7 +7,7 @@ import {
 } from "@/lib/classNames";
 import { Link } from "react-router-dom";
 import { useMemo, useState, useEffect } from "react";
-import { buildPreviewState } from "@/lib/utils/images";
+import { buildPreviewState, buildSrcSet } from "@/lib/utils/images";
 import { isCoarsePointer } from "@/lib/isTouch";
 import { HeartIcon } from "@/components/HeartIcon";
 import { AuthDialog } from "@/components/User";
@@ -35,14 +35,7 @@ export const Card = ({
   // Build responsive image sources only if we have an image URL
   const imageSources = useMemo(() => {
     if (!game.image) return null;
-    const base = encodeURIComponent(game.image);
-    const make = (w: number) =>
-      `https://images.weserv.nl/?url=${base}&w=${w}&output=webp&q=70`;
-    return {
-      src: make(640),
-      srcSet: `${make(320)} 320w, ${make(480)} 480w, ${make(640)} 640w`,
-      sizes: "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw",
-    };
+    return buildSrcSet(game.image, [320, 480, 640]);
   }, [game.image]);
 
   return (

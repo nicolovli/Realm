@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { MouseEvent } from "react";
 import { HOVER } from "@/lib/classNames";
 import type { Game } from "@/types";
+import { buildSrcSet } from "@/lib/utils/images";
 
 type SearchSuggestionListProps = {
   isOpen: boolean;
@@ -81,13 +82,7 @@ export const SearchSuggestionList = ({
     >
       {suggestions.map((game, index) => {
         const isActive = index === activeIndex;
-        const encoded = game.image ? encodeURIComponent(game.image) : null;
-        const src =
-          encoded &&
-          `https://images.weserv.nl/?url=${encoded}&w=96&output=webp&q=70`;
-        const srcSet =
-          encoded &&
-          `https://images.weserv.nl/?url=${encoded}&w=48&output=webp&q=70 1x, https://images.weserv.nl/?url=${encoded}&w=96&output=webp&q=70 2x`;
+        const imageSet = game.image ? buildSrcSet(game.image, [48, 96]) : null;
         const hasLoaded = loadedImages.has(game.id);
 
         return (
@@ -109,10 +104,11 @@ export const SearchSuggestionList = ({
                 {!hasLoaded && (
                   <span className="absolute inset-0 rounded bg-gray-200 dark:bg-gray-600 animate-pulse" />
                 )}
-                {src ? (
+                {imageSet ? (
                   <img
-                    src={src}
-                    srcSet={srcSet ?? undefined}
+                    src={imageSet.src}
+                    srcSet={imageSet.srcSet}
+                    sizes={imageSet.sizes}
                     alt={game.name}
                     width={48}
                     height={48}
