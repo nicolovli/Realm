@@ -7,6 +7,10 @@ export const FOCUS_VISIBLE =
 export const DISABLED =
   "disabled:opacity-20 disabled:cursor-not-allowed disabled:pointer-events-none ";
 
+// Example: Hover effect on dots
+export const HOVER_DOTS =
+  "hover:bg-activelightdots dark:hover:bg-darkbuttonpurple cursor-pointer ";
+
 //Example: Hover effect on clear all button
 export const HOVER =
   "relative overflow-hidden " +
