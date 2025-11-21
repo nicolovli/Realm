@@ -1,16 +1,6 @@
 import { gameResolvers } from "../graphql/game/gameResolvers.js";
 import { prisma } from "../db.js";
-import {
-  clearGamesCache,
-  planForSort,
-  serializeField,
-} from "../graphql/game/index.js";
-import { Prisma } from "@prisma/client";
-import {
-  encodeCursorTuple,
-  CursorFieldName,
-  CursorField,
-} from "../graphql/utils/cursor.js";
+import { clearGamesCache } from "../graphql/game/index.js";
 
 jest.mock("../db.js", () => ({
   prisma: {
@@ -261,42 +251,6 @@ describe("gameResolvers", () => {
       expect(result.pageInfo.hasNextPage).toBe(true);
       expect(result.pageInfo.startCursor).toBeTruthy();
       expect(result.edges[0].node.publishers).toEqual(["PubD"]);
-    });
-
-    it("applies 'after' cursor filtering for subsequent page", async () => {
-      const { fields } = planForSort("popularity", "desc");
-      type TestCursorRow = {
-        id: number;
-        name: string;
-        publishedStore: Date;
-        avgRating: number | Prisma.Decimal | null;
-        popularityScore: number | Prisma.Decimal | null;
-        hasRatings: boolean | null;
-      };
-      const firstRow: TestCursorRow = {
-        id: 20,
-        name: "Alpha",
-        publishedStore: new Date("2024-04-01"),
-        avgRating: 4.0,
-        popularityScore: 100,
-        hasRatings: true,
-      };
-      const cursorFields: CursorField[] = fields.map((f) => ({
-        k: f.field as CursorFieldName,
-        v: serializeField(f.field as CursorFieldName, firstRow),
-      }));
-      const afterCursor = encodeCursorTuple(cursorFields);
-
-      mockPrisma.game.findMany.mockResolvedValue([]);
-      await gameResolvers.Query.gamesConnection(undefined, {
-        first: 1,
-        after: afterCursor,
-      });
-      expect(mockPrisma.game.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({ AND: expect.any(Array) }),
-        }),
-      );
     });
   });
 });

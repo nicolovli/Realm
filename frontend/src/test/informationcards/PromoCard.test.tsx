@@ -3,49 +3,23 @@ import userEvent from "@testing-library/user-event";
 import { vi, describe, it, expect } from "vitest";
 import { MockedProvider } from "@apollo/client/testing/react";
 import { MemoryRouter } from "react-router-dom";
-import { GET_PROMO_GAMES } from "@/lib/graphql";
+import {
+  defaultGamesData as gamesData,
+  buildPromoCarouselMocks,
+} from "@/test/mocks/promoMocks";
 import { PromoCard } from "@/components/InformationCards";
+import {
+  buildEmptyPromoMocks,
+  buildIncompletePromoMocks,
+} from "@/test/mocks/promoMocks";
 
-// Mock useNavigate
 const navigateMock = vi.fn();
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return { ...actual, useNavigate: () => navigateMock };
 });
 
-// Mocked games data
-const mocks = [
-  {
-    request: {
-      query: GET_PROMO_GAMES,
-      variables: { ids: [14610, 8600, 7472] },
-    },
-    result: {
-      data: {
-        games: [
-          {
-            id: "1",
-            name: "Game 1",
-            descriptionShort: "Desc 1",
-            image: "img1",
-          },
-          {
-            id: "2",
-            name: "Game 2",
-            descriptionShort: "Desc 2",
-            image: "img2",
-          },
-          {
-            id: "3",
-            name: "Game 3",
-            descriptionShort: "Desc 3",
-            image: "img3",
-          },
-        ],
-      },
-    },
-  },
-];
+const mocks = buildPromoCarouselMocks(gamesData, 3);
 
 describe("PromoCard tests", () => {
   it("renders the first game by default", async () => {
@@ -70,26 +44,21 @@ describe("PromoCard tests", () => {
       </MockedProvider>,
     );
 
-    // Wait for first game
     expect(await screen.findByText("Game 1")).toBeInTheDocument();
 
     const nextBtn = screen.getByLabelText("Next slide");
     const prevBtn = screen.getByLabelText("Previous slide");
     const dotButtons = screen.getAllByRole("tab");
 
-    // Next slide
     await user.click(nextBtn);
     expect(await screen.findByText("Game 2")).toBeInTheDocument();
 
-    // Next slide again
     await user.click(nextBtn);
     expect(await screen.findByText("Game 3")).toBeInTheDocument();
 
-    // Previous slide
     await user.click(prevBtn);
     expect(await screen.findByText("Game 2")).toBeInTheDocument();
 
-    // Dot navigation to first slide
     await user.click(dotButtons[0]);
     expect(await screen.findByText("Game 1")).toBeInTheDocument();
   });
@@ -104,7 +73,6 @@ describe("PromoCard tests", () => {
       </MockedProvider>,
     );
 
-    // Wait for first game
     expect(await screen.findByText("Game 1")).toBeInTheDocument();
 
     const readMoreBtn = screen.getByText("Read more");
@@ -114,5 +82,73 @@ describe("PromoCard tests", () => {
         previewImage: "https://images.weserv.nl/?url=img1&w=640&output=webp",
       },
     });
+  });
+
+  it("supports keyboard navigation with Arrow keys when focused", async () => {
+    const user = userEvent.setup();
+    render(
+      <MockedProvider mocks={mocks}>
+        <MemoryRouter>
+          <PromoCard />
+        </MemoryRouter>
+      </MockedProvider>,
+    );
+
+    const carousel = await screen.findByLabelText("Promotional games carousel");
+    (carousel as HTMLElement).focus();
+
+    await user.keyboard("{ArrowRight}");
+    expect(await screen.findByText("Game 2")).toBeInTheDocument();
+
+    await user.keyboard("{ArrowLeft}");
+    expect(await screen.findByText("Game 1")).toBeInTheDocument();
+  });
+
+  it("updates aria-selected on tabs when slides change", async () => {
+    const user = userEvent.setup();
+    render(
+      <MockedProvider mocks={mocks}>
+        <MemoryRouter>
+          <PromoCard />
+        </MemoryRouter>
+      </MockedProvider>,
+    );
+
+    expect(await screen.findByText("Game 1")).toBeInTheDocument();
+    const tabs = screen.getAllByRole("tab");
+    expect(tabs[0]).toHaveAttribute("aria-selected", "true");
+
+    await user.click(tabs[1]);
+    expect(await screen.findByText("Game 2")).toBeInTheDocument();
+    expect(tabs[1]).toHaveAttribute("aria-selected", "true");
+    expect(tabs[0]).toHaveAttribute("aria-selected", "false");
+  });
+
+  it("shows empty state when no games available", async () => {
+    render(
+      <MockedProvider mocks={buildEmptyPromoMocks()}>
+        <MemoryRouter>
+          <PromoCard />
+        </MemoryRouter>
+      </MockedProvider>,
+    );
+
+    expect(
+      await screen.findByText(/No games available\./i),
+    ).toBeInTheDocument();
+  });
+
+  it("shows data incomplete state when a game lacks required fields", async () => {
+    render(
+      <MockedProvider mocks={buildIncompletePromoMocks()}>
+        <MemoryRouter>
+          <PromoCard />
+        </MemoryRouter>
+      </MockedProvider>,
+    );
+
+    expect(
+      await screen.findByText(/Game data incomplete\./i),
+    ).toBeInTheDocument();
   });
 });

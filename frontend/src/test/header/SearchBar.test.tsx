@@ -4,7 +4,9 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { MockedProvider } from "@apollo/client/testing/react";
 import { SearchBar } from "@/components/Header";
-import { SEARCH_GAMES } from "@/lib/graphql";
+import { axe, toHaveNoViolations } from "jest-axe";
+expect.extend(toHaveNoViolations);
+import { searchMocks } from "@/test/mocks/searchMock";
 
 // Mock react-router-dom navigation
 const mockNavigate = vi.fn();
@@ -15,38 +17,6 @@ vi.mock("react-router-dom", async () => {
     useNavigate: () => mockNavigate,
   };
 });
-
-// Mock data for GraphQL queries
-const mockGames = [
-  {
-    id: "1",
-    sid: "portal-2",
-    name: "Portal 2",
-    image: "portal2.jpg",
-    publishers: ["Valve"],
-  },
-  {
-    id: "2",
-    sid: "portal",
-    name: "Portal",
-    image: "portal.jpg",
-    publishers: ["Valve"],
-  },
-];
-
-const searchMocks = [
-  {
-    request: {
-      query: SEARCH_GAMES,
-      variables: { query: "portal", limit: 6 },
-    },
-    result: {
-      data: {
-        searchGames: mockGames,
-      },
-    },
-  },
-];
 
 describe("SearchBar Component", () => {
   const renderSearchBar = (props = {}) => {
@@ -149,5 +119,11 @@ describe("SearchBar Component", () => {
     await waitFor(() => {
       expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
     });
+  });
+
+  it("has no accessibility violations", async () => {
+    const { container } = renderSearchBar();
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

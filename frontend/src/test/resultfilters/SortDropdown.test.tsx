@@ -1,6 +1,7 @@
 import { render, cleanup } from "@testing-library/react";
 import { vi, type MockedFunction } from "vitest";
 import { SortDropdown } from "@/components/ResultFilters";
+import { sortOptions } from "@/test/fixtures/sortOptions";
 
 vi.mock("../../components/ResultFilters", () => ({
   __esModule: true,
@@ -13,37 +14,6 @@ afterEach(() => {
   cleanup();
   vi.clearAllMocks();
 });
-
-const sortOptions = [
-  {
-    value: "popularity" as const,
-    label: "Popularity",
-    sortValue: "popularity" as const,
-    order: "desc" as const,
-    onSelect: () => {},
-  },
-  {
-    value: "alphabetical" as const,
-    label: "Alphabetical",
-    sortValue: "alphabetical" as const,
-    order: "asc" as const,
-    onSelect: () => {},
-  },
-  {
-    value: "release-date" as const,
-    label: "Release date",
-    sortValue: "release-date" as const,
-    order: "desc" as const,
-    onSelect: () => {},
-  },
-  {
-    value: "rating" as const,
-    label: "Rating",
-    sortValue: "rating" as const,
-    order: "desc" as const,
-    onSelect: () => {},
-  },
-];
 
 describe("SortDropdown", () => {
   it("renders with correct props", () => {

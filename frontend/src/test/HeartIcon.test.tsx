@@ -5,6 +5,7 @@ import { MockedProvider } from "@apollo/client/testing/react";
 import { HeartIcon } from "@/components/HeartIcon";
 import { GET_USER_WITH_FAV, TOGGLE_FAVORITE } from "@/lib/graphql";
 import * as authHook from "@/hooks/useAuthStatus";
+import "@testing-library/jest-dom";
 
 vi.mock("@/hooks/useAuthStatus");
 vi.mock("sonner", () => ({
@@ -20,18 +21,20 @@ describe("HeartIcon", () => {
     cleanup();
   });
 
+  const getHeartButton = (container: HTMLElement) => {
+    return container.querySelector('svg[role="button"]') as HTMLElement;
+  };
+
   const renderHeartIcon = async (
     isLoggedIn = true,
     favorites: string[] = [],
     onRequireLogin = vi.fn(),
   ) => {
-    // Mock auth status hook
     vi.mocked(authHook.useAuthStatus).mockReturnValue({
       isLoggedIn,
       setIsLoggedIn: vi.fn(),
     });
 
-    // Apollo mocks
     const mocks = [
       {
         request: { query: GET_USER_WITH_FAV },
@@ -65,9 +68,7 @@ describe("HeartIcon", () => {
     ).container;
 
     await waitFor(() => {
-      if (isLoggedIn) {
-        expect(container.querySelector("svg")).toBeInTheDocument();
-      }
+      expect(getHeartButton(container)).toBeInTheDocument();
     });
 
     return { container, onRequireLogin };
@@ -80,7 +81,7 @@ describe("HeartIcon", () => {
   });
 
   it("renders HeartSolid when liked", async () => {
-    const { container } = await renderHeartIcon(true, ["game1"]);
+    const { container } = await renderHeartIcon(true, ["1"]);
     const svg = container.querySelector("svg");
     expect(svg).toBeInTheDocument();
   });

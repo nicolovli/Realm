@@ -160,6 +160,20 @@ describe("GameDetailCard", () => {
     );
   });
 
+  it("exposes a named region for screen readers", () => {
+    render(
+      <MockedProvider mocks={[]}>
+        <MemoryRouter>
+          <GameDetailCard {...mockProps} />
+        </MemoryRouter>
+      </MockedProvider>,
+    );
+
+    // A <section> with an accessible name becomes a landmark region
+    const region = screen.getByRole("region", { name: /Test Game/i });
+    expect(region).toBeInTheDocument();
+  });
+
   it("renders the image in the correct position", () => {
     const { container } = render(
       <MockedProvider mocks={[]}>

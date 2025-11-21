@@ -69,4 +69,35 @@ describe("ReviewForm", () => {
     const submit = await screen.findByRole("button", { name: /post|sender/i });
     expect(submit).toBeInTheDocument();
   });
+
+  it("renders error state if GraphQL query fails", async () => {
+    const errorMocks = [
+      {
+        request: {
+          query: GET_REVIEWS_FOR_GAME,
+          variables: { gameId: 1, first: 100 },
+        },
+        error: new Error("Network error"),
+      },
+      {
+        request: {
+          query: GET_REVIEWS_META_FOR_GAME,
+          variables: { gameId: 1 },
+        },
+        error: new Error("Network error"),
+      },
+    ];
+
+    render(
+      <MockedProvider mocks={errorMocks}>
+        <ReviewForm gameId={1} currentUserId={42} />
+      </MockedProvider>,
+    );
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toBeInTheDocument();
+    expect(alert).toHaveTextContent(
+      /could not check existing reviews\. please try again later\./i,
+    );
+  });
 });

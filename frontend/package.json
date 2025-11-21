@@ -20,7 +20,7 @@
   "vitest": {
     "environment": "jsdom",
     "setupFiles": [
-      "./test/setup.ts"
+      "./src/test/setup.ts"
     ]
   },
   "dependencies": {
@@ -49,6 +49,7 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
+    "@types/jest-axe": "^3.5.9",
     "@types/node": "^24.7.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.1.9",
@@ -58,6 +59,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.4.0",
+    "jest-axe": "^10.0.0",
     "jsdom": "^27.0.0",
     "prettier": "3.6.2",
     "typescript": "~5.8.3",
