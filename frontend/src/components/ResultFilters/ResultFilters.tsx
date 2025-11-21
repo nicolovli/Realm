@@ -122,7 +122,7 @@ export const ResultFilters = ({
 
       {/* Filter pills (desktop) */}
       <nav
-        className="flex mdlg:flex w-full gap-2 pb-4"
+        className= " hidden mdlg:flex w-full gap-2 pb-4"
         aria-label="Filter dropdowns"
       >
         {availableGroups.map(({ key, label }) => (
