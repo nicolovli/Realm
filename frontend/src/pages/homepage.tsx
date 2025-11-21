@@ -10,7 +10,7 @@ export const HomePage = () => {
   return (
     <main className={`home`}>
       <section
-        className={`w-[min(1600px,92%)] mx-auto flex flex-col gap-10 py-10`}
+        className={`w-[min(1600px,92%)] mx-auto flex flex-col gap-10`}
       >
         <section aria-label="Promo">
           <PromoCard />
