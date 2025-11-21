@@ -1,4 +1,5 @@
 import { useLocation, Link, useParams } from "react-router-dom";
+import { Fragment } from "react";
 import { useQuery } from "@apollo/client/react";
 import { GET_GAME } from "@/lib/graphql";
 import type { GetGameData, GetGameVariables } from "@/types";
@@ -64,7 +65,7 @@ export const Breadcrumbs = () => {
                 : labels[name] || name.charAt(0).toUpperCase() + name.slice(1);
 
             return (
-              <section key={routeTo} className="flex items-center">
+              <Fragment key={routeTo}>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   {isLast ? (
@@ -75,7 +76,7 @@ export const Breadcrumbs = () => {
                     </BreadcrumbLink>
                   )}
                 </BreadcrumbItem>
-              </section>
+              </Fragment>
             );
           })}
         </BreadcrumbList>

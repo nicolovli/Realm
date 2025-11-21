@@ -164,7 +164,7 @@ export const Card = ({
                   src={imageSources.src}
                   srcSet={imageSources.srcSet}
                   sizes={imageSources.sizes}
-                  alt={game.name}
+                  alt={`Image of ${game.name}`}
                   loading="lazy"
                   decoding="async"
                   onLoad={() => setLoaded(true)}

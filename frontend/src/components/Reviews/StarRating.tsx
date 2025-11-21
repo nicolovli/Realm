@@ -39,7 +39,6 @@ export const StarRating = (props: StarRatingProps) => {
         key={key}
         className="relative inline-block"
         style={{ width: size, height: size, lineHeight: 0 }}
-        aria-hidden
       >
         <StarOutline
           width={size}
@@ -71,7 +70,7 @@ export const StarRating = (props: StarRatingProps) => {
   if (!("onChange" in props) || props.readOnly) {
     if (value == null || value === 0) {
       return (
-        <span className={`text-xs md:text-sm text-black/40 dark:text-white/60`}>
+        <span className={`text-xs md:text-sm text-black dark:text-white`}>
           No ratings yet
         </span>
       );

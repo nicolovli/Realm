@@ -30,11 +30,8 @@ export const arrowClass =
   FOCUS_VISIBLE;
 
 export const dotBaseClass =
-  "h-2 w-2 rounded-full transition-all " +
-  "bg-lightdots dark:bg-darkpurple cursor-pointer " +
+  "rounded-full transition-all bg-transparent cursor-pointer flex items-center justify-center" +
   FOCUS_VISIBLE;
-
-export const activeDotClass = "w-4 bg-activelightdots dark:bg-darkbuttonpurple";
 
 export const exploreBtnClass =
   "rounded-full px-4 py-2 text-sm font-medium text-white shadow " +
@@ -184,7 +181,7 @@ export const FeaturedCarousel = ({
           )}
         </figure>
 
-        <nav aria-label="Pagination" className="mt-4 flex justify-center gap-2">
+        <nav aria-label="Pagination" className="mt-4 flex justify-center gap-5">
           {Array.from({ length: snapCount }).map((_, i) => {
             const isActive = selected === i;
             return (
@@ -194,11 +191,16 @@ export const FeaturedCarousel = ({
                 aria-label={`Go to slide ${i + 1} of ${snapCount}`}
                 aria-current={isActive}
                 onClick={() => api?.scrollTo(i)}
-                className={`${dotBaseClass} ${isActive ? activeDotClass : ""}`}
-                style={{
-                  width: isActive ? "1rem" : "0.5rem",
-                }}
-              />
+                className={`${dotBaseClass}`}
+              >
+                <span
+                  className={`block rounded-full transition-all ${
+                    isActive
+                      ? "h-5 w-5 bg-activelightdots dark:bg-darkbuttonpurple"
+                      : "h-4 w-4 bg-lightdots dark:bg-darkpurple"
+                  }`}
+                />
+              </button>
             );
           })}
         </nav>
