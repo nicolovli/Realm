@@ -99,7 +99,7 @@ export const ReviewList = ({
                     Game:{" "}
                     <Link
                       to={`/games/${review.game.id}`}
-                      className={`${FOCUS_VISIBLE} hover:underline text-lightbuttonpurple dark:text-lightpurple`}
+                      className={`${FOCUS_VISIBLE} underline text-blue-600 dark:text-blue-300 dark:hover:brightness-200 hover:brightness-70`}
                     >
                       {review.game.name}
                     </Link>

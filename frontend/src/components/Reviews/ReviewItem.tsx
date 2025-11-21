@@ -120,19 +120,27 @@ export const ReviewItem = ({
       className={`bg-lightpurple dark:bg-darkpurple rounded-4xl p-6 w-full text-black dark:text-white ${isMine && "mb-10"}`}
       aria-labelledby={`review-${review.id}-heading`}
     >
-      {/* Header with user + rating */}
-      <header className="flex flex-wrap items-center justify-between gap-3">
+      {/* Header with user + rating + time */}
+      <header className="flex flex-wrap items-center justify-between gap-4">
         <h3
           id={`review-${review.id}-heading`}
           className="text-base md:text-lg font-semibold"
         >
           <span>{review.user?.username ?? "Anon"}</span>
           {isMine && (
-            <span className="ml-2 text-lg px-3 py-1 rounded-full bg-white text-black dark:bg-white/80">
+            <span className="ml-2 text-lg px-3 py-1 rounded-full bg-white text-black dark:bg-white/80 whitespace-nowrap">
               Your review
             </span>
           )}
+          <time
+            className={`ml-3 mt-3 text-black dark:text-white`}
+            dateTime={isoForAttr}
+            title={created?.toLocaleString("nb-NO")}
+          >
+            {pretty}
+          </time>
         </h3>
+
         {!editing ? (
           <p className="flex items-center gap-2">
             <span
@@ -175,30 +183,32 @@ export const ReviewItem = ({
 
       {/* Footer with meta + actions */}
       <footer
-        className={`mt-3 text-xs flex md:flex-row items-center justify-between ${showDeleteConfirm && "flex-col"}`}
+        className={`mt-3 text-xs flex md:flex-row  items-center justify-end`}
       >
-        <time
-          className={`mt-3 text-black dark:text-white opacity-70 ${showDeleteConfirm && "w-full md:w-auto text-left"}`}
-          dateTime={isoForAttr}
-          title={created?.toLocaleString("nb-NO")}
-        >
-          {pretty}
-        </time>
-
         {(isMine || isPrivileged) && (
           <>
             {!editing ? (
               <span className={`flex items-center gap-2`}>
                 {!showDeleteConfirm ? (
-                  <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    disabled={deleting}
-                    className={`${FOCUS_VISIBLE} ${HOVER} mt-3 text-lg px-4 py-1 rounded-full cursor-pointer text-white dark:text-white bg-black/20 dark:bg-white/20`}
-                    aria-label="Delete review"
-                    title="Delete review"
-                  >
-                    Delete
-                  </button>
+                  <section className="flex items-center gap-2">
+                    <button
+                      onClick={() => setShowDeleteConfirm(true)}
+                      disabled={deleting}
+                      className={`${FOCUS_VISIBLE} ${HOVER} mt-3 text-lg px-4 py-1 rounded-full cursor-pointer text-white dark:text-white bg-black/20 dark:bg-white/20`}
+                      aria-label="Delete review"
+                      title="Delete review"
+                    >
+                      Delete
+                    </button>
+                    <button
+                      onClick={() => setEditing(true)}
+                      data-cy="edit-review-button"
+                      disabled={updating}
+                      className={`${FOCUS_VISIBLE} ${HOVER} mt-3 text-lg px-4 py-1 rounded-full cursor-pointer text-white bg-lightbuttonpurple dark:bg-darkbuttonpurple whitespace-nowrap ${showDeleteConfirm && "hidden md:inline-flex"}`}
+                    >
+                      Edit {isMine ? "your" : ""} review
+                    </button>
+                  </section>
                 ) : (
                   <>
                     <section
@@ -230,15 +240,6 @@ export const ReviewItem = ({
                     </section>
                   </>
                 )}
-
-                <button
-                  onClick={() => setEditing(true)}
-                  data-cy="edit-review-button"
-                  disabled={updating}
-                  className={`${FOCUS_VISIBLE} ${HOVER} mt-3 text-lg px-4 py-1 rounded-full cursor-pointer text-white bg-lightbuttonpurple dark:bg-darkbuttonpurple whitespace-nowrap ${showDeleteConfirm && "hidden md:inline-flex"}`}
-                >
-                  Edit {isMine ? "your" : ""} review
-                </button>
               </span>
             ) : (
               <section className="flex items-center gap-2">
