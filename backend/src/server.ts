@@ -7,6 +7,8 @@ import express, { Request } from "express";
 import { expressMiddleware } from "@as-integrations/express5";
 import cors from "cors";
 import compression from "compression";
+import path from "path";
+import fs from "fs";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 // Apollo context shared with resolvers
@@ -48,7 +50,7 @@ const start = async () => {
           try {
             const decoded = jwt.verify(
               token,
-              process.env.JWT_SECRET!,
+              process.env.JWT_SECRET!
             ) as JwtPayload & {
               userId?: number;
             };
@@ -63,13 +65,48 @@ const start = async () => {
         return { prisma, userId };
       },
     }),
-    compression(),
+    compression()
   );
 
   // Simple health endpoint
   app.get("/", (_req, res) => {
     res.send("Server is running");
   });
+
+  if (process.env.SERVE_STATIC === "true") {
+    const distDir = path.resolve(process.cwd(), "frontend/dist");
+    if (fs.existsSync(distDir)) {
+      app.use(
+        express.static(distDir, {
+          setHeaders(res, filePath) {
+            if (filePath.endsWith("index.html")) {
+              res.setHeader(
+                "Cache-Control",
+                "no-cache, no-store, must-revalidate"
+              );
+              return;
+            }
+
+            const basename = path.basename(filePath);
+            const hasHash = /-[0-9a-f]{6,}\./i.test(basename);
+            if (hasHash) {
+              res.setHeader(
+                "Cache-Control",
+                "public, max-age=31536000, immutable"
+              );
+            } else {
+              res.setHeader("Cache-Control", "public, max-age=3600");
+            }
+          },
+        })
+      );
+      console.log(`Serving static files from ${distDir} with cache headers`);
+    } else {
+      console.warn(
+        `SERVE_STATIC=true but ${distDir} not found; skipping static middleware`
+      );
+    }
+  }
 
   const port = process.env.PORT ?? 4000;
   app.listen(port, () => {
