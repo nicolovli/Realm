@@ -73,7 +73,7 @@ describe("GameCardBase", () => {
     ).toBeInTheDocument();
     expect(screen.getByAltText("Test Game")).toHaveAttribute(
       "src",
-      "https://images.weserv.nl/?url=test-image.jpg&w=800&output=webp",
+      "https://images.weserv.nl/?url=test-image.jpg&w=800&output=webp&q=70",
     );
   });
 

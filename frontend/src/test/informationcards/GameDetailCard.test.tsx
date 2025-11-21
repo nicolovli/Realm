@@ -61,7 +61,7 @@ describe("GameDetailCard", () => {
     ).toBeInTheDocument();
     expect(screen.getByAltText("Test Game")).toHaveAttribute(
       "src",
-      "https://images.weserv.nl/?url=%2Ftest-image.jpg&w=800&output=webp",
+      "https://images.weserv.nl/?url=%2Ftest-image.jpg&w=800&output=webp&q=70",
     );
   });
 

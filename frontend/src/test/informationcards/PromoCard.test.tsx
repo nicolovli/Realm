@@ -79,7 +79,8 @@ describe("PromoCard tests", () => {
     await user.click(readMoreBtn);
     expect(navigateMock).toHaveBeenCalledWith("/games/1", {
       state: {
-        previewImage: "https://images.weserv.nl/?url=img1&w=640&output=webp",
+        previewImage:
+          "https://images.weserv.nl/?url=img1&w=640&output=webp&q=70",
       },
     });
   });

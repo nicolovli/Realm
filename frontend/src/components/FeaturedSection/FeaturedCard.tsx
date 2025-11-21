@@ -40,9 +40,10 @@ export const FeaturedCard = memo(
         <figure className={cardClass}>
           <section className="relative w-full aspect-[16/9]">
             {imageSet && !loaded && !errored && (
-              <span
+              <img
                 className="absolute inset-0 animate-pulse bg-zinc-200/60 dark:bg-zinc-700/40"
-                aria-hidden
+                alt="Next game"
+                aria-hidden={false}
               />
             )}
 
@@ -51,7 +52,7 @@ export const FeaturedCard = memo(
                 src={imageSet.src}
                 srcSet={imageSet.srcSet}
                 sizes={imageSet.sizes}
-                alt={`Picure of game: ${game.name}`}
+                alt={`Picture of game: ${game.name}`}
                 loading={priority ? "eager" : "lazy"}
                 fetchPriority={priority ? "high" : undefined}
                 decoding="async"

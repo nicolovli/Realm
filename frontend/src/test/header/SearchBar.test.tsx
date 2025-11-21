@@ -82,7 +82,7 @@ describe("SearchBar Component", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/games/1", {
       state: {
         previewImage:
-          "https://images.weserv.nl/?url=portal2.jpg&w=640&output=webp",
+          "https://images.weserv.nl/?url=portal2.jpg&w=640&output=webp&q=70",
       },
     });
   });
