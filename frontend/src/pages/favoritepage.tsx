@@ -47,14 +47,14 @@ export const FavoritePage = () => {
       <>
         <main className="flex flex-col items-center justify-center min-h-screen p-6">
           <section className="text-center space-y-4 -mt-20">
-            <h1 className="text-3xl font-bold dark:text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold dark:text-white">
               You have no favorites yet :/
             </h1>
-            <section className="flex !flex-row gap-2 justify-center">
+            <section className="flex flex-col sm:flex-row gap-2 justify-center">
               <button
                 type="button"
                 onClick={openLogin}
-                className={`${FOCUS_VISIBLE} underline dark:hover:brightness-200 hover:brightness-70 text-lightbuttonpurple dark:text-lightpurple font-semibold cursor-pointer whitespace-nowrap`}
+                className={`${FOCUS_VISIBLE} underline dark:hover:brightness-200 hover:brightness-70 text-blue-600 dark:text-blue-400 font-semibold cursor-pointer whitespace-nowrap`}
               >
                 Log in
               </button>
@@ -62,7 +62,7 @@ export const FavoritePage = () => {
                 and start favoriting games to see them here!
               </p>
             </section>
-            <p className="text-sm text-yellow-600 dark:text-yellow-400">
+            <p className="text-sm text-yellow-700 dark:text-yellow-400">
               (You can favorite games by clicking on the heart on a game's
               specific page)
             </p>
