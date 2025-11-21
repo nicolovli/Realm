@@ -153,7 +153,7 @@ export const GameCardBase = ({
             </p>
           )}
           {/* Tags */}
-          {tags.length > 0 && (
+          {tags.length > 0 ? (
             <section className="flex flex-wrap justify-center gap-2 items-center">
               {visibleTags.map((tag) => (
                 <Link
@@ -164,7 +164,6 @@ export const GameCardBase = ({
                   {tag}
                 </Link>
               ))}
-
               {hasExtraTags && (
                 <button
                   onClick={() => setShowAllTags((prev) => !prev)}
@@ -181,6 +180,8 @@ export const GameCardBase = ({
                 </button>
               )}
             </section>
+          ) : (
+            <span>No tags available</span>
           )}
 
           {/* Rating and favorite */}
