@@ -12,11 +12,13 @@ import {
 } from "@/hooks/useLoginDialog";
 
 interface AuthButtonProps {
+  className?: string;
   dialogControls?: LoginDialogControls;
   renderDialog?: boolean;
 }
 
 export const AuthButton = ({
+  className = "",
   dialogControls,
   renderDialog = true,
 }: AuthButtonProps) => {
@@ -26,7 +28,10 @@ export const AuthButton = ({
     dialogControls ?? internalDialogControls;
   const navigate = useNavigate();
   const loginbutton =
-    "flex items-center gap-1 rounded-full cursor-pointer " + FOCUS_VISIBLE;
+    "flex items-center gap-1 rounded-full cursor-pointer " +
+    FOCUS_VISIBLE +
+    " " +
+    className;
 
   const handleAccountClick = () => {
     navigate("/profile");
