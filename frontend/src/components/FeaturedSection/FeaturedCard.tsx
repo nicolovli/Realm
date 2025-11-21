@@ -42,7 +42,7 @@ export const FeaturedCard = memo(
             {imageSrc && (
               <img
                 src={imageSrc}
-                alt={`Picure of game: ${game.name}`}
+                alt={`Picture of game: ${game.name}`}
                 loading="lazy"
                 decoding="async"
                 onLoad={() => setLoaded(true)}

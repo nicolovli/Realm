@@ -28,7 +28,7 @@ describe("FeaturedCard", () => {
       </BrowserRouter>,
     );
     expect(screen.getByText("Super Fun Game")).toBeInTheDocument();
-    expect(screen.getByAltText("Super Fun Game")).toBeInTheDocument();
+    expect(screen.getByAltText("Picture of game: Super Fun Game")).toBeInTheDocument();
   });
 
   it("links to the correct game page", () => {
@@ -51,7 +51,7 @@ describe("FeaturedCard", () => {
 
     expect(screen.getByAltText("Next game")).toBeInTheDocument();
 
-    const img = screen.getByAltText("Super Fun Game");
+    const img = screen.getByAltText("Picture of game: Super Fun Game");
     await act(async () => {
       img.dispatchEvent(new Event("load"));
     });
@@ -81,7 +81,7 @@ describe("FeaturedCard", () => {
       </BrowserRouter>,
     );
 
-    const img = screen.getByAltText("Super Fun Game");
+    const img = screen.getByAltText("Picture of game: Super Fun Game");
     await act(async () => {
       img.dispatchEvent(new Event("error"));
     });
