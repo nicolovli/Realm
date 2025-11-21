@@ -1,4 +1,4 @@
-import { render, screen, cleanup } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { ResultsPagination } from "@/components/ResultsGrid";
 import { vi } from "vitest";
 import userEvent from "@testing-library/user-event";
@@ -95,10 +95,9 @@ describe("ResultsPagination (always-input)", () => {
 
     const input = screen.getByLabelText(/page number/i);
     expect(input).toBeInTheDocument();
-    expect(input).toHaveAttribute("readonly"); // no onPage => readOnly
+    expect(input).toHaveAttribute("readonly");
     expect(screen.getByText(/\/ 10/i)).toBeInTheDocument();
 
-    // with onPage -> editable (no readonly)
     rerender(
       <ResultsPagination
         page={3}
@@ -183,5 +182,105 @@ describe("ResultsPagination (always-input)", () => {
     await user.clear(input);
     await user.type(input, "999{Enter}");
     expect(onPage).toHaveBeenCalledWith(5);
+  });
+
+  it("clamps totalPages=0 to 1 and disables Next", () => {
+    render(
+      <ResultsPagination
+        page={1}
+        totalPages={0}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+      />,
+    );
+    expect(screen.getByText(/\/ 1/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /next/i })).toBeDisabled();
+  });
+
+  it("ignores non-numeric input and does not call onPage", async () => {
+    const onPage = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <ResultsPagination
+        page={2}
+        totalPages={5}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+        onPage={onPage}
+      />,
+    );
+    const input = screen.getByLabelText(/page number/i);
+    await user.clear(input);
+    await user.type(input, "abc{Enter}");
+    expect(onPage).not.toHaveBeenCalled();
+    expect((input as HTMLInputElement).value).toBe("");
+    await user.tab(); // move focus away
+    expect(
+      (screen.getByLabelText(/page number/i) as HTMLInputElement).value,
+    ).toBe("2");
+  });
+
+  it("disables controls when isJumping is true", async () => {
+    const onPrev = vi.fn();
+    const onNext = vi.fn();
+    render(
+      <ResultsPagination
+        page={3}
+        totalPages={10}
+        isJumping={true}
+        onPrev={onPrev}
+        onNext={onNext}
+        onPage={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole("button", { name: /prev/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /next/i })).toBeDisabled();
+    const input = screen.getByLabelText(/page number/i);
+    expect(input).toBeDisabled();
+  });
+
+  it("normalizes leading zeros on submit", async () => {
+    const onPage = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <ResultsPagination
+        page={1}
+        totalPages={20}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+        onPage={onPage}
+      />,
+    );
+    const input = screen.getByLabelText(/page number/i);
+    await user.clear(input);
+    await user.type(input, "0004{Enter}");
+    expect(onPage).toHaveBeenCalledWith(4);
+  });
+
+  it("syncs draft when external page prop changes", async () => {
+    const { rerender } = render(
+      <ResultsPagination
+        page={2}
+        totalPages={10}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+        onPage={vi.fn()}
+      />,
+    );
+    expect(
+      (screen.getByLabelText(/page number/i) as HTMLInputElement).value,
+    ).toBe("2");
+    rerender(
+      <ResultsPagination
+        page={7}
+        totalPages={10}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+        onPage={vi.fn()}
+      />,
+    );
+    expect(
+      (screen.getByLabelText(/page number/i) as HTMLInputElement).value,
+    ).toBe("7");
   });
 });

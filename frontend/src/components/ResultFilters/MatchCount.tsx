@@ -40,7 +40,7 @@ export const MatchCount = ({
         ? countError
         : matchesCount === 0
           ? "No matches found. Adjust filters or clear selections."
-          : `${matchesCount.toLocaleString()} matches`}
+          : `${matchesCount.toLocaleString("en-US")} matches`}
     </p>
   );
 };

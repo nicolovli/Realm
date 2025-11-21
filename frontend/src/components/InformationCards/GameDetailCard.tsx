@@ -35,7 +35,7 @@ export const GameDetailCard = ({
   publishedStore,
 }: GameDetailCardProps) => {
   return (
-    <section className={CARD_CONTAINER} aria-labelledby={`${title}-heading`}>
+    <section className={CARD_CONTAINER} aria-label={title}>
       <GameCardBase
         gameId={Number(gameId)}
         title={title}

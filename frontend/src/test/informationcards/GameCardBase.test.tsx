@@ -183,6 +183,85 @@ describe("GameCardBase", () => {
     expect(screen.getByTestId("auth-dialog")).toBeInTheDocument();
   });
 
+  it("does not render tags section or toggle when tags are empty", () => {
+    render(
+      <MockedProvider mocks={[]}>
+        <MemoryRouter>
+          <GameCardBase
+            {...defaultProps}
+            tags={[]}
+            descriptionShort="A teaser description https://example.com"
+          />
+        </MemoryRouter>
+      </MockedProvider>,
+    );
+
+    expect(
+      screen.queryByRole("button", { name: /Show more tags|Show fewer tags/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows 3 tags on mobile and toggles correctly", async () => {
+    const user = userEvent.setup();
+    Object.defineProperty(window, "innerWidth", {
+      writable: true,
+      configurable: true,
+      value: 500,
+    });
+
+    render(
+      <MockedProvider mocks={[]}>
+        <MemoryRouter>
+          <GameCardBase {...defaultProps} />
+        </MemoryRouter>
+      </MockedProvider>,
+    );
+
+    const initialVisible = screen.getAllByText(/Action|Adventure|Puzzle/);
+    expect(initialVisible).toHaveLength(3);
+
+    const expandBtn = screen.getByRole("button", { name: /Show more tags/i });
+    await user.click(expandBtn);
+    const expanded = screen.getAllByText(
+      /Action|Adventure|Puzzle|RPG|Horror|Strategy/,
+    );
+    expect(expanded).toHaveLength(6);
+  });
+
+  it("hides favorite action when used as promo card", () => {
+    render(
+      <MockedProvider mocks={[]}>
+        <MemoryRouter>
+          <GameCardBase {...defaultProps} isPromoCard />
+        </MemoryRouter>
+      </MockedProvider>,
+    );
+
+    expect(screen.queryByLabelText("Favorite game")).not.toBeInTheDocument();
+  });
+
+  it("shows published label when publishedStore is provided", () => {
+    render(
+      <MockedProvider mocks={[]}>
+        <MemoryRouter>
+          <GameCardBase {...defaultProps} publishedStore={"2025-11-01"} />
+        </MemoryRouter>
+      </MockedProvider>,
+    );
+    expect(screen.getByText(/Released/i)).toBeInTheDocument();
+  });
+
+  it("does not render numeric rating text when rating is 0", () => {
+    render(
+      <MockedProvider mocks={[]}>
+        <MemoryRouter>
+          <GameCardBase {...defaultProps} rating={0} />
+        </MemoryRouter>
+      </MockedProvider>,
+    );
+    expect(screen.queryByText(/0\.0/)).not.toBeInTheDocument();
+  });
+
   it("strips trailing links from description", () => {
     render(
       <MockedProvider mocks={[]}>

@@ -2,6 +2,8 @@ import { describe, it, vi, expect, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Register } from "@/components/User";
+import { axe, toHaveNoViolations } from "jest-axe";
+expect.extend(toHaveNoViolations);
 
 describe("Register component", () => {
   const mockOnSubmit = vi.fn();
@@ -77,5 +79,23 @@ describe("Register component", () => {
       email: "john@example.com",
       password: "password123",
     });
+  });
+
+  it("does NOT submit if username is empty", async () => {
+    render(<Register onSubmit={mockOnSubmit} />);
+    const user = userEvent.setup();
+
+    await user.type(screen.getByLabelText("Password:"), "password123");
+    await user.type(screen.getByLabelText("Confirm Password:"), "password123");
+    await user.type(screen.getByLabelText(/email/i), "test@example.com");
+
+    await user.click(screen.getByRole("button", { name: /register/i }));
+    expect(mockOnSubmit).not.toHaveBeenCalled();
+  });
+
+  it("should have no accessibility violations", async () => {
+    const { container } = render(<Register onSubmit={mockOnSubmit} />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

@@ -4,6 +4,8 @@ import { Header } from "@/components/Header";
 import { MemoryRouter } from "react-router-dom";
 import { MockedProvider } from "@apollo/client/testing/react";
 import * as useAuthStatusModule from "@/hooks/useAuthStatus";
+import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
 
 vi.mock("@/hooks/useAuthStatus");
 
@@ -95,5 +97,39 @@ describe("Header Component", () => {
   it("renders search bars for desktop and mobile", () => {
     renderHeader();
     expect(screen.getAllByLabelText(/Search/i).length).toBeGreaterThan(1);
+  });
+
+  it("renders correct number of navigation links", () => {
+    renderHeader();
+    const links = screen
+      .getAllByRole("link")
+      .filter((l) => l.getAttribute("href")?.startsWith("/"));
+    expect(links).toHaveLength(3);
+  });
+
+  it("shows only login OR profile button", () => {
+    renderHeader(true);
+    expect(screen.queryByText("Login")).toBeNull();
+    cleanup();
+    renderHeader(false);
+    expect(screen.queryByText("Profile")).toBeNull();
+  });
+
+  it("fallbacks to 'Search' accessible name when no placeholder", () => {
+    renderHeader();
+    expect(screen.getAllByLabelText("Search").length).toBeGreaterThan(0);
+  });
+
+  it("tab order starts at homepage link", async () => {
+    const user = userEvent.setup();
+    renderHeader();
+    await user.tab(); // first focus
+    expect(screen.getByLabelText("Homepage")).toHaveFocus();
+  });
+
+  it("has no basic a11y violations", async () => {
+    const { container } = renderHeader();
+    const results = await axe(container);
+    expect(results.violations.length).toBe(0);
   });
 });

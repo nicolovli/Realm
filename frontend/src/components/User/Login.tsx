@@ -10,8 +10,20 @@ export const Login = ({ onSubmit }: LoginProps) => {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    const username = formData.username.trim();
+    const password = formData.password.trim();
+
+    if (!username || !password) {
+      return;
+    }
+
+    onSubmit({
+      username: username.toLowerCase(),
+      password,
+    });
   };
+
   const formDataCSS = "border p-2 rounded-2xl w-full flex";
 
   return (
@@ -26,7 +38,7 @@ export const Login = ({ onSubmit }: LoginProps) => {
           name="username"
           value={formData.username}
           onChange={(e) =>
-            setFormData({ ...formData, username: e.target.value.toLowerCase() })
+            setFormData({ ...formData, username: e.target.value })
           }
           className={formDataCSS + FOCUS_VISIBLE}
         />

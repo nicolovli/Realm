@@ -4,6 +4,9 @@ import { MemoryRouter } from "react-router-dom";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import { MobileSheetMenu } from "@/components/Header";
 import type { SVGProps } from "react";
+import { axe, toHaveNoViolations } from "jest-axe";
+
+expect.extend(toHaveNoViolations);
 
 vi.mock("@/components/ui/sheet", () => ({
   Sheet: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -120,6 +123,26 @@ describe("MobileSheetMenu", () => {
     expect(screen.getByTestId("icon-discover")).toBeInTheDocument();
   });
 
+  it("links point to the correct destinations", () => {
+    renderMenu();
+    const favLink = screen.getByRole("link", { name: "Favorites" });
+    const discLink = screen.getByRole("link", { name: "Discover" });
+    expect(favLink).toHaveAttribute("href", "/favorites");
+    expect(discLink).toHaveAttribute("href", "/discover");
+  });
+
+  it("menu icons are hidden from assistive tech", () => {
+    renderMenu();
+    expect(screen.getByTestId("icon-fav")).toHaveAttribute(
+      "aria-hidden",
+      "true",
+    );
+    expect(screen.getByTestId("icon-discover")).toHaveAttribute(
+      "aria-hidden",
+      "true",
+    );
+  });
+
   it("renders no links if navigation array is empty", () => {
     render(
       <MemoryRouter>
@@ -135,5 +158,15 @@ describe("MobileSheetMenu", () => {
     const trigger = screen.getByLabelText("Open mobile menu");
     await userEvent.click(trigger);
     expect(trigger).toBeEnabled();
+  });
+
+  it("has no obvious accessibility violations (static render)", async () => {
+    const { container } = render(
+      <MemoryRouter>
+        <MobileSheetMenu navigation={mockNavigation} />
+      </MemoryRouter>,
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });
