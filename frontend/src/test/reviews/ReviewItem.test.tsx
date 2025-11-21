@@ -28,7 +28,7 @@ describe("ReviewItem", () => {
 
     // find the star rating container by label
     const rating = screen.getByLabelText(/star rating/i);
-    const outerStarSpans = rating.querySelectorAll("span[aria-hidden='true']");
+    const outerStarSpans = rating.querySelectorAll("span.relative.inline-block");
     expect(outerStarSpans.length).toBe(5);
   });
 });
