@@ -183,14 +183,14 @@ export const ReviewItem = ({
 
       {/* Footer with meta + actions */}
       <footer
-        className={`mt-3 text-xs flex md:flex-row  items-center justify-end`}
+        className={`mt-3 text-xs flex md:flex-row items-center justify-end`}
       >
         {(isMine || isPrivileged) && (
           <>
             {!editing ? (
               <span className={`flex items-center gap-2`}>
                 {!showDeleteConfirm ? (
-                  <section className="flex items-center gap-2">
+                  <section className="flex items-center gap-2 flex-wrap">
                     <button
                       onClick={() => setShowDeleteConfirm(true)}
                       disabled={deleting}

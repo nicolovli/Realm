@@ -153,46 +153,49 @@ export const GameCardBase = ({
           <h2 className="text-xl md:text-3xl">{title}</h2>
 
           {/* Release / published date */}
-          {publishedLabel ? (
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              Released {publishedLabel}
-            </p>
-          ) : (
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              No release date available
-            </p>
-          )}
+          {!isPromoCard &&
+            (publishedLabel ? (
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                Released {publishedLabel}
+              </p>
+            ) : (
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                No release date available
+              </p>
+            ))}
+
           {/* Tags */}
-          {tags.length > 0 ? (
-            <section className="flex flex-wrap justify-center gap-2 items-center">
-              {visibleTags.map((tag) => (
-                <Link
-                  key={tag}
-                  to={`/games?tags=${encodeURIComponent(tag)}`}
-                  className={`bg-lightdots dark:bg-lightdots text-white px-2 py-1 rounded-full text-xs inline-flex items-center ${HOVER} ${FOCUS_VISIBLE}`}
-                >
-                  {tag}
-                </Link>
-              ))}
-              {hasExtraTags && (
-                <button
-                  onClick={() => setShowAllTags((prev) => !prev)}
-                  className={`text-gray-800 dark:text-gray-200 cursor-pointer ${HOVER} ${FOCUS_VISIBLE}`}
-                  aria-label={
-                    showAllTags ? "Show fewer tags" : "Show more tags"
-                  }
-                >
-                  {showAllTags ? (
-                    <ChevronUpIcon className="w-5 h-5" />
-                  ) : (
-                    <ChevronDownIcon className="w-5 h-5" />
-                  )}
-                </button>
-              )}
-            </section>
-          ) : (
-            <span>No tags available</span>
-          )}
+          {!isPromoCard &&
+            (tags.length > 0 ? (
+              <section className="flex flex-wrap justify-center gap-2 items-center">
+                {visibleTags.map((tag) => (
+                  <Link
+                    key={tag}
+                    to={`/games?tags=${encodeURIComponent(tag)}`}
+                    className={`bg-lightdots dark:bg-lightdots text-white px-2 py-1 rounded-full text-xs inline-flex items-center ${HOVER} ${FOCUS_VISIBLE}`}
+                  >
+                    {tag}
+                  </Link>
+                ))}
+                {hasExtraTags && (
+                  <button
+                    onClick={() => setShowAllTags((prev) => !prev)}
+                    className={`text-gray-800 dark:text-gray-200 cursor-pointer ${HOVER} ${FOCUS_VISIBLE}`}
+                    aria-label={
+                      showAllTags ? "Show fewer tags" : "Show more tags"
+                    }
+                  >
+                    {showAllTags ? (
+                      <ChevronUpIcon className="w-5 h-5" />
+                    ) : (
+                      <ChevronDownIcon className="w-5 h-5" />
+                    )}
+                  </button>
+                )}
+              </section>
+            ) : (
+              <span>No tags available</span>
+            ))}
 
           {/* Rating and favorite */}
           <section className="flex justify-center items-center gap-2 mt-3">
