@@ -5,6 +5,7 @@ import { GET_PROMO_GAMES, GET_REVIEWS_META_FOR_GAME } from "@/lib/graphql";
 import { GameCardBase } from "@/components/InformationCards";
 import { useNavigate } from "react-router-dom";
 import {
+  HOVER_DOTS,
   HOVER,
   FOCUS_VISIBLE,
   CARD_CONTAINER,
@@ -145,7 +146,7 @@ export const PromoCard = () => {
                   index === currentIndex
                     ? "bg-activelightdots dark:bg-darkbuttonpurple"
                     : "bg-lightdots dark:bg-darkpurple"
-                } ${HOVER} ${FOCUS_VISIBLE}`}
+                } ${HOVER_DOTS} ${FOCUS_VISIBLE}`}
                 role="tab"
                 aria-selected={index === currentIndex}
                 aria-label={`Go to slide ${index + 1}`}

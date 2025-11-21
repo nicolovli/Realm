@@ -11,7 +11,7 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { FOCUS_VISIBLE, HOVER } from "@/lib/classNames";
+import { FOCUS_VISIBLE, HOVER, HOVER_DOTS } from "@/lib/classNames";
 
 export type FeaturedCarouselProps = {
   items: FeaturedGame[];
@@ -36,7 +36,7 @@ export const dotBaseClass =
 export const exploreBtnClass =
   "rounded-full px-4 py-2 text-sm font-medium text-white shadow " +
   "bg-lightbuttonpurple dark:bg-darkbuttonpurple cursor-pointer " +
-  HOVER +
+  HOVER_DOTS +
   FOCUS_VISIBLE;
 
 function useAnyHover() {
@@ -198,7 +198,7 @@ export const FeaturedCarousel = ({
                 className={`${dotBaseClass}`}
               >
                 <span
-                  className={`block rounded-full transition-all ${
+                  className={`block rounded-full transition-all ${HOVER_DOTS} ${
                     isActive
                       ? "h-5 w-5 bg-activelightdots dark:bg-darkbuttonpurple"
                       : "h-4 w-4 bg-lightdots dark:bg-darkpurple"
@@ -212,7 +212,10 @@ export const FeaturedCarousel = ({
         {onExploreAll && (
           <section className="mt-6 flex justify-center mb-4">
             <Link className="focus-visible:outline-none" to="/games">
-              <button onClick={onExploreAll} className={exploreBtnClass}>
+              <button
+                onClick={onExploreAll}
+                className={`${exploreBtnClass} ${HOVER}`}
+              >
                 Explore all games
               </button>
             </Link>

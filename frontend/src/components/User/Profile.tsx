@@ -37,7 +37,7 @@ export const Profile = ({ user, handleLogOut }: UserProfileProps) => {
         {isEditing ? (
           /* Editing form */
           <section className="flex flex-col gap-4">
-            <section className="flex flex-row gap-2 items-center">
+            <section className="flex-col lg:flex-row lg:flex gap-2 items-center">
               <label htmlFor="username" className="font-bold text-xl w-55">
                 Username:
               </label>
@@ -50,10 +50,10 @@ export const Profile = ({ user, handleLogOut }: UserProfileProps) => {
                 }
                 placeholder="Enter your username"
                 autoComplete="username"
-                className={`${FOCUS_VISIBLE} w-60 lg:w-65 bg-gray-100 dark:bg-white/10 rounded-xl p-2 outline-none`}
+                className={`${FOCUS_VISIBLE} w-full lg:w-65 bg-gray-100 dark:bg-white/10 rounded-xl p-2 outline-none`}
               />
             </section>
-            <section className="flex flex-row gap-2 items-center">
+            <section className="flex-col lg:flex-row lg:flex gap-2 items-center">
               <label htmlFor="email" className="font-bold text-xl w-55">
                 Email:
               </label>
@@ -64,10 +64,10 @@ export const Profile = ({ user, handleLogOut }: UserProfileProps) => {
                 onChange={(event) => updateField("email", event.target.value)}
                 placeholder="Enter your email"
                 autoComplete="email"
-                className={`${FOCUS_VISIBLE} w-60 lg:w-65 bg-gray-100 dark:bg-white/10 rounded-xl p-2 outline-none`}
+                className={`${FOCUS_VISIBLE} w-full lg:w-65 bg-gray-100 dark:bg-white/10 rounded-xl p-2 outline-none`}
               />
             </section>
-            <section className="flex flex-row gap-2 items-center">
+            <section className="flex-col lg:flex-row lg:flex gap-2 items-center">
               <label htmlFor="password" className="font-bold text-xl w-55">
                 Password:
               </label>
@@ -80,10 +80,10 @@ export const Profile = ({ user, handleLogOut }: UserProfileProps) => {
                   updateField("password", event.target.value)
                 }
                 autoComplete="new-password"
-                className={`${FOCUS_VISIBLE} w-60 lg:w-65 bg-gray-100 dark:bg-white/10 rounded-xl p-2 outline-none`}
+                className={`${FOCUS_VISIBLE} w-full lg:w-65 bg-gray-100 dark:bg-white/10 rounded-xl p-2 outline-none`}
               />
             </section>
-            <section className="flex flex-row gap-2 items-center">
+            <section className="flex-col lg:flex-row lg:flex gap-2 items-center">
               <label
                 htmlFor="confirm-password"
                 className="font-bold text-xl w-55 text-nowrap"
@@ -99,7 +99,7 @@ export const Profile = ({ user, handleLogOut }: UserProfileProps) => {
                   updateField("confirmPassword", event.target.value)
                 }
                 autoComplete="new-password"
-                className={`${FOCUS_VISIBLE} w-60 lg:w-65 bg-gray-100 dark:bg-white/10 rounded-xl p-2 outline-none`}
+                className={`${FOCUS_VISIBLE} w-full lg:w-65 bg-gray-100 dark:bg-white/10 rounded-xl p-2 outline-none`}
               />
             </section>
             {formError && (
