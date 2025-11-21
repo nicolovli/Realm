@@ -117,7 +117,10 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           {mode === "login" ? (
             <>
               New to Realm?{" "}
-              <span className="underline" onClick={() => setMode("register")}>
+              <span
+                className="underline text-blue-600 dark:text-blue-300"
+                onClick={() => setMode("register")}
+              >
                 Create your portal
               </span>{" "}
               and start exploring!
@@ -125,7 +128,10 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           ) : (
             <>
               Back to the adventure?{" "}
-              <span className="underline" onClick={() => setMode("login")}>
+              <span
+                className="underline text-blue-600 dark:text-blue-300"
+                onClick={() => setMode("login")}
+              >
                 Enter Realm
               </span>{" "}
               and continue your journey!

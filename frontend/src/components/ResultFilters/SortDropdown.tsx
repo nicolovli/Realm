@@ -9,8 +9,8 @@ import {
 import {
   FOCUS_VISIBLE,
   HOVER,
-  PILL_TRIGGER_BASE,
   SHADOW_SM,
+  SORT_TRIGGER_BASE,
 } from "@/lib/classNames";
 import { useState } from "react";
 
@@ -51,9 +51,9 @@ export const SortDropdown = ({
         className={`
           ${FOCUS_VISIBLE}
           ${HOVER}
-          ${PILL_TRIGGER_BASE}
+          ${SORT_TRIGGER_BASE}
           ${SHADOW_SM}
-          md:w-[200px] w-[177px] bg-lightpurple dark:bg-darkpurple whitespace-nowrap
+          md:w-[200px] w-40 bg-lightpurple dark:bg-darkpurple whitespace-nowrap
         `}
         aria-haspopup="menu"
         aria-label={`Sort by ${currentLabel}`}

@@ -104,13 +104,13 @@ export const ResultFilters = ({
         aria-label="Open filters"
       >
         <button
-          className={`${PILL_TRIGGER_BASE} ${FOCUS_VISIBLE} bg-lightpurple dark:bg-darkpurple w-30 justify-center`}
+          className={`${PILL_TRIGGER_BASE} ${FOCUS_VISIBLE} bg-lightpurple dark:bg-darkpurple w-25 justify-center`}
           onClick={() => setMobileDrawerOpen(true)}
           aria-label="Open filters"
         >
           Filters
         </button>
-        <section className="flex items-center gap-2 ml-auto">
+        <section className="flex items-center gap-2 ml-auto ">
           <SortDropdown
             sortOption={sortOption}
             order={order}
