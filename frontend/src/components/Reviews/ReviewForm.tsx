@@ -114,7 +114,7 @@ export const ReviewForm = ({
             type="button"
             onClick={openLogin}
             disabled={false}
-            className={`${FOCUS_VISIBLE} underline dark:hover:brightness-200 hover:brightness-70 text-lightbuttonpurple dark:text-darkbuttonpurple font-semibold cursor-pointer`}
+            className={`${FOCUS_VISIBLE} underline dark:hover:brightness-200 hover:brightness-70 text-blue-600 dark:text-blue-400 font-semibold cursor-pointer`}
           >
             log in
           </button>{" "}

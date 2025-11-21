@@ -224,7 +224,7 @@ export const GameCardBase = ({
                   type="button"
                   aria-expanded={showFullDescription}
                   onClick={() => setShowFullDescription((prev) => !prev)}
-                  className={`${FOCUS_VISIBLE} inline-flex items-center text-sm text-lightbuttonpurple font-semibold dark:text-darkbuttonpurple cursor-pointer underline dark:hover:brightness-200 hover:brightness-70`}
+                  className={`${FOCUS_VISIBLE} inline-flex items-center text-sm text-blue-600 dark:text-blue-400 font-semibold cursor-pointer underline dark:hover:brightness-200 hover:brightness-70`}
                 >
                   {showFullDescription ? "View less" : "View more"}
                 </button>

@@ -118,7 +118,7 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             <>
               New to Realm?{" "}
               <span
-                className="underline text-blue-600 dark:text-blue-300"
+                className="underline text-blue-600 dark:text-blue-300 dark:hover:brightness-200 hover:brightness-70"
                 onClick={() => setMode("register")}
               >
                 Create your portal
