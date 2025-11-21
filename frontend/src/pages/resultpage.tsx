@@ -47,7 +47,7 @@ export const ResultPage = () => {
     <main className="!p-0 !gap-8">
       {/* Elevated container for filters and results grid */}
       <article
-        className={`w-[min(1600px,92%)] mx-auto ${ELEVATED_CONTAINER} px-8 py-10 flex flex-col gap-8 `}
+        className={`w-[min(1600px,92%)] mx-auto ${ELEVATED_CONTAINER} flex flex-col gap-8 `}
       >
         {" "}
         <section aria-label="Result filters">
