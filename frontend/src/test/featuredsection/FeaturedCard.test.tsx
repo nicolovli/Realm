@@ -28,7 +28,9 @@ describe("FeaturedCard", () => {
       </BrowserRouter>,
     );
     expect(screen.getByText("Super Fun Game")).toBeInTheDocument();
-    expect(screen.getByAltText("Picture of game: Super Fun Game")).toBeInTheDocument();
+    expect(
+      screen.getByAltText("Picture of game: Super Fun Game"),
+    ).toBeInTheDocument();
   });
 
   it("links to the correct game page", () => {
