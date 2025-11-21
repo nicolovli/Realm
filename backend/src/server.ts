@@ -100,6 +100,29 @@ const start = async () => {
           },
         })
       );
+
+      const assetsDir = path.join(distDir, "assets");
+      app.get("/", (_req, res) => {
+        const indexPath = path.join(distDir, "index.html");
+        if (!fs.existsSync(indexPath)) return res.status(404).send("Not found");
+        let html = fs.readFileSync(indexPath, "utf8");
+
+        if (fs.existsSync(assetsDir)) {
+          const files = fs.readdirSync(assetsDir);
+          const cssFiles = files.filter((f) => f.endsWith(".css"));
+          const preloadLinks = cssFiles
+            .map(
+              (f) =>
+                `<link rel=\"preload\" as=\"style\" href=\"/assets/${f}\" onload=\"this.rel='stylesheet'\">`
+            )
+            .join("\n");
+
+          html = html.replace("</head>", `${preloadLinks}\n</head>`);
+        }
+
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        res.send(html);
+      });
       console.log(`Serving static files from ${distDir} with cache headers`);
     } else {
       console.warn(
