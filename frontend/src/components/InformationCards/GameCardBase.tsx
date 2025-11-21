@@ -130,15 +130,21 @@ export const GameCardBase = ({
     >
       {/* Image */}
       <figure className="md:w-1/2 flex justify-center mb-4 md:mb-0">
-        <img
-          src={src}
-          srcSet={src === resolvedFinal ? finalSet.srcSet : initialSet.srcSet}
-          sizes={finalSet.sizes}
-          alt={title}
-          className="rounded-3xl w-full h-full max-h-[25rem] object-cover"
-          fetchPriority="high"
-          decoding="async"
-        />
+        {src ? (
+          <img
+            src={src}
+            srcSet={src === resolvedFinal ? finalSet.srcSet : initialSet.srcSet}
+            sizes={finalSet.sizes}
+            alt={title}
+            className="rounded-3xl w-full h-full max-h-[25rem] object-cover"
+            fetchPriority="high"
+            decoding="async"
+          />
+        ) : (
+          <section className="rounded-3xl w-full h-full max-h-[25rem] grid place-items-center text-xs text-zinc-600 dark:text-zinc-300 bg-lightsearchbargray dark:bg-darksearchbargray">
+            <span>Image unavailable</span>
+          </section>
+        )}
       </figure>
 
       {/* Text */}
@@ -147,9 +153,13 @@ export const GameCardBase = ({
           <h2 className="text-xl md:text-3xl">{title}</h2>
 
           {/* Release / published date */}
-          {publishedLabel && (
+          {publishedLabel ? (
             <p className="text-sm text-gray-700 dark:text-gray-300">
               Released {publishedLabel}
+            </p>
+          ) : (
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              No release date available
             </p>
           )}
           {/* Tags */}
@@ -237,21 +247,16 @@ export const GameCardBase = ({
         {/* Developers, publishers and platforms */}
         {(developers || publishers || platforms) && (
           <section className="mt-4 flex flex-wrap justify-center gap-6 text-xs md:text-sm text-gray-800 dark:text-white text-center">
-            {developers && (
-              <p>
-                <strong>Developer:</strong> {developers}
+            {[
+              { label: "Developer", value: developers },
+              { label: "Publisher", value: publishers },
+              { label: "Platforms", value: platforms },
+            ].map(({ label, value }) => (
+              <p key={label}>
+                <strong>{label}:</strong>{" "}
+                {value || `No ${label.toLowerCase()} available`}
               </p>
-            )}
-            {publishers && (
-              <p>
-                <strong>Publisher:</strong> {publishers}
-              </p>
-            )}
-            {platforms && (
-              <p>
-                <strong>Platforms:</strong> {platforms}
-              </p>
-            )}
+            ))}
           </section>
         )}
 
