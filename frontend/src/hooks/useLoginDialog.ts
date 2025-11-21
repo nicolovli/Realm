@@ -2,7 +2,13 @@
 import { useState } from "react";
 import { useAuthStatus } from "@/hooks/useAuthStatus";
 
-export const useLoginDialog = () => {
+export type LoginDialogControls = {
+  open: boolean;
+  openLogin: () => void;
+  handleOpenChange: (open: boolean) => void;
+};
+
+export const useLoginDialog = (): LoginDialogControls => {
   const [open, setOpen] = useState(false);
   const { setIsLoggedIn } = useAuthStatus();
 

@@ -9,6 +9,7 @@ import {
   ToggleTheme,
 } from "@/components/Header";
 import { FOCUS_VISIBLE, SHADOW_SM } from "@/lib/classNames";
+import { useLoginDialog } from "@/hooks/useLoginDialog";
 
 export type NavigationItem = {
   title: string;
@@ -30,6 +31,8 @@ const navigation: NavigationItem[] = [
 ];
 
 export const Header = () => {
+  const loginDialogControls = useLoginDialog();
+
   return (
     <header className="sticky top-4 z-50 flex flex-col m-3 gap-2 w-[min(1600px,92%)] mx-auto">
       <section
@@ -72,13 +75,19 @@ export const Header = () => {
           </nav>
         </section>
 
-        <AuthButton className="hidden md:flex md:flex-row" />
+        <AuthButton
+          className="hidden md:flex md:flex-row"
+          dialogControls={loginDialogControls}
+        />
         <ToggleTheme className=" hidden md:block lg:ml-5 lg:mr-5" />
 
         {/* Mobile icons only visible in reponsivive small size */}
         <section className="flex flex-row gap-3 w-full md:hidden items-center">
           <SearchBar />
-          <MobileSheetMenu navigation={navigation} />
+          <MobileSheetMenu
+            navigation={navigation}
+            dialogControls={loginDialogControls}
+          />
         </section>
       </section>
     </header>
