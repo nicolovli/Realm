@@ -83,7 +83,7 @@ export const Header = () => {
 
         {/* Mobile icons only visible in reponsivive small size */}
         <section className="flex flex-row gap-3 w-full md:hidden items-center">
-          <SearchBar placeholder="Search" />
+          <SearchBar placeholder="Search for games" />
           <MobileSheetMenu
             navigation={navigation}
             dialogControls={loginDialogControls}
