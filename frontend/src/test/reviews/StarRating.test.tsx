@@ -8,8 +8,8 @@ describe("StarRating", () => {
     render(<StarRating value={3.5} readOnly ariaLabel="star rating" />);
 
     const container = screen.getByLabelText(/star rating/i);
-    const outer = container.querySelectorAll("span[aria-hidden='true']");
-    expect(outer.length).toBe(5);
+    const stars = container.querySelectorAll("span.relative.inline-block");
+    expect(stars.length).toBe(5);
 
     expect(container).toHaveAttribute(
       "aria-label",
