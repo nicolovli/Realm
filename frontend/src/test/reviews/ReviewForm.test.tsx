@@ -70,6 +70,7 @@ describe("ReviewForm", () => {
     expect(submit).toBeInTheDocument();
   });
 
+  // network error test
   it("renders error state if GraphQL query fails", async () => {
     const errorMocks = [
       {

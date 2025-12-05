@@ -3,6 +3,8 @@ import { render, screen } from "@testing-library/react";
 import { GameDetailCard } from "@/components/InformationCards";
 import { MockedProvider } from "@apollo/client/testing/react";
 import { MemoryRouter } from "react-router-dom";
+import { axe, toHaveNoViolations } from "jest-axe";
+expect.extend(toHaveNoViolations);
 
 // Mock auth status hook and components
 vi.mock("@/hooks/useAuthStatus", () => ({
@@ -230,5 +232,17 @@ describe("GameDetailCard", () => {
     expect(screen.getByText("Multiplayer")).toBeInTheDocument();
     expect(screen.getByText(/Super Studio/)).toBeInTheDocument();
     expect(screen.getByText(/PC, PS5, Xbox/)).toBeInTheDocument();
+  });
+
+  it("should have no accessibility violations", async () => {
+    const { container } = render(
+      <MockedProvider mocks={[]}>
+        <MemoryRouter>
+          <GameDetailCard {...mockProps} />
+        </MemoryRouter>
+      </MockedProvider>,
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

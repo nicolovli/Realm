@@ -8,11 +8,14 @@ En Apollo Server backend, med Express, Prisma og PostgreSQL som database
 
 - [Backend for Realm](#backend-for-realm)
   - [Innholdfortegnelse](#innholdfortegnelse)
-  - [Kodeorganisering](#kodeorganisering)
   - [Oppsett](#oppsett)
   - [Konfigurer Miljøvariabler](#konfigurer-miljøvariabler)
   - [Kjør backend gjennom VM](#kjør-backend-gjennom-vm)
   - [Kjøre backend lokalt](#kjøre-backend-lokalt)
+  - [Har du backend problemer?](#har-du-backend-problemer)
+
+> [!IMPORTANT]
+> Vi anbefaler å kjøre backend gjennom VM i stedet for lokalt. Dette skyldes to hovedpunkter: 1. Du må seede en json fil som tar svært lang tid (6-10min), ettersom den inneholder over 53 000 spill. 2. Du trenger Postgres installert lokalt, og må i tillegg opprette en egen database for å populere JSON-filen. Dette kan komme i konflikt med eksisterende databaser på maskinen din. Vi anbefaler derfor hoppe over seksjonene `Oppsett` og `Konfigurer Miljøvariabler`, og heller les [Kjør backend gjennom VM](#kjør-backend-gjennom-vm).
 
 ## Oppsett
 
@@ -39,7 +42,7 @@ JWT_SECRET=your_super_secret_string_here
 JWT_SECRET kan du bare føre en tilfeldig og random string/setning som er ønskelig. Du kan generere en tilfeldig en, da det eneste kravet er at den er vanskelig å gjette og er konstant på serveren.
 
 > [!NOTE]
-> Miljøvariablene som trengs for å kjøre applikasjonen kan man finne i vår VM under `/home/jennicad/backend/backend/.env`. Dersom du ønsker å kopiere dette for å bruke lokalt, må du legge de under .env filen i `backend` folder for at ting skal funke.
+> Miljøvariablene som trengs for å kjøre applikasjonen kan man finne i vår VM under `/home/jennicad/backend/backend/.env`. Dersom du ønsker å kopiere dette for å bruke lokalt, må du legge de under .env filen i `backend` folder for at ting skal funke. Evt, så kan du bruke din egen postgresql database.
 
 <!-- >[!IMPORTANT]
 > Vi har valgt å ta med `DATABASE_URL` i dette README-filen, men dette er en praksis som ellers ikke anbefales å gjøre. Dette er bare for å gjøre det enklere å medstudentvurdere/sensurere. `DATABASE_URL="postgresql://admin:123@localhost:5432/webdev` -->
@@ -79,6 +82,7 @@ npx prisma generate
    Legg reviews.json og users.json filene i db-mappen.
 
 ```bash
+cd backend
 npm run seed
 ```
 
@@ -88,62 +92,33 @@ npm run seed
 npm run dev
 ```
 
-<!-- 2. To build the project run:
+## Har du backend problemer?
 
-```bash
-npx prisma generate
-npx tsc
-```
+Serveren holdes gående kontinuerlig ved hjelp av PM2 (Process Manager 2), som sikrer at den automatisk starter opp igjen ved eventuelle feil eller server-restart.
 
-3. To run the project in VM:
+Dersom den likevel har stoppet/kræsjet, kan den restartes ved hjelp av følgende kommandoer:
 
-```bash
-npm run dist
-``` -->
+1. Naviger til backend-mappen som ligger under brukeren "jennicad":
 
-<!-- ## Oppsett for første gang (må fjernes før sluttlevering):
+   ```bash
+   cd home/jennicad/backend/backend
+   ```
 
-For å se dataen i databasen og importere json fil for første gang, kjør:
+2. Sjekk om serveren er der:
 
-```bash
-npx prisma migrate dev --name init
-npx tsx src/scripts/importJson.ts
-npx prisma generate
-npx prisma studio
-```
+   ```bash
+   pm2 list
+   ```
 
-- Kjør koden over også dersom schema.prisma har blitt oppdatert.
+   1. Dersom serveren er der, men status kommer opp som 'stopped' kjør:
+      ```bash
+      pm2 start 0
+      ```
+   2. Dersom du ikke får opp serveren, start den med PM2:
 
-Dersom det har kommet endringer i migration filen, kjør.
+      ```bash
+      pm2 start dist/server.js
+      ```
 
-```bash
-npx prisma migrate dev
-npx prisma generate
-npx prisma studio
-```
-
-### For ulike kjøringer:
-
-Dersom schema.prisma er endret, eller output og provider kjør:
-
-```bash
-npx prisma generate
-```
-
-For å se selve databasen på prisma kjør følgende:
-
-```bash
-npx prisma studio
-```
-
-For å kjøre dev serveren:
-
-```bash
-npm run dev
-```
-
-For å kjøre serveren for produksjon:
-
-```bash
-npm start
-``` -->
+> [!IMPORTANT]
+> Gjerne kontakt oss dersom feilen ikke løser seg. Kontaktinformasjon finner du på [README.md](../README.md) under `Utviklet av`.
