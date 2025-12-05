@@ -9,7 +9,7 @@ import { client } from "@/lib/apolloClient.ts";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ApolloProvider client={client}>
-      <BrowserRouter basename="/project2">
+      <BrowserRouter>
         <App />
       </BrowserRouter>
     </ApolloProvider>
