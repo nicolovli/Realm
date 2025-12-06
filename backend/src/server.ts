@@ -35,7 +35,7 @@ const start = async () => {
         "http://localhost:4173",
         "http://localhost:5173",
         "https://studio.apollographql.com",
-        "https://realm-eflw.vercel.app/graphql",
+        "https://realm-mocha.vercel.app",
       ],
       credentials: true,
     }),
