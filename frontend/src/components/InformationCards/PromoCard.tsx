@@ -20,7 +20,7 @@ export const PromoCard = () => {
   const carouselRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
 
-  const promoGameIds = [14610, 44235, 7988];
+  const promoGameIds = [6194, 1567, 6815];
   const { data, loading, error } = useQuery<GetPromoGamesData>(
     GET_PROMO_GAMES,
     {
